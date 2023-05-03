@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+pragma AbiHeader expire;
+pragma AbiHeader time;
+pragma AbiHeader pubkey;
+
+import "../base/AsterizmClient.tsol";
+
+contract AsterizmDemo is AsterizmClient {
+
+    event SetChainMessageEvent(string message);
+
+    string public chainMessage = "Test";
+
+    constructor (IInitializerSender _initializerLib) AsterizmClient(_initializerLib, true, false) public {
+        tvm.accept();
+        chainMessage = "Chain message";
+    }
+
+    /// Send message
+    /// @param _dstChainId uint64  Destination chain ID
+    /// @param _dstAddress address  Destination address
+    /// @param _message string  Message
+    function sendMessage(uint64 _dstChainId, address _dstAddress, string _message) public {
+        _initAsterizmTransferEvent(_buildClInitTransferEventDto(_dstChainId, _dstAddress, abi.encode(_message)));
+    }
+
+    /// Receive non-encoded payload
+    /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
+    function _asterizmReceive(ClAsterizmReceiveRequestDto _dto) internal override {
+        string message = abi.decode(_dto.payload, (string));
+        chainMessage = message;
+        emit SetChainMessageEvent(message);
+    }
+}

@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+import "./IAsterizmStructs.tsol";
+
+/// Initializer receive interface
+interface IInitializerReceiver is IAsterizmStructs {
+
+    /// Receive payload from translator
+    /// @param _dto IzReceivePayloadRequestDto  Method DTO
+    function receivePayload(IzReceivePayloadRequestDto _dto) external;
+}

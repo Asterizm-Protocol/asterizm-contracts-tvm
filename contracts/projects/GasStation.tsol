@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+pragma AbiHeader expire;
+pragma AbiHeader time;
+pragma AbiHeader pubkey;
+
+import "../interfaces/IInitializerSender.tsol";
+import "../base/AsterizmClient.tsol";
+
+contract GasStation {
+
+    IInitializerSender private initializerLib;
+    uint64 private localChainId;
+
+    uint128 constant MIN_CONTRACT_BALANCE = 1 ton;
+
+    constructor(IInitializerSender _initializerLib) public {
+        tvm.accept();
+        initializerLib = _initializerLib;
+        uint128 chainValue = address(this).balance - MIN_CONTRACT_BALANCE;
+        localChainId = initializerLib.getLocalChainId{value: chainValue >= MIN_CONTRACT_BALANCE ? chainValue : MIN_CONTRACT_BALANCE}().await;
+    }
+
+    /// Return local chain id
+    /// @return uint64
+    function getTestLocalChainId() external externalMsg view returns(uint64) {
+        tvm.accept();
+        return localChainId;
+    }
+}

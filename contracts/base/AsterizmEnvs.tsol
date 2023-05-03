@@ -1,0 +1,14 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+library AsterizmEnvs {
+
+    // For Translator contract
+    uint128 constant TRANSLATOR__MIN_CONTRACT_BALANCE = 1 ton;
+
+    // For Initializer contract
+    uint128 constant INITIALIZER__MIN_CONTRACT_BALANCE = 1 ton;
+
+    // For Asterizm client contract
+    uint128 constant CLIENT__MIN_CONTRACT_BALANCE = 1 ton;
+}

@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+import "./IAsterizmStructs.tsol";
+
+/// Translator interface
+interface ITranslator is IAsterizmStructs {
+
+    /// Send transfer payload
+    /// @param _dto TrSendMessageRequestDto  Method DTO
+    function sendMessage(TrSendMessageRequestDto _dto) external internalMsg;
+
+    /// Return local chain id
+    /// @return uint64
+    function getLocalChainId() external internalMsg view responsible returns(uint64);
+}

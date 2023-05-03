@@ -1,0 +1,6 @@
+.idea
+.temp
+node_modules
+*.tvc
+*.abi.json
+*.base64

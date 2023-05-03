@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+library AsterizmErrors {
+
+    // For Ownable contract
+    uint16 constant OWNER__ONLY_OWNER__ERROR = 1001;
+    uint16 constant OWNER__ZERO_ADDRESS__ERROR = 1002;
+
+    // For Translator contract
+    uint16 constant TRANSLATOR__ONLY_INITIALIZER__ERROR = 2001;
+    uint16 constant TRANSLATOR__ONLY_RELAYER__ERROR = 2002;
+    uint16 constant TRANSLATOR__REMOVE_LOCAL_CHAIN__ERROR = 2003;
+    uint16 constant TRANSLATOR__CHAIN_NOT_EXISTS__ERROR = 2004;
+    uint16 constant TRANSLATOR__WRONG_CHAIN_ID__ERROR = 2005;
+    uint16 constant TRANSLATOR__TRANSFER__ERROR = 2006;
+
+    // For Initializer contract
+    uint16 constant INITIALIZER__ONLY_TRANSLATOR__ERROR = 3001;
+    uint16 constant INITIALIZER__SENDER_ADDRESS_IS_BLOCKED__ERROR = 3002;
+    uint16 constant INITIALIZER__TARGET_ADDRESS_IS_BLOCKED__ERROR = 3003;
+    uint16 constant INITIALIZER__WRONG_NONCE__ERROR = 3004;
+    uint16 constant INITIALIZER__WRONG_DESTINATION_ADDRESS__ERROR = 3005;
+
+    // For Asterizm client contract
+    uint16 constant CLIENT__ONLY_INITIALIZER__ERROR = 4001;
+    uint16 constant CLIENT__ONLY_OWNER_OR_INITIALIZER__ERROR = 4002;
+    uint16 constant CLIENT__WRONG_SOURCE_ADDRESS__ERROR = 4003;
+    uint16 constant CLIENT__INVALID_HASH__ERROR = 4004;
+    uint16 constant CLIENT__TRANSFER_NOT_RECEIVED__ERROR = 4005;
+    uint16 constant CLIENT__TRANSFER_EXECUTED_ALREADY__ERROR = 4006;
+    uint16 constant CLIENT__OUTBOUND_TRANSFER_NOT_EXISTS__ERROR = 4007;
+    uint16 constant CLIENT__OUTBOUND_TRANSFER_EXECUTED_ALREADY__ERROR = 4008;
+    uint16 constant CLIENT__TRUSTED_ADDRESS_NOT_FOUND__ERROR = 4009;
+    uint16 constant CLIENT__BALANCE_NOT_ENOUGH__ERROR = 4010;
+    uint16 constant CLIENT__WRONG_TXID__ERROR = 4011;
+}

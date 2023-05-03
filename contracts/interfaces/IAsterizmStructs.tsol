@@ -1,0 +1,132 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+interface IAsterizmStructs {
+
+    /// Base transfer direction DTO
+    /// @param srcChainId uint64  Source chain ID
+    /// @param srcAddress address  Source address
+    /// @param dstChainId uint64  Destination chain ID
+    /// @param dstAddress address  Destination address
+    struct BaseTransferDirectionDto {
+        uint64 srcChainId;
+        address srcAddress;
+        uint64 dstChainId;
+        address dstAddress;
+    }
+
+    /// Translator send message request DTO
+    /// @param srcAddress address  Source address
+    /// @param dstChainId uint64  Destination chain ID
+    /// @param dstAddress address  Destination address
+    /// @param nonce uint  Nonce
+    /// @param useEncryption bool  Use encryption flag
+    /// @param forceOrder bool  Force order flag
+    /// @param shouldCheckFee bool  Should check fee flag
+    /// @param txId uint  Transaction ID
+    /// @param transferHash bytes32  Transfer hash
+    /// @param payload TvmCell  Payload
+    struct TrSendMessageRequestDto {
+        address srcAddress;
+        uint64 dstChainId;
+        address dstAddress;
+        uint nonce;
+        bool forceOrder;
+        uint txId;
+        bytes32 transferHash;
+        TvmCell payload;
+    }
+
+    /// Initializator receive payload request DTO
+    /// @param srcChainId uint64  Source chain ID
+    /// @param srcAddress address  Source address
+    /// @param dstChainId uint64  Destination chain ID
+    /// @param dstAddress address  Destination address
+    /// @param nonce uint  Nonce
+    /// @param gasLimit uint  Gas limit
+    /// @param forceOrder bool  Force order flag
+    /// @param txId uint  Transaction ID
+    /// @param transferHash bytes32  Transfer hash
+    /// @param payload TvmCell  Payload
+    struct IzReceivePayloadRequestDto {
+        uint64 srcChainId;
+        address srcAddress;
+        uint64 dstChainId;
+        address dstAddress;
+        uint nonce;
+        uint gasLimit;
+        bool forceOrder;
+        uint txId;
+        bytes32 transferHash;
+        TvmCell payload;
+    }
+
+    /// Translator transfer message request DTO
+    /// @param gasLimit uint  Gas limit
+    /// @param payload TvmCell  Payload
+    struct TrTransferMessageRequestDto {
+        uint gasLimit;
+        TvmCell payload;
+    }
+
+    /// Initializator initizte transfer request DTO
+    /// @param dstChainId uint64  Destination chain ID
+    /// @param dstAddress address  Destination address
+    /// @param transferHash bytes32  Transfer hash
+    /// @param txId uint  Transaction ID
+    /// @param payload TvmCell  Payload
+    struct IzIninTransferRequestDto {
+        uint64 dstChainId;
+        address dstAddress;
+        bytes32 transferHash;
+        bool useForceOrder;
+        uint txId;
+        TvmCell payload;
+    }
+
+    /// Client asterizm receive request DTO
+    /// @param srcChainId uint64  Source chain ID
+    /// @param srcAddress address  Source address
+    /// @param dstChainId uint64  Destination chain ID
+    /// @param dstAddress address  Destination address
+    /// @param nonce uint  Nonce
+    /// @param txId uint  Transaction ID
+    /// @param transferHash bytes32  Transfer hash
+    /// @param payload TvmCell  Payload
+    struct ClAsterizmReceiveRequestDto {
+        uint64 srcChainId;
+        address srcAddress;
+        uint64 dstChainId;
+        address dstAddress;
+        uint nonce;
+        uint txId;
+        bytes32 transferHash;
+        TvmCell payload;
+    }
+
+    /// Client initiation transfer event DTO
+    /// @param dstChainId uint64  Destination chain ID
+    /// @param dstAddress address  Destination address
+    /// @param payload TvmCell  Payload
+    struct ClInitTransferEventDto {
+        uint64 dstChainId;
+        address dstAddress;
+        TvmCell payload;
+    }
+
+    /// Client initiation transfer request DTO
+    /// @param dstChainId uint64  Destination chain ID
+    /// @param dstAddress address  Destination address
+    /// @param feeAmount uint  Fee amount
+    /// @param txId uint  Transaction ID
+    /// @param transferHash bytes32  Transfer hash
+    /// @param payload TvmCell  Payload
+    struct ClInitTransferRequestDto {
+        uint64 dstChainId;
+        address dstAddress;
+        uint feeAmount;
+        uint txId;
+        bytes32 transferHash;
+        TvmCell payload;
+    }
+}

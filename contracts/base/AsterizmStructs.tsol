@@ -1,0 +1,174 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+import "../interfaces/IAsterizmStructs.tsol";
+
+abstract contract AsterizmStructs is IAsterizmStructs {
+
+    /// Build initializer receive payload request DTO
+    /// @param _srcChainId uint64  Source chain ID
+    /// @param _srcAddress address  Source address
+    /// @param _dstChainId uint64  Destination chain ID
+    /// @param _dstAddress address  Destination address
+    /// @return BaseTransferDirectionDto
+    function _buildBaseTransferDirectionDto(
+        uint64 _srcChainId, address _srcAddress,
+        uint64 _dstChainId, address _dstAddress
+    ) internal pure returns(BaseTransferDirectionDto) {
+        BaseTransferDirectionDto dto;
+        dto.srcChainId = _srcChainId;
+        dto.srcAddress = _srcAddress;
+        dto.dstChainId = _dstChainId;
+        dto.dstAddress = _dstAddress;
+
+        return dto;
+    }
+
+    /// Build translator transfer message request DTO
+    /// @param _gasLimit uint  Gas limit
+    /// @param _payload TvmCell  Payload
+    /// @return TrTransferMessageRequestDto
+    function _buildTrTarnsferMessageRequestDto(uint _gasLimit, TvmCell _payload) internal pure returns(TrTransferMessageRequestDto) {
+        TrTransferMessageRequestDto dto;
+        dto.gasLimit = _gasLimit;
+        dto.payload = _payload;
+
+        return dto;
+    }
+
+    /// Build initializer receive payload request DTO
+    /// @param _baseTransferDirectioDto BaseTransferDirectionDto  Base transfer direction DTO
+    /// @param _nonce uint  Nonce
+    /// @param _gasLimit uint  Gas limit
+    /// @param _forceOrder bool  Force order flag
+    /// @param _txId uint  Transaction ID
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _payload TvmCell  Payload
+    /// @return IzReceivePayloadRequestDto
+    function _buildIzReceivePayloadRequestDto(
+        BaseTransferDirectionDto _baseTransferDirectioDto,
+        uint _nonce, uint _gasLimit, bool _forceOrder, uint _txId, bytes32 _transferHash, TvmCell _payload
+    ) internal pure returns(IzReceivePayloadRequestDto) {
+        IzReceivePayloadRequestDto dto;
+        dto.srcChainId = _baseTransferDirectioDto.srcChainId;
+        dto.srcAddress = _baseTransferDirectioDto.srcAddress;
+        dto.dstChainId = _baseTransferDirectioDto.dstChainId;
+        dto.dstAddress = _baseTransferDirectioDto.dstAddress;
+        dto.nonce = _nonce;
+        dto.gasLimit = _gasLimit;
+        dto.forceOrder = _forceOrder;
+        dto.txId = _txId;
+        dto.transferHash = _transferHash;
+        dto.payload = _payload;
+
+        return dto;
+    }
+
+    /// Build initializer init transfer request DTO
+    /// @param _dstChainId uint64  Destination chain ID
+    /// @param _dstAddress address  Destination address
+    /// @param _txId uint  Transaction ID
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _useForceOrder bool  Use force order flag
+    /// @param _payload TvmCell  Payload
+    /// @return IzIninTransferRequestDto
+    function _buildIzIninTransferRequestDto(uint64 _dstChainId, address _dstAddress, uint _txId, bytes32 _transferHash, bool _useForceOrder, TvmCell _payload) internal pure returns(IzIninTransferRequestDto) {
+        IzIninTransferRequestDto dto;
+        dto.dstChainId = _dstChainId;
+        dto.dstAddress = _dstAddress;
+        dto.txId = _txId;
+        dto.transferHash = _transferHash;
+        dto.useForceOrder = _useForceOrder;
+        dto.payload = _payload;
+
+        return dto;
+    }
+
+    /// Build client asterizm receive request DTO
+    /// @param _srcChainId uint64  Source chain ID
+    /// @param _srcAddress address  Source address
+    /// @param _dstChainId uint64  Destination chain ID
+    /// @param _dstAddress address  Destination address
+    /// @param _nonce uint  Nonce
+    /// @param _txId uint  Transaction ID
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _payload TvmCell  Payload
+    /// @return ClAsterizmReceiveRequestDto
+    function _buildClAsterizmReceiveRequestDto(
+        uint64 _srcChainId, address _srcAddress, uint64 _dstChainId, address _dstAddress,
+        uint _nonce, uint _txId, bytes32 _transferHash, TvmCell _payload
+    ) internal pure returns(ClAsterizmReceiveRequestDto) {
+        ClAsterizmReceiveRequestDto dto;
+        dto.srcChainId = _srcChainId;
+        dto.srcAddress = _srcAddress;
+        dto.dstChainId = _dstChainId;
+        dto.dstAddress = _dstAddress;
+        dto.nonce = _nonce;
+        dto.txId = _txId;
+        dto.transferHash = _transferHash;
+        dto.payload = _payload;
+
+        return dto;
+    }
+
+    /// Build translator send message request DTO
+    /// @param _srcAddress address  Source address
+    /// @param _dstChainId uint64  Destination chain ID
+    /// @param _dstAddress address  Destination address
+    /// @param _nonce uint  Nonce
+    /// @param _forceOrder bool  Force order flag
+    /// @param _txId uint  Transaction ID
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _payload TvmCell  Payload
+    /// @return TrSendMessageRequestDto
+    function _buildTrSendMessageRequestDto(
+        address _srcAddress, uint64 _dstChainId, address _dstAddress, uint _nonce,
+        bool _forceOrder, uint _txId, bytes32 _transferHash, TvmCell _payload
+    ) internal pure returns(TrSendMessageRequestDto) {
+        TrSendMessageRequestDto dto;
+        dto.srcAddress = _srcAddress;
+        dto.dstChainId = _dstChainId;
+        dto.dstAddress = _dstAddress;
+        dto.nonce = _nonce;
+        dto.forceOrder = _forceOrder;
+        dto.txId = _txId;
+        dto.transferHash = _transferHash;
+        dto.payload = _payload;
+
+        return dto;
+    }
+
+    /// Build client initiation transfer event DTO
+    /// @param _dstChainId uint64  Destination chain ID
+    /// @param _dstAddress address  Destination address
+    /// @param _payload TvmCell  Payload
+    /// @return ClInitTransferEventDto
+    function _buildClInitTransferEventDto(uint64 _dstChainId, address _dstAddress, TvmCell _payload) internal pure returns(ClInitTransferEventDto) {
+        ClInitTransferEventDto dto;
+        dto.dstChainId = _dstChainId;
+        dto.dstAddress = _dstAddress;
+        dto.payload = _payload;
+
+        return dto;
+    }
+
+    /// Build client initiation transfer request DTO
+    /// @param _dstChainId uint64  Destination chain ID
+    /// @param _dstAddress address  Destination address
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _feeAmount uint  Fee amount
+    /// @param _txId uint  Transaction ID
+    /// @param _payload TvmCell  Payload
+    /// @return ClInitTransferRequestDto
+    function _buildClInitTransferRequestDto(uint64 _dstChainId, address _dstAddress, uint _txId, bytes32 _transferHash, uint _feeAmount, TvmCell _payload) internal pure returns(ClInitTransferRequestDto) {
+        ClInitTransferRequestDto dto;
+        dto.dstChainId = _dstChainId;
+        dto.dstAddress = _dstAddress;
+        dto.transferHash = _transferHash;
+        dto.feeAmount = _feeAmount;
+        dto.txId = _txId;
+        dto.payload = _payload;
+
+        return dto;
+    }
+}

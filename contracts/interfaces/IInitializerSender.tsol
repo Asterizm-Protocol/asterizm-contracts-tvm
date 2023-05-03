@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+import "./IAsterizmStructs.tsol";
+
+/// Initializer sender interface
+interface IInitializerSender is IAsterizmStructs {
+
+    /// Initiate asterizm transfer
+    /// @param _dto IzIninTransferRequestDto  Method DTO
+    function initTransfer(IzIninTransferRequestDto _dto) external;
+
+    /// Validate income transfer by hash
+    /// @param _transferHash bytes32
+    function validIncomeTransferHash(bytes32 _transferHash) external internalMsg view returns(bool);
+
+    /// Return local chain id
+    /// @return uint64
+    function getLocalChainId() external internalMsg view responsible returns(uint64);
+}
