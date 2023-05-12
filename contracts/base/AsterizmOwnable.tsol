@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+import "./AsterizmErrors.tsol";
+
+abstract contract AsterizmOwnable {
+
+    address static owner_;
+
+    /// Only translator modifier
+    modifier onlyOwner() {
+        require(msg.sender == owner_, AsterizmErrors.OWNER__ONLY_OWNER__ERROR);
+        _;
+    }
+
+    /// Return owner
+    /// @return address
+    function owner() internal view returns(address) {
+        return owner_;
+    }
+}

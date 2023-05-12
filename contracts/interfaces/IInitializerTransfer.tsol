@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+/// Initializer transfer interface
+interface IInitializerTransfer {
+
+    /// Is transfer exists
+    /// @param _transferHash uint
+    /// @return uint, bool, uint8
+    function isExists(uint _transferHash) external internalMsg view responsible returns(uint, bool, uint8);
+}

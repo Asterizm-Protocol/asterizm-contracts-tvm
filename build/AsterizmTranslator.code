@@ -9,38 +9,35 @@ IFREF {
 }
 GETGLOB 6
 THROWIF 51
-LDU 64
 ENDS
-.loc ../contracts/libs/Ownable.tsol, 18
-CALLREF {
-	CALL $_msgSender_119df25f_internal_macro$
-}
-CALLREF {
-	CALL $_transferOwnership_d29d44ee_internal_macro$
-}
-.loc ../contracts/AsterizmTranslator.tsol, 70
+.loc ../contracts/AsterizmTranslator.tsol, 71
 ACCEPT
-.loc ../contracts/AsterizmTranslator.tsol, 72
+.loc ../contracts/AsterizmTranslator.tsol, 73
 CALLREF {
 	CALL $owner_8da5cb5b_internal_macro$
 }
 CALLREF {
-	CALL $addRelayer_dd39f00d_internal_macro$
-}
-.loc ../contracts/AsterizmTranslator.tsol, 73
-DUP
-CALLREF {
-	CALL $addChain_e2947e54_internal_macro$
+	CALL $addRelayerPrivate_2e6a1d28_internal_macro$
 }
 .loc ../contracts/AsterizmTranslator.tsol, 74
+GETGLOB 14
 CALLREF {
-	CALL $_setLocalChainId_638cee16_internal_macro$
+	CALL $addChainPrivate_92673c32_internal_macro$
 }
-.loc ../contracts/AsterizmTranslator.tsol, 76
+.loc ../contracts/AsterizmTranslator.tsol, 75
+GETGLOB 14
+PUSHSLICE xc000000000000000000000000051262698
+NEWC
+STSLICE
+STU 64
+ENDC
+PUSHINT 0
+SENDRAWMSG
+.loc ../contracts/AsterizmTranslator.tsol, 77
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/AsterizmTranslator.tsol, 77
+.loc ../contracts/AsterizmTranslator.tsol, 78
 GETGLOB 9
 NEWC
 STSLICECONST x42_
@@ -65,7 +62,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/AsterizmTranslator.tsol, 100
+.loc ../contracts/AsterizmTranslator.tsol, 112
 OVER
 PUSHCONT {
 	LDREF
@@ -90,11 +87,37 @@ THROW 0
 CALL $addRelayer_dd39f00d_internal_macro$
 
 .macro addRelayer_dd39f00d_internal_macro
-.loc ../contracts/libs/Ownable.tsol, 25
+.loc ../contracts/base/AsterizmOwnable.tsol, 12
+GETGLOB 9
+GETGLOB 10
+SDEQ
+THROWIFNOT 1001
+.loc ../contracts/AsterizmTranslator.tsol, 99
+PUSHINT 1000000000
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/AsterizmTranslator.tsol, 113
 CALLREF {
-	CALL $_checkOwner_53a72975_internal_macro$
+	CALL $addRelayerPrivate_2e6a1d28_internal_macro$
 }
 .loc ../contracts/AsterizmTranslator.tsol, 101
+GETGLOB 9
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+SENDRAWMSG
+.loc ../contracts/AsterizmTranslator.tsol, 0
+
+.globl	addRelayerPrivate_2e6a1d28_internal
+.type	addRelayerPrivate_2e6a1d28_internal, @function
+CALL $addRelayerPrivate_2e6a1d28_internal_macro$
+
+.macro addRelayerPrivate_2e6a1d28_internal_macro
+.loc ../contracts/AsterizmTranslator.tsol, 119
 DUP
 GETGLOB 12
 DUP2
@@ -121,7 +144,7 @@ ROTREV
 PUSHINT 267
 DICTSETB
 SETGLOB 12
-.loc ../contracts/AsterizmTranslator.tsol, 102
+.loc ../contracts/AsterizmTranslator.tsol, 120
 PUSHSLICE xc000000000000000000000000021eafc9b
 NEWC
 STSLICE
@@ -140,7 +163,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/AsterizmTranslator.tsol, 107
+.loc ../contracts/AsterizmTranslator.tsol, 125
 OVER
 PUSHCONT {
 	LDREF
@@ -165,24 +188,39 @@ THROW 0
 CALL $removeRelayer_60f0a5ac_internal_macro$
 
 .macro removeRelayer_60f0a5ac_internal_macro
-.loc ../contracts/libs/Ownable.tsol, 25
-CALLREF {
-	CALL $_checkOwner_53a72975_internal_macro$
-}
-.loc ../contracts/AsterizmTranslator.tsol, 108
+.loc ../contracts/base/AsterizmOwnable.tsol, 12
+GETGLOB 9
+GETGLOB 10
+SDEQ
+THROWIFNOT 1001
+.loc ../contracts/AsterizmTranslator.tsol, 99
+PUSHINT 1000000000
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/AsterizmTranslator.tsol, 126
 DUP
 GETGLOB 12
 PUSHINT 267
 DICTDEL
 DROP
 SETGLOB 12
-.loc ../contracts/AsterizmTranslator.tsol, 109
+.loc ../contracts/AsterizmTranslator.tsol, 127
 PUSHSLICE xc000000000000000000000000052936f04
 NEWC
 STSLICE
 STSLICE
 ENDC
 PUSHINT 0
+SENDRAWMSG
+.loc ../contracts/AsterizmTranslator.tsol, 101
+GETGLOB 9
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/AsterizmTranslator.tsol, 0
 
@@ -195,7 +233,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/AsterizmTranslator.tsol, 114
+.loc ../contracts/AsterizmTranslator.tsol, 132
 OVER
 PUSHCONT {
 	LDREF
@@ -220,20 +258,35 @@ THROW 0
 CALL $setInitializer_5c24b074_internal_macro$
 
 .macro setInitializer_5c24b074_internal_macro
-.loc ../contracts/libs/Ownable.tsol, 25
-CALLREF {
-	CALL $_checkOwner_53a72975_internal_macro$
-}
-.loc ../contracts/AsterizmTranslator.tsol, 115
+.loc ../contracts/base/AsterizmOwnable.tsol, 12
+GETGLOB 9
+GETGLOB 10
+SDEQ
+THROWIFNOT 1001
+.loc ../contracts/AsterizmTranslator.tsol, 99
+PUSHINT 1000000000
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/AsterizmTranslator.tsol, 133
 DUP
 SETGLOB 11
-.loc ../contracts/AsterizmTranslator.tsol, 116
+.loc ../contracts/AsterizmTranslator.tsol, 134
 PUSHSLICE xc000000000000000000000000078cf5cd7
 NEWC
 STSLICE
 STSLICE
 ENDC
 PUSHINT 0
+SENDRAWMSG
+.loc ../contracts/AsterizmTranslator.tsol, 101
+GETGLOB 9
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/AsterizmTranslator.tsol, 0
 
@@ -246,7 +299,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/AsterizmTranslator.tsol, 121
+.loc ../contracts/AsterizmTranslator.tsol, 139
 LDU 64
 ENDS
 .loc ../contracts/AsterizmTranslator.tsol, 0
@@ -264,11 +317,37 @@ THROW 0
 CALL $addChain_e2947e54_internal_macro$
 
 .macro addChain_e2947e54_internal_macro
-.loc ../contracts/libs/Ownable.tsol, 25
+.loc ../contracts/base/AsterizmOwnable.tsol, 12
+GETGLOB 9
+GETGLOB 10
+SDEQ
+THROWIFNOT 1001
+.loc ../contracts/AsterizmTranslator.tsol, 99
+PUSHINT 1000000000
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/AsterizmTranslator.tsol, 140
 CALLREF {
-	CALL $_checkOwner_53a72975_internal_macro$
+	CALL $addChainPrivate_92673c32_internal_macro$
 }
-.loc ../contracts/AsterizmTranslator.tsol, 122
+.loc ../contracts/AsterizmTranslator.tsol, 101
+GETGLOB 9
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+SENDRAWMSG
+.loc ../contracts/AsterizmTranslator.tsol, 0
+
+.globl	addChainPrivate_92673c32_internal
+.type	addChainPrivate_92673c32_internal, @function
+CALL $addChainPrivate_92673c32_internal_macro$
+
+.macro addChainPrivate_92673c32_internal_macro
+.loc ../contracts/AsterizmTranslator.tsol, 146
 DUP
 GETGLOB 13
 DUP2
@@ -295,7 +374,7 @@ ROTREV
 PUSHINT 64
 DICTUSETB
 SETGLOB 13
-.loc ../contracts/AsterizmTranslator.tsol, 123
+.loc ../contracts/AsterizmTranslator.tsol, 147
 PUSHSLICE xc00000000000000000000000003ffb2d22
 NEWC
 STSLICE
@@ -314,7 +393,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/AsterizmTranslator.tsol, 128
+.loc ../contracts/AsterizmTranslator.tsol, 152
 LDU 32
 LDDICT
 ROTREV
@@ -336,11 +415,16 @@ THROW 0
 CALL $addChains_b218b87a_internal_macro$
 
 .macro addChains_b218b87a_internal_macro
-.loc ../contracts/libs/Ownable.tsol, 25
-CALLREF {
-	CALL $_checkOwner_53a72975_internal_macro$
-}
-.loc ../contracts/AsterizmTranslator.tsol, 129
+.loc ../contracts/base/AsterizmOwnable.tsol, 12
+GETGLOB 9
+GETGLOB 10
+SDEQ
+THROWIFNOT 1001
+.loc ../contracts/AsterizmTranslator.tsol, 99
+PUSHINT 1000000000
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/AsterizmTranslator.tsol, 153
 PUSHINT 0
 PUSHCONT {
 	PUSH2 S0, S1
@@ -348,7 +432,7 @@ PUSHCONT {
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/AsterizmTranslator.tsol, 130
+	.loc ../contracts/AsterizmTranslator.tsol, 154
 	PUSH2 S0, S1
 	SECOND
 	PUSHINT 32
@@ -356,14 +440,24 @@ PUSHCONT {
 	THROWIFNOT 50
 	PLDU 64
 	CALLREF {
-		CALL $addChain_e2947e54_internal_macro$
+		CALL $addChainPrivate_92673c32_internal_macro$
 	}
-	.loc ../contracts/AsterizmTranslator.tsol, 129
+	.loc ../contracts/AsterizmTranslator.tsol, 153
 	INC
 	.loc ../contracts/AsterizmTranslator.tsol, 0
 }
 WHILE
 DROP2
+.loc ../contracts/AsterizmTranslator.tsol, 101
+GETGLOB 9
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+SENDRAWMSG
 .loc ../contracts/AsterizmTranslator.tsol, 0
 
 .macro removeChainById
@@ -375,7 +469,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/AsterizmTranslator.tsol, 136
+.loc ../contracts/AsterizmTranslator.tsol, 160
 LDU 64
 ENDS
 .loc ../contracts/AsterizmTranslator.tsol, 0
@@ -393,23 +487,28 @@ THROW 0
 CALL $removeChainById_eb164f59_internal_macro$
 
 .macro removeChainById_eb164f59_internal_macro
-.loc ../contracts/libs/Ownable.tsol, 25
-CALLREF {
-	CALL $_checkOwner_53a72975_internal_macro$
-}
-.loc ../contracts/AsterizmTranslator.tsol, 137
+.loc ../contracts/base/AsterizmOwnable.tsol, 12
+GETGLOB 9
+GETGLOB 10
+SDEQ
+THROWIFNOT 1001
+.loc ../contracts/AsterizmTranslator.tsol, 99
+PUSHINT 1000000000
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/AsterizmTranslator.tsol, 161
 GETGLOB 14
 OVER
 NEQ
 THROWIFNOT 2003
-.loc ../contracts/AsterizmTranslator.tsol, 138
+.loc ../contracts/AsterizmTranslator.tsol, 162
 DUP
 GETGLOB 13
 PUSHINT 64
 DICTUDEL
 DROP
 SETGLOB 13
-.loc ../contracts/AsterizmTranslator.tsol, 139
+.loc ../contracts/AsterizmTranslator.tsol, 163
 PUSHSLICE xc00000000000000000000000000a92e17a
 NEWC
 STSLICE
@@ -417,44 +516,15 @@ STU 64
 ENDC
 PUSHINT 0
 SENDRAWMSG
-.loc ../contracts/AsterizmTranslator.tsol, 0
-
-.globl	_setLocalChainId_638cee16_internal
-.type	_setLocalChainId_638cee16_internal, @function
-CALL $_setLocalChainId_638cee16_internal_macro$
-
-.macro _setLocalChainId_638cee16_internal_macro
-.loc ../contracts/libs/Ownable.tsol, 25
-CALLREF {
-	CALL $_checkOwner_53a72975_internal_macro$
-}
-.loc ../contracts/AsterizmTranslator.tsol, 145
-DUP
-GETGLOB 13
-PUSHINT 64
-DICTUGET
-IFREFELSEREF
-{
-	LDI 1
-	ENDS
-	SINGLE
-}
-{
-	PUSHINT 0
-	SINGLE
-}
-FIRST
-THROWIFNOT 2004
-.loc ../contracts/AsterizmTranslator.tsol, 146
-DUP
-SETGLOB 14
-.loc ../contracts/AsterizmTranslator.tsol, 147
-PUSHSLICE xc000000000000000000000000051262698
+.loc ../contracts/AsterizmTranslator.tsol, 101
+GETGLOB 9
 NEWC
+STSLICECONST x42_
 STSLICE
-STU 64
+PUSHINT 111
+STZEROES
 ENDC
-PUSHINT 0
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/AsterizmTranslator.tsol, 0
 
@@ -467,7 +537,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/AsterizmTranslator.tsol, 154
+.loc ../contracts/AsterizmTranslator.tsol, 170
 LDU 32
 GETGLOB 4
 ROT
@@ -530,34 +600,16 @@ IFREF {
 THROW 0
 
 .macro getLocalChainId_3c32cf58_internal_macro
-.loc ../contracts/AsterizmTranslator.tsol, 154
+.loc ../contracts/AsterizmTranslator.tsol, 170
 DEPTH
 ADDCONST -5
 PICK
 THROWIF 72
-.loc ../contracts/AsterizmTranslator.tsol, 155
-GETPARAM 7
-FIRST
-DEPTH
-ADDCONST -2
-PICK
-SUB
-UFITS 128
-.loc ../contracts/AsterizmTranslator.tsol, 156
-DUP
+.loc ../contracts/AsterizmTranslator.tsol, 171
 PUSHINT 1000000000
-GEQ
-PUSHCONT {
-	DUP
-}
-PUSHCONT {
-	PUSHINT 1000000000
-}
-IFELSE
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/AsterizmTranslator.tsol, 157
-DROP
+.loc ../contracts/AsterizmTranslator.tsol, 172
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -578,7 +630,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/AsterizmTranslator.tsol, 162
+.loc ../contracts/AsterizmTranslator.tsol, 177
 OVER
 PUSHCONT {
 	LDREF
@@ -586,12 +638,9 @@ PUSHCONT {
 	CTOS
 }
 IF
-LDMSGADDR
+LDU 256
 LDU 64
-LDREF
-ENDS
-CTOS
-LDMSGADDR
+LDU 256
 LDU 256
 LDI 1
 LDREF
@@ -615,19 +664,19 @@ CALLREF {
 THROW 0
 
 .macro sendMessage_5a546328_internal_macro
-.loc ../contracts/AsterizmTranslator.tsol, 162
+.loc ../contracts/AsterizmTranslator.tsol, 177
 DEPTH
 ADDCONST -5
 PICK
 THROWIF 72
-.loc ../contracts/AsterizmTranslator.tsol, 86
+.loc ../contracts/AsterizmTranslator.tsol, 87
 GETGLOB 9
 GETGLOB 11
 SDEQ
 THROWIFNOT 2001
-.loc ../contracts/AsterizmTranslator.tsol, 87
+.loc ../contracts/AsterizmTranslator.tsol, 88
 PUSHCONT {
-	.loc ../contracts/AsterizmTranslator.tsol, 163
+	.loc ../contracts/AsterizmTranslator.tsol, 178
 	DUP
 	SECOND
 	GETGLOB 13
@@ -645,7 +694,11 @@ IFREFELSEREF
 }
 	FIRST
 	THROWIFNOT 2005
-	.loc ../contracts/AsterizmTranslator.tsol, 165
+	.loc ../contracts/AsterizmTranslator.tsol, 179
+	PUSHINT 1000000000
+	PUSHINT 0
+	RAWRESERVE
+	.loc ../contracts/AsterizmTranslator.tsol, 181
 	DUP
 	INDEX 7
 	OVER
@@ -669,28 +722,25 @@ IFREFELSEREF
 	NEWC
 	STU 256
 	STU 64
-	STSLICE
+	STU 256
 	STU 64
-	ROLLREV 6
+	STU 256
+	ROLLREV 5
 	NEWC
-	STSLICE
 	STU 128
 	STI 1
 	STU 256
-	ROTREV
-	NEWC
 	STU 256
 	STREF
 	STBREFR
-	STBREFR
 	ENDC
-	.loc ../contracts/AsterizmTranslator.tsol, 169
+	.loc ../contracts/AsterizmTranslator.tsol, 189
 	SWAP
 	SECOND
 	GETGLOB 14
 	EQUAL
 	PUSHCONT {
-		.loc ../contracts/AsterizmTranslator.tsol, 171
+		.loc ../contracts/AsterizmTranslator.tsol, 191
 		DEPTH
 		ADDCONST -2
 		PICK
@@ -698,11 +748,11 @@ IFREFELSEREF
 		CALLREF {
 			CALL $_buildTrTarnsferMessageRequestDto_e6a27211_internal_macro$
 		}
-		.loc ../contracts/AsterizmTranslator.tsol, 172
+		.loc ../contracts/AsterizmTranslator.tsol, 192
 		CALLREF {
-			CALL $_internalTransferMessage_4bffc7b5_internal_macro$
+			CALL $_baseTransferMessage_faacb5ae_internal_macro$
 		}
-		.loc ../contracts/AsterizmTranslator.tsol, 173
+		.loc ../contracts/AsterizmTranslator.tsol, 193
 		PUSHREF {
 			.blob xc00000000000000000000000006efd8f09
 		}
@@ -711,27 +761,7 @@ IFREFELSEREF
 		.loc ../contracts/AsterizmTranslator.tsol, 0
 	}
 	IFJMP
-	.loc ../contracts/AsterizmTranslator.tsol, 177
-	GETPARAM 7
-	FIRST
-	GTINT 0
-	PUSHCONT {
-		.loc ../contracts/AsterizmTranslator.tsol, 178
-		CALLREF {
-			CALL $owner_8da5cb5b_internal_macro$
-		}
-		NEWC
-		STSLICECONST x42_
-		STSLICE
-		PUSHINT 111
-		STZEROES
-		ENDC
-		PUSHPOW2 7
-		SENDRAWMSG
-		.loc ../contracts/AsterizmTranslator.tsol, 0
-	}
-	IF
-	.loc ../contracts/AsterizmTranslator.tsol, 185
+	.loc ../contracts/AsterizmTranslator.tsol, 197
 	PUSHSLICE xc00000000000000000000000006b6cb757
 	NEWC
 	STSLICE
@@ -739,20 +769,21 @@ IFREFELSEREF
 	ENDC
 	PUSHINT 0
 	SENDRAWMSG
-	.loc ../contracts/AsterizmTranslator.tsol, 162
+	.loc ../contracts/AsterizmTranslator.tsol, 199
+	CALLREF {
+		CALL $owner_8da5cb5b_internal_macro$
+	}
+	NEWC
+	STSLICECONST x42_
+	STSLICE
+	PUSHINT 111
+	STZEROES
+	ENDC
+	PUSHPOW2 7
+	SENDRAWMSG
+	.loc ../contracts/AsterizmTranslator.tsol, 177
 }
 CALLX
-.loc ../contracts/AsterizmTranslator.tsol, 0
-
-.globl	_internalTransferMessage_4bffc7b5_internal
-.type	_internalTransferMessage_4bffc7b5_internal, @function
-CALL $_internalTransferMessage_4bffc7b5_internal_macro$
-
-.macro _internalTransferMessage_4bffc7b5_internal_macro
-.loc ../contracts/AsterizmTranslator.tsol, 191
-CALLREF {
-	CALL $_baseTransferMessage_faacb5ae_internal_macro$
-}
 .loc ../contracts/AsterizmTranslator.tsol, 0
 
 .macro transferMessage
@@ -764,7 +795,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/AsterizmTranslator.tsol, 197
+.loc ../contracts/AsterizmTranslator.tsol, 205
 OVER
 PUSHCONT {
 	LDREF
@@ -785,12 +816,12 @@ IFREF {
 THROW 0
 
 .macro transferMessage_2f1ac05e_internal_macro
-.loc ../contracts/AsterizmTranslator.tsol, 197
+.loc ../contracts/AsterizmTranslator.tsol, 205
 DEPTH
 ADDCONST -5
 PICK
 THROWIF 72
-.loc ../contracts/AsterizmTranslator.tsol, 92
+.loc ../contracts/AsterizmTranslator.tsol, 93
 GETGLOB 9
 GETGLOB 12
 PUSHINT 267
@@ -807,7 +838,11 @@ IFREFELSEREF
 }
 FIRST
 THROWIFNOT 2002
-.loc ../contracts/AsterizmTranslator.tsol, 198
+.loc ../contracts/AsterizmTranslator.tsol, 206
+PUSHINT 1000000000
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/AsterizmTranslator.tsol, 207
 CALLREF {
 	CALL $_buildTrTarnsferMessageRequestDto_e6a27211_internal_macro$
 }
@@ -821,39 +856,36 @@ CALLREF {
 CALL $_baseTransferMessage_faacb5ae_internal_macro$
 
 .macro _baseTransferMessage_faacb5ae_internal_macro
-.loc ../contracts/AsterizmTranslator.tsol, 204
+.loc ../contracts/AsterizmTranslator.tsol, 213
 DUP
 SECOND
 CTOS
 LDU 256
 LDU 64
-LDMSGADDR
-LDU 64
-LDREF
-ENDS
-CTOS
-LDMSGADDR
 LDU 256
-LDI 1
+LDU 64
+LDU 256
 LDREF
 ENDS
 CTOS
+LDU 128
+LDI 1
 LDU 256
 LDU 256
 LDREF
 ENDS
 BLKDROP2 1, 4
-.loc ../contracts/AsterizmTranslator.tsol, 213
+.loc ../contracts/AsterizmTranslator.tsol, 222
 ROLL 5
 GETGLOB 14
 EQUAL
 THROWIFNOT 2005
-.loc ../contracts/AsterizmTranslator.tsol, 215
+.loc ../contracts/AsterizmTranslator.tsol, 224
 BLKPUSH 2, 6
 GETGLOB 14
 PUSH S7
 CALLREF {
-	CALL $_buildBaseTransferDirectionDto_a4f60f05_internal_macro$
+	CALL $_buildBaseTransferDirectionDto_771582d0_internal_macro$
 }
 PUSH S8
 ROLL 10
@@ -861,27 +893,28 @@ FIRST
 BLKSWAP 2, 5
 BLKPUSH 2, 6
 CALLREF {
-	CALL $_buildIzReceivePayloadRequestDto_20af2e2b_internal_macro$
+	CALL $_buildIzReceivePayloadRequestDto_552e3db8_internal_macro$
 }
-.loc ../contracts/AsterizmTranslator.tsol, 218
+.loc ../contracts/AsterizmTranslator.tsol, 227
 GETGLOB 11
+FALSE
 NEWC
-STSLICECONST x62_
+STSLICECONST x6_
+STI 1
+STSLICECONST x1_
 STSLICE
-PUSHINT 9789369574394656757036770681243717074945
-STUR 135
+PUSHINT 1
+STUR 111
 SWAP
 NEWC
-STSLICECONST x667a8e2a
+STSLICECONST x4727cb24
 SWAP
 UNTUPLE 10
 REVERSE 11, 0
 STU 64
-STSLICE
+STU 256
 STU 64
-ROLLREV 7
-NEWC
-STSLICE
+STU 256
 STU 256
 ROLLREV 5
 NEWC
@@ -892,11 +925,10 @@ STU 256
 STREF
 STBREFR
 STBREFR
-STBREFR
 ENDC
-PUSHINT 0
+PUSHPOW2 7
 SENDRAWMSG
-.loc ../contracts/AsterizmTranslator.tsol, 220
+.loc ../contracts/AsterizmTranslator.tsol, 229
 HASHCU
 REVERSE 6, 0
 ROLLREV 3
@@ -905,12 +937,10 @@ NEWC
 STSLICE
 ROLLREV 6
 NEWC
-STSLICECONST x1113d1ee
+STSLICECONST x7c6b60cc
 STU 64
-STSLICE
-ROLLREV 4
-NEWC
-STSLICE
+STU 256
+STU 256
 STU 256
 ROTREV
 NEWC
@@ -918,26 +948,19 @@ STU 256
 STU 256
 STBREFR
 STBREFR
-STBREFR
 ENDC
 PUSHINT 0
 SENDRAWMSG
 .loc ../contracts/AsterizmTranslator.tsol, 0
 
-.globl	_buildBaseTransferDirectionDto_a4f60f05_internal
-.type	_buildBaseTransferDirectionDto_a4f60f05_internal, @function
-CALL $_buildBaseTransferDirectionDto_a4f60f05_internal_macro$
+.globl	_buildBaseTransferDirectionDto_771582d0_internal
+.type	_buildBaseTransferDirectionDto_771582d0_internal, @function
+CALL $_buildBaseTransferDirectionDto_771582d0_internal_macro$
 
-.macro _buildBaseTransferDirectionDto_a4f60f05_internal_macro
+.macro _buildBaseTransferDirectionDto_771582d0_internal_macro
 .loc ../contracts/base/AsterizmStructs.tsol, 19
 PUSHINT 0
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-PUSHINT 0
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
+BLKPUSH 3, 0
 TUPLE 4
 ROLL 4
 SETINDEX 0
@@ -969,24 +992,16 @@ SWAP
 SETINDEX 1
 .loc ../contracts/base/AsterizmStructs.tsol, 0
 
-.globl	_buildIzReceivePayloadRequestDto_20af2e2b_internal
-.type	_buildIzReceivePayloadRequestDto_20af2e2b_internal, @function
-CALL $_buildIzReceivePayloadRequestDto_20af2e2b_internal_macro$
+.globl	_buildIzReceivePayloadRequestDto_552e3db8_internal
+.type	_buildIzReceivePayloadRequestDto_552e3db8_internal, @function
+CALL $_buildIzReceivePayloadRequestDto_552e3db8_internal_macro$
 
-.macro _buildIzReceivePayloadRequestDto_20af2e2b_internal_macro
+.macro _buildIzReceivePayloadRequestDto_552e3db8_internal_macro
 .loc ../contracts/base/AsterizmStructs.tsol, 53
 PUSH S6
 FIRST
 PUSHINT 0
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-PUSHINT 0
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-PUSHINT 0
-BLKPUSH 4, 0
+BLKPUSH 8, 0
 PUSHREF {
 }
 TUPLE 10
@@ -1024,18 +1039,14 @@ SWAP
 SETINDEX 9
 .loc ../contracts/base/AsterizmStructs.tsol, 0
 
-.globl	_buildIzIninTransferRequestDto_89b0eabe_internal
-.type	_buildIzIninTransferRequestDto_89b0eabe_internal, @function
-CALL $_buildIzIninTransferRequestDto_89b0eabe_internal_macro$
+.globl	_buildIzIninTransferRequestDto_50e48a06_internal
+.type	_buildIzIninTransferRequestDto_50e48a06_internal, @function
+CALL $_buildIzIninTransferRequestDto_50e48a06_internal_macro$
 
-.macro _buildIzIninTransferRequestDto_89b0eabe_internal_macro
+.macro _buildIzIninTransferRequestDto_50e48a06_internal_macro
 .loc ../contracts/base/AsterizmStructs.tsol, 77
 PUSHINT 0
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-PUSHINT 0
-BLKPUSH 2, 0
+BLKPUSH 4, 0
 PUSHREF {
 }
 TUPLE 6
@@ -1058,22 +1069,14 @@ SWAP
 SETINDEX 5
 .loc ../contracts/base/AsterizmStructs.tsol, 0
 
-.globl	_buildClAsterizmReceiveRequestDto_0aae991a_internal
-.type	_buildClAsterizmReceiveRequestDto_0aae991a_internal, @function
-CALL $_buildClAsterizmReceiveRequestDto_0aae991a_internal_macro$
+.globl	_buildClAsterizmReceiveRequestDto_c17bacf2_internal
+.type	_buildClAsterizmReceiveRequestDto_c17bacf2_internal, @function
+CALL $_buildClAsterizmReceiveRequestDto_c17bacf2_internal_macro$
 
-.macro _buildClAsterizmReceiveRequestDto_0aae991a_internal_macro
+.macro _buildClAsterizmReceiveRequestDto_c17bacf2_internal_macro
 .loc ../contracts/base/AsterizmStructs.tsol, 102
 PUSHINT 0
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-PUSHINT 0
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-PUSHINT 0
-BLKPUSH 2, 0
+BLKPUSH 6, 0
 PUSHREF {
 }
 TUPLE 8
@@ -1102,21 +1105,14 @@ SWAP
 SETINDEX 7
 .loc ../contracts/base/AsterizmStructs.tsol, 0
 
-.globl	_buildTrSendMessageRequestDto_b8fdfbe9_internal
-.type	_buildTrSendMessageRequestDto_b8fdfbe9_internal, @function
-CALL $_buildTrSendMessageRequestDto_b8fdfbe9_internal_macro$
+.globl	_buildTrSendMessageRequestDto_d88eae6b_internal
+.type	_buildTrSendMessageRequestDto_d88eae6b_internal, @function
+CALL $_buildTrSendMessageRequestDto_d88eae6b_internal_macro$
 
-.macro _buildTrSendMessageRequestDto_b8fdfbe9_internal_macro
+.macro _buildTrSendMessageRequestDto_d88eae6b_internal_macro
 .loc ../contracts/base/AsterizmStructs.tsol, 129
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
 PUSHINT 0
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-PUSHINT 0
-BLKPUSH 3, 0
+BLKPUSH 6, 0
 PUSHREF {
 }
 TUPLE 8
@@ -1145,271 +1141,61 @@ SWAP
 SETINDEX 7
 .loc ../contracts/base/AsterizmStructs.tsol, 0
 
-.globl	_buildClInitTransferEventDto_8231f166_internal
-.type	_buildClInitTransferEventDto_8231f166_internal, @function
-CALL $_buildClInitTransferEventDto_8231f166_internal_macro$
+.globl	_buildClInitTransferEventDto_3f81b0f7_internal
+.type	_buildClInitTransferEventDto_3f81b0f7_internal, @function
+CALL $_buildClInitTransferEventDto_3f81b0f7_internal_macro$
 
-.macro _buildClInitTransferEventDto_8231f166_internal_macro
-.loc ../contracts/base/AsterizmStructs.tsol, 148
+.macro _buildClInitTransferEventDto_3f81b0f7_internal_macro
+.loc ../contracts/base/AsterizmStructs.tsol, 147
 PUSHINT 0
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
 PUSHREF {
 }
-TRIPLE
-ROLL 3
-SETINDEX 0
-.loc ../contracts/base/AsterizmStructs.tsol, 149
+PAIR
 ROT
-SETINDEX 1
-.loc ../contracts/base/AsterizmStructs.tsol, 150
+SETINDEX 0
+.loc ../contracts/base/AsterizmStructs.tsol, 148
 SWAP
-SETINDEX 2
+SETINDEX 1
 .loc ../contracts/base/AsterizmStructs.tsol, 0
 
-.globl	_buildClInitTransferRequestDto_58e70a01_internal
-.type	_buildClInitTransferRequestDto_58e70a01_internal, @function
-CALL $_buildClInitTransferRequestDto_58e70a01_internal_macro$
+.globl	_buildClInitTransferRequestDto_13fcedf0_internal
+.type	_buildClInitTransferRequestDto_13fcedf0_internal, @function
+CALL $_buildClInitTransferRequestDto_13fcedf0_internal_macro$
 
-.macro _buildClInitTransferRequestDto_58e70a01_internal_macro
-.loc ../contracts/base/AsterizmStructs.tsol, 165
+.macro _buildClInitTransferRequestDto_13fcedf0_internal_macro
+.loc ../contracts/base/AsterizmStructs.tsol, 163
 PUSHINT 0
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-PUSHINT 0
-BLKPUSH 2, 0
+BLKPUSH 4, 0
 PUSHREF {
 }
 TUPLE 6
 ROLL 6
 SETINDEX 0
-.loc ../contracts/base/AsterizmStructs.tsol, 166
+.loc ../contracts/base/AsterizmStructs.tsol, 164
 ROLL 5
 SETINDEX 1
-.loc ../contracts/base/AsterizmStructs.tsol, 167
+.loc ../contracts/base/AsterizmStructs.tsol, 165
 ROLL 3
 SETINDEX 4
-.loc ../contracts/base/AsterizmStructs.tsol, 168
+.loc ../contracts/base/AsterizmStructs.tsol, 166
 ROT
 SETINDEX 2
-.loc ../contracts/base/AsterizmStructs.tsol, 169
+.loc ../contracts/base/AsterizmStructs.tsol, 167
 ROT
 SETINDEX 3
-.loc ../contracts/base/AsterizmStructs.tsol, 170
+.loc ../contracts/base/AsterizmStructs.tsol, 168
 SWAP
 SETINDEX 5
 .loc ../contracts/base/AsterizmStructs.tsol, 0
-
-.macro owner
-DROP
-GETGLOB 6
-THROWIFNOT 76
-GETGLOB 2
-ISNULL
-IFREF {
-	CALL $c4_to_c7$
-}
-.loc ../contracts/libs/Ownable.tsol, 32
-ENDS
-.loc ../contracts/libs/Ownable.tsol, 0
-CALLREF {
-	CALL $owner_8da5cb5b_internal_macro$
-}
-OVER
-PUSHCONT {
-	PUSH S3
-	CTOS
-	LDU 2
-	LDMSGADDR
-	DROP
-	NIP
-	NEWC
-	STSLICECONST xc
-	STSLICE
-	PUSHINT 1
-	STUR 98
-	SWAP
-	NEWC
-	STSLICECONST xdf0bcfde
-	STSLICE
-	STBREFR
-	ENDC
-	PUSHINT 0
-	SENDRAWMSG
-}
-PUSHCONT {
-	DROP
-}
-IFELSE
-IFREF {
-	CALL $upd_only_time_in_c4$
-}
-THROW 0
 
 .globl	owner_8da5cb5b_internal
 .type	owner_8da5cb5b_internal, @function
 CALL $owner_8da5cb5b_internal_macro$
 
 .macro owner_8da5cb5b_internal_macro
-.loc ../contracts/libs/Ownable.tsol, 33
+.loc ../contracts/base/AsterizmOwnable.tsol, 19
 GETGLOB 10
-.loc ../contracts/libs/Ownable.tsol, 0
-
-.globl	_checkOwner_53a72975_internal
-.type	_checkOwner_53a72975_internal, @function
-CALL $_checkOwner_53a72975_internal_macro$
-
-.macro _checkOwner_53a72975_internal_macro
-.loc ../contracts/libs/Ownable.tsol, 40
-CALLREF {
-	CALL $owner_8da5cb5b_internal_macro$
-}
-CALLREF {
-	CALL $_msgSender_119df25f_internal_macro$
-}
-SDEQ
-THROWIFNOT 1001
-.loc ../contracts/libs/Ownable.tsol, 0
-
-.macro renounceOwnership
-DROP
-GETGLOB 6
-THROWIFNOT 76
-GETGLOB 2
-ISNULL
-IFREF {
-	CALL $c4_to_c7$
-}
-.loc ../contracts/libs/Ownable.tsol, 50
-ENDS
-.loc ../contracts/libs/Ownable.tsol, 0
-CALLREF {
-	CALL $renounceOwnership_715018a6_internal_macro$
-}
-DROP
-CALLREF {
-	CALL $c7_to_c4$
-}
-THROW 0
-
-.globl	renounceOwnership_715018a6_internal
-.type	renounceOwnership_715018a6_internal, @function
-CALL $renounceOwnership_715018a6_internal_macro$
-
-.macro renounceOwnership_715018a6_internal_macro
-.loc ../contracts/libs/Ownable.tsol, 25
-CALLREF {
-	CALL $_checkOwner_53a72975_internal_macro$
-}
-.loc ../contracts/libs/Ownable.tsol, 51
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-CALLREF {
-	CALL $_transferOwnership_d29d44ee_internal_macro$
-}
-.loc ../contracts/libs/Ownable.tsol, 0
-
-.macro transferOwnership
-DROP
-GETGLOB 6
-THROWIFNOT 76
-GETGLOB 2
-ISNULL
-IFREF {
-	CALL $c4_to_c7$
-}
-.loc ../contracts/libs/Ownable.tsol, 58
-OVER
-PUSHCONT {
-	LDREF
-	ENDS
-	CTOS
-}
-IF
-LDMSGADDR
-ENDS
-.loc ../contracts/libs/Ownable.tsol, 0
-CALLREF {
-	CALL $transferOwnership_f2fde38b_internal_macro$
-}
-DROP
-CALLREF {
-	CALL $c7_to_c4$
-}
-THROW 0
-
-.globl	transferOwnership_f2fde38b_internal
-.type	transferOwnership_f2fde38b_internal, @function
-CALL $transferOwnership_f2fde38b_internal_macro$
-
-.macro transferOwnership_f2fde38b_internal_macro
-.loc ../contracts/libs/Ownable.tsol, 25
-CALLREF {
-	CALL $_checkOwner_53a72975_internal_macro$
-}
-.loc ../contracts/libs/Ownable.tsol, 59
-DUP
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-SDEQ
-THROWIF 1002
-.loc ../contracts/libs/Ownable.tsol, 60
-CALLREF {
-	CALL $_transferOwnership_d29d44ee_internal_macro$
-}
-.loc ../contracts/libs/Ownable.tsol, 0
-
-.globl	_transferOwnership_d29d44ee_internal
-.type	_transferOwnership_d29d44ee_internal, @function
-CALL $_transferOwnership_d29d44ee_internal_macro$
-
-.macro _transferOwnership_d29d44ee_internal_macro
-.loc ../contracts/libs/Ownable.tsol, 68
-GETGLOB 10
-.loc ../contracts/libs/Ownable.tsol, 69
-OVER
-SETGLOB 10
-.loc ../contracts/libs/Ownable.tsol, 70
-PUSHSLICE xc0000000000000000000000001
-NEWC
-STSLICE
-ROTREV
-NEWC
-STSLICECONST x6115f072
-STSLICE
-SWAP
-NEWC
-STSLICE
-STBREFR
-STBREFR
-ENDC
-PUSHINT 0
-SENDRAWMSG
-.loc ../contracts/libs/Ownable.tsol, 0
-
-.globl	_msgSender_119df25f_internal
-.type	_msgSender_119df25f_internal, @function
-CALL $_msgSender_119df25f_internal_macro$
-
-.macro _msgSender_119df25f_internal_macro
-.loc ../contracts/libs/Context.tsol, 6
-GETGLOB 9
-.loc ../contracts/libs/Context.tsol, 0
-
-.globl	_msgData_8b49d47e_internal
-.type	_msgData_8b49d47e_internal, @function
-CALL $_msgData_8b49d47e_internal_macro$
-
-.macro _msgData_8b49d47e_internal_macro
-.loc ../contracts/libs/Context.tsol, 10
-DEPTH
-ADDCONST -4
-PICK
-.loc ../contracts/libs/Context.tsol, 0
+.loc ../contracts/base/AsterizmOwnable.tsol, 0
 
 .macro c4_to_c7
 PUSHROOT
@@ -1445,13 +1231,30 @@ PUSHCONT {
 	PUSHROOT
 	CTOS
 	PLDDICT ; D
+	PUSHINT 1
+	OVER
+	PUSHINT 64
+	DICTUGET
+	PUSHCONT {
+		PUSHREFSLICE {
+			.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+		}
+	}
+	IFNOT
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
-	DUP
 	NEWDICT
 	DUP
-	PUSHINT 0
+	PUSHINT 2
+	PUSH S5
+	PUSHINT 64
+	DICTUGET
+	ZEROSWAPIFNOT
+	PUSHCONT {
+		PLDU 64
+	}
+	IF
 	SETGLOB 14
 	SETGLOB 13
 	SETGLOB 12
@@ -1631,43 +1434,11 @@ PUSHCONT {
 IF
 THROW 0
 
-.macro localChainId
-DROP
-ENDS
-CALLREF {
-	CALL $c4_to_c7$
-}
-GETGLOB 14
-OVER
-PUSHCONT {
-	PUSHSLICE xc0000000000000000000000000f29cc0f5
-	NEWC
-	STSLICE
-	STU 64
-	ENDC
-	PUSHINT 0
-	SENDRAWMSG
-}
-IF
-THROW 0
-
 .macro public_function_selector
 DUP
-PUSHINT 611614122
+PUSHINT 1094521452
 LEQ
 IFJMPREF {
-	DUP
-	PUSHINT 208819826
-	EQUAL
-	IFJMPREF {
-		CALL $sendMessage$
-	}
-	DUP
-	PUSHINT 235197086
-	EQUAL
-	IFJMPREF {
-		CALL $transferOwnership$
-	}
 	DUP
 	PUSHINT 396182341
 	EQUAL
@@ -1675,22 +1446,28 @@ IFJMPREF {
 		CALL $removeChainById$
 	}
 	DUP
+	PUSHINT 583260751
+	EQUAL
+	IFJMPREF {
+		CALL $sendMessage$
+	}
+	DUP
 	PUSHINT 611614122
 	EQUAL
 	IFJMPREF {
 		CALL $transferMessage$
 	}
-}
-DUP
-PUSHINT 1504765774
-LEQ
-IFJMPREF {
 	DUP
 	PUSHINT 1094521452
 	EQUAL
 	IFJMPREF {
 		CALL $setInitializer$
 	}
+}
+DUP
+PUSHINT 1659842636
+LEQ
+IFJMPREF {
 	DUP
 	PUSHINT 1194236884
 	EQUAL
@@ -1709,34 +1486,11 @@ IFJMPREF {
 	IFJMPREF {
 		CALL $addChains$
 	}
-}
-DUP
-PUSHINT 1768026261
-LEQ
-IFJMPREF {
-	DUP
-	PUSHINT 1594609630
-	EQUAL
-	IFJMPREF {
-		CALL $owner$
-	}
 	DUP
 	PUSHINT 1659842636
 	EQUAL
 	IFJMPREF {
 		CALL $addChain$
-	}
-	DUP
-	PUSHINT 1729444094
-	EQUAL
-	IFJMPREF {
-		CALL $renounceOwnership$
-	}
-	DUP
-	PUSHINT 1768026261
-	EQUAL
-	IFJMPREF {
-		CALL $chains$
 	}
 }
 DUP
@@ -1744,16 +1498,16 @@ PUSHINT 2023770658
 LEQ
 IFJMPREF {
 	DUP
-	PUSHINT 1883103951
+	PUSHINT 1756716863
 	EQUAL
 	IFJMPREF {
 		CALL $constructor$
 	}
 	DUP
-	PUSHINT 1922875637
+	PUSHINT 1768026261
 	EQUAL
 	IFJMPREF {
-		CALL $localChainId$
+		CALL $chains$
 	}
 	DUP
 	PUSHINT 2023770658

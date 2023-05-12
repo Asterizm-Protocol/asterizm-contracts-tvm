@@ -11,4 +11,21 @@ library AsterizmEnvs {
 
     // For Asterizm client contract
     uint128 constant CLIENT__MIN_CONTRACT_BALANCE = 1 ton;
+
+    // For Asterizm transfers contract
+    uint128 constant TRANSFER__MIN_CONTRACT_BALANCE = 0.01 ton;
+    uint128 constant TRANSFER__MIN_DEPLOY_CONTRACT_VALUE = 0.1 ton;
+    uint128 constant TRANSFER__GET_REQUEST_VALUE = 0.05 ton;
+    uint128 constant TRANSFER__SET_REQUEST_VALUE = 0.05 ton;
+
+    // For Asterizm nonces contract
+    uint128 constant NONCE__MIN_CONTRACT_BALANCE = 0.01 ton;
+    uint128 constant NONCE__MIN_DEPLOY_CONTRACT_VALUE = 0.2 ton;
+    uint128 constant NONCE__GET_REQUEST_VALUE = 0.05 ton;
+    uint128 constant NONCE__SET_REQUEST_VALUE = 0.1 ton;
+
+    // Method types
+    uint8 constant METHOD__INITIALIZER_HASH_EXISTS = 1;
+    uint8 constant METHOD__CLIENT_HASH_EXISTS = 2;
+    uint8 constant METHOD__CLIENT_HASH_EXECUTED = 3;
 }

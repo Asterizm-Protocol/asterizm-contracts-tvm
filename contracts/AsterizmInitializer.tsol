@@ -10,24 +10,25 @@ import "./interfaces/IClientReceiverContract.tsol";
 import "./interfaces/IInitializerSender.tsol";
 import "./interfaces/IInitializerReceiver.tsol";
 import "./base/AsterizmStructs.tsol";
-import "./libs/Ownable.tsol";
 import "./base/AsterizmErrors.tsol";
 import "./base/AsterizmTransferFlags.tsol";
 import "./base/AsterizmEnvs.tsol";
+import "./base/AsterizmOwnable.tsol";
+import "./libs/AddressLib.tsol";
+import "./libs/BytesLib.tsol";
+import "./libs/UintLib.tsol";
+import "./base/AsterizmInitializerTransfer.tsol";
+import "./base/AsterizmNonce.tsol";
 
-contract AsterizmInitializer is Ownable, IInitializerSender, IInitializerReceiver, AsterizmStructs {
+contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitializerReceiver, AsterizmStructs {
+
+    using AddressLib for address;
+    using BytesLib for bytes;
+    using UintLib for uint;
 
     /// Set translator event
     /// @param _translatorAddress address
     event SetTranslatorEvent(address _translatorAddress);
-
-    /// Set outbound nonce event
-    /// @param _nonceAddress address
-    event SetOutBoundNonceEvent(address _nonceAddress);
-
-    /// Set inbound nonce event
-    /// @param _nonceAddress address
-    event SetInBoundNonceEvent(address _nonceAddress);
 
     /// Set decryption send availeble event
     /// @param _flag bool
@@ -38,12 +39,31 @@ contract AsterizmInitializer is Ownable, IInitializerSender, IInitializerReceive
     event SetEncriptionSendAvailableEvent(bool _flag);
 
     /// Block address event
-    /// @param _address address
-    event AddBlockAddressEvent(address _address);
+    /// @param _cheinId uint64
+    /// @param _address uint
+    event AddBlockAddressEvent(uint64 _cheinId, uint _address);
 
     /// Remove block address event
+    /// @param _cheinId uint64
+    /// @param _address uint
+    event RemoveBlockAddressEvent(uint64 _cheinId, uint _address);
+
+    /// Asterizm transfet hash contract deploy event
     /// @param _address address
-    event RemoveBlockAddressEvent(address _address);
+    event TransferHashContractDeployEvent(address _address);
+
+    /// Asterizm nonce contract deploy event
+    /// @param _address address
+    event NonceContractDeployEvent(address _address);
+
+    /// Init transfer successfully event
+    /// @param _transferHash uint
+    event InitTransferSuccessfullyEvent(uint _transferHash);
+
+    /// Nonce error event
+    /// @param _transferHash uint
+    /// @param _errorCode uint16
+    event NonceErrorEvent(uint _transferHash, uint16 _errorCode);
 
     /// Payload error event
     /// Client can listen it for moniroting error transfers
@@ -52,131 +72,338 @@ contract AsterizmInitializer is Ownable, IInitializerSender, IInitializerReceive
     /// @param _dstChainId uint64  Destination chain ID
     /// @param _dstAddress address  Destination address
     /// @param _nonce uint  Nonce
-    /// @param _transferHash bytes32  Tansfer hash
+    /// @param _transferHash uint  Tansfer hash
     /// @param _payload bytes  Payload
     /// @param _reason bytes  Error reason
-    event PayloadErrorEvent(uint64 _srcChainId, address _srcAddress, uint64 _dstChainId, address _dstAddress, uint _nonce, bytes32 _transferHash, TvmCell _payload, TvmCell _reason);
+    event PayloadErrorEvent(uint64 _srcChainId, address _srcAddress, uint64 _dstChainId, address _dstAddress, uint _nonce, uint _transferHash, TvmCell _payload, TvmCell _reason);
 
     /// Sent payload event
-    /// @param _transferHash bytes32  Transfer hash
-    event SentPayloadEvent(bytes32 _transferHash);
+    /// @param _transferHash uint  Transfer hash
+    event SentPayloadEvent(uint _transferHash);
 
-    INonce private inboundNonce;
-    INonce private outboundNonce;
-    ITranslator private translatorLib;
+    struct Nonce {
+        bool exists;
+        address sender;
+        TvmCell dto;
+    }
+
     uint64 private localChainId;
-    mapping(address => bool) public blockAddresses;
-    mapping(bytes32 => bool) private outgoingTransfers;
+    mapping(uint64 => uint) public blockAddresses;
+    mapping(uint => Nonce) private nonces;
 
-    constructor (ITranslator _translatorLibrary) public {
+    ITranslator static translatorLib_;
+    TvmCell static initializerTransferCode_;
+    TvmCell static clientTransferCode_;
+    TvmCell static nonceCode_;
+
+    constructor () public {
         tvm.accept();
 
-        setTransalor(_translatorLibrary);
-        uint128 chainValue = address(this).balance - AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE;
-        localChainId = translatorLib.getLocalChainId{value: chainValue >= AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE ? chainValue : AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE}().await;
-        
-        tvm.rawReserve(AsterizmEnvs.TRANSLATOR__MIN_CONTRACT_BALANCE, 0);
+        emit SetTranslatorEvent(address(translatorLib_));
+        localChainId = translatorLib_.getLocalChainId{ value: AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE }().await;
+
+        tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
         msg.sender.transfer({
             value: 0,
-            flag: 128,
+            flag: AsterizmTransferFlags.ALL_NOT_RESERVED,
             bounce: false
         });
     }
 
+    onBounce(TvmSlice slice) external {
+        uint32 functionId = slice.decode(uint32);
+        if (functionId == tvm.functionId(AsterizmNonce.increaseNonce)) {
+            (uint transferHash, ) = slice.decodeFunctionParams(AsterizmNonce.increaseNonce);
+            delete nonces[transferHash];
+            emit NonceErrorEvent(transferHash, AsterizmErrors.INITIALIZER__NONCE_INCREACE__ERROR);
+        }
+    
+        if (functionId == tvm.functionId(AsterizmNonce.increaseNonceWithValidation)) {
+            (uint transferHash, ) = slice.decodeFunctionParams(AsterizmNonce.increaseNonce);
+            delete nonces[transferHash];
+            emit NonceErrorEvent(transferHash, AsterizmErrors.INITIALIZER__NONCE_INCREACE_WITH_VALIDATION__ERROR);
+        }
+    }
+
+    /** Modifiers */
+
     /// Only translator modifier
     modifier onlyTranslator() {
-        require(msg.sender == address(translatorLib), AsterizmErrors.INITIALIZER__ONLY_TRANSLATOR__ERROR);
+        require(msg.sender == address(translatorLib_), AsterizmErrors.INITIALIZER__ONLY_TRANSLATOR__ERROR);
         _;
     }
 
+    /// Send residue modifier
+    modifier sendResidue() {
+        tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
+        _;
+        msg.sender.transfer({
+            value: 0,
+            flag: AsterizmTransferFlags.ALL_NOT_RESERVED,
+            bounce: false
+        });
+    }
+
+
+    /*******************/
     /** Internal logic */
+    /*******************/
 
-    /// Set translator
-    /// @param _translatorLib ITranslator  Translator library
-    function setTransalor(ITranslator _translatorLib) public onlyOwner {
-        translatorLib = _translatorLib;
-        emit SetTranslatorEvent(address(_translatorLib));
+    /** External contracts */
+    
+    /// Return transfer hash contract status init
+    /// @param _transferHash uint  Transfer hash
+    /// @return TvmCell  Transfer hash contract state init
+    function _getTransferHashContractStatiInit(uint _transferHash) private view returns(TvmCell) {
+        return tvm.buildStateInit({
+            contr: AsterizmInitializerTransfer,  
+            varInit: {
+                owner_: address(this),
+                hash_: _transferHash
+            },
+            pubkey: 0,
+            code: initializerTransferCode_
+        });
     }
 
-    /// Set outbound nonce
-    /// @param _nonce INonce  Set outbound nonce
-    function setOutBoundNonce(INonce _nonce) public onlyOwner {
-        outboundNonce = _nonce;
-        emit SetOutBoundNonceEvent(address(_nonce));
+    /// Deploy transfer hash contract
+    /// @param _transferHash uint  Transfer hash
+    /// @return address  Transfer hash contract address
+    function _deployTransferHashContract(uint _transferHash) private view returns(address) {
+        address contractAddress = new AsterizmInitializerTransfer{
+            stateInit: _getTransferHashContractStatiInit(_transferHash),
+            value: AsterizmEnvs.NONCE__MIN_DEPLOY_CONTRACT_VALUE,
+            wid: address(this).wid,
+            flag: AsterizmTransferFlags.SENDER_PAYS_FEES
+        }();
+        emit TransferHashContractDeployEvent(contractAddress);
+
+        return contractAddress;
     }
 
-    /// Set inbound nonce
-    /// @param _nonce INonce  Set inbound nonce
-    function setInBoundNonce(INonce _nonce) public onlyOwner {
-        inboundNonce = _nonce;
-        emit SetInBoundNonceEvent(address(_nonce));
+    /// Return transfer hash contract address
+    /// @param _transferHash uint  Transfer hash
+    /// @return address  Transfer hash contract address
+    function _getTransferHashContractAddress(uint _transferHash) private view returns(address) {
+        return address(tvm.hash(_getTransferHashContractStatiInit(_transferHash)));
     }
+
+    /// Return transfer hash contract status init
+    /// @param _chainId uint64  Chain id
+    /// @param _srcAddress uint  Source address
+    /// @param _dstAddress uint  Destination address
+    /// @param _type bool  Nonce contract type (false - source chain, true - destination chain)
+    /// @return TvmCell  Nonce contract state init
+    function _getNonceContractStatiInit(uint64 _chainId, uint _srcAddress, uint _dstAddress, bool _type) private view returns(TvmCell) {
+        return tvm.buildStateInit({
+            contr: AsterizmNonce,  
+            varInit: {
+                owner_: address(this),
+                chainId_: _chainId,
+                srcAddress_: _srcAddress,
+                dstAddress_: _dstAddress,
+                type_: _type
+            },
+            pubkey: 0,
+            code: nonceCode_
+        });
+    }
+
+    /// Deploy nonce contract
+    /// @param _chainId uint64  Chain id
+    /// @param _srcAddress uint  Source address
+    /// @param _dstAddress uint  Destination address
+    /// @param _type bool  Nonce contract type (false - source chain, true - destination chain)
+    /// @return address  Nonce contract address
+    function _deployNonceContract(uint64 _chainId, uint _srcAddress, uint _dstAddress, bool _type) private view returns(address) {
+        address contractAddress = new AsterizmNonce{
+            stateInit: _getNonceContractStatiInit(_chainId, _srcAddress, _dstAddress, _type),
+            value: AsterizmEnvs.NONCE__MIN_DEPLOY_CONTRACT_VALUE,
+            wid: address(this).wid,
+            flag: AsterizmTransferFlags.SENDER_PAYS_FEES
+        }();
+        emit NonceContractDeployEvent(contractAddress);
+
+        return contractAddress;
+    }
+
+    /// Return nonce contract address
+    /// @param _chainId uint64  Chain id
+    /// @param _srcAddress uint  Source address
+    /// @param _dstAddress uint  Destination address
+    /// @param _type bool  Nonce contract type (false - source chain, true - destination chain)
+    /// @return address  Noncecontract address
+    function _getNonceContractAddress(uint64 _chainId, uint _srcAddress, uint _dstAddress, bool _type) private view returns(address) {
+        return address(tvm.hash(_getNonceContractStatiInit(_chainId, _srcAddress, _dstAddress, _type)));
+    }
+
+    /// Return nonce contract address
+    /// @param _chainId uint64  Chain id
+    /// @param _srcAddress uint  Source address
+    /// @param _dstAddress uint  Destination address
+    /// @param _type bool  Nonce contract type (false - source chain, true - destination chain)
+    /// @param _withDeploy bool  With deploy
+    /// @return AsterizmNonce  Nonce contract
+    function _getNonceContract(uint64 _chainId, uint _srcAddress, uint _dstAddress, bool _type, bool _withDeploy) private view returns(AsterizmNonce) {
+        return AsterizmNonce(_withDeploy ? _deployNonceContract(_chainId, _srcAddress, _dstAddress, _type) : _getNonceContractAddress(_chainId, _srcAddress, _dstAddress, _type));
+    }
+
+    /** Other internal functions */
 
     /// Block address
-    /// @param _address address  Available flag
-    function addBlockAddress(address _address) external onlyOwner {
-        blockAddresses[_address] = true;
-        emit AddBlockAddressEvent(_address);
+    /// @param _chainId uint64  Chain id
+    /// @param _address uint  Available flag
+    function addBlockAddress(uint64 _chainId, uint _address) external onlyOwner sendResidue {
+        blockAddresses[_chainId] = _address;
+        emit AddBlockAddressEvent(_chainId, _address);
     }
 
     /// Unblock address
-    /// @param _address address  Available flag
-    function removeBlockAddress(address _address) external onlyOwner {
-        delete blockAddresses[_address];
-        emit RemoveBlockAddressEvent(_address);
+    /// @param _chainId uint64 Chain id
+    function removeBlockAddress(uint64 _chainId) external onlyOwner sendResidue {
+        require(blockAddresses[_chainId] != uint(0), AsterizmErrors.CLIENT__ADDRESS_IS_NOT_BLOCKED__ERROR);
+        uint blockedAddress = blockAddresses[_chainId];
+        delete blockAddresses[_chainId];
+        emit RemoveBlockAddressEvent(_chainId, blockedAddress);
     }
 
+
+    /*******************/
     /** External logic */
+    /*******************/
 
-    /// Validate income transfer by hash
-    /// @param _transferHash bytes32
-    function validIncomeTransferHash(bytes32 _transferHash) external internalMsg view override returns(bool) {
-        return outgoingTransfers[_transferHash];
-    }
+    /** Other external functions */
 
     /// Return local chain id
     /// @return uint64
     function getLocalChainId() external internalMsg view responsible override returns(uint64) {
-        uint128 balance = address(this).balance - msg.value;
-        tvm.rawReserve(balance >= AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE ? balance : AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
+        tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
         return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } localChainId;
     }
+
+    /// Return initializer transfer code
+    /// @return TvmCell
+    function getInitializerTransferCode() external internalMsg view responsible override returns(TvmCell) {
+        tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
+        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } initializerTransferCode_;
+    }
+
+    /// Return client transfer code
+    /// @return TvmCell
+    function getClientTransferCode() external internalMsg view responsible override returns(TvmCell) {
+        tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
+        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } clientTransferCode_;
+    }
+
+
+    /** Sending logic */
 
     /// Initiate asterizm transfer
     /// Only clients can call this method
     /// @param _dto IzIninTransferRequestDto  Method DTO
     function initTransfer(IzIninTransferRequestDto _dto) external override {
-        require(!blockAddresses[msg.sender], AsterizmErrors.INITIALIZER__SENDER_ADDRESS_IS_BLOCKED__ERROR);
-        require(!blockAddresses[_dto.dstAddress], AsterizmErrors.INITIALIZER__TARGET_ADDRESS_IS_BLOCKED__ERROR);
+        address sender = msg.sender;
+        require(sender.toUint() != blockAddresses[localChainId], AsterizmErrors.INITIALIZER__SENDER_ADDRESS_IS_BLOCKED__ERROR);
+        require(_dto.dstAddress != blockAddresses[_dto.dstChainId], AsterizmErrors.INITIALIZER__TARGET_ADDRESS_IS_BLOCKED__ERROR);
 
+        if (_dto.useForceOrder) {
+            nonces[_dto.transferHash].exists = true;
+            nonces[_dto.transferHash].sender = sender;
+            nonces[_dto.transferHash].dto = abi.encode(_dto);
+            _getNonceContract(_dto.dstChainId, sender.toUint(), _dto.dstAddress, false, true).increaseNonce{
+                value: AsterizmEnvs.NONCE__SET_REQUEST_VALUE,
+                bounce: true,
+                callback: onInitTransferCallback
+            }(_dto.transferHash);
+
+            return;
+        }
+
+        _initTransferPrivate(_dto, sender, 0);
+    }
+
+    /// Init transfer callback
+    /// @param _transferHash uint  Transfer hash
+    /// @param _nonce uint  Transfer nonce
+    function onInitTransferCallback(uint _transferHash, uint _nonce) public {
+        require(nonces[_transferHash].exists, AsterizmErrors.INITIALIZER__NONCE_DATA_NOT_FOUND__ERROR);
+        IzIninTransferRequestDto dto = abi.decode(nonces[_transferHash].dto, (IzIninTransferRequestDto));
+        address sender = nonces[_transferHash].sender;
+        require(_getNonceContractAddress(dto.dstChainId, sender.toUint(), dto.dstAddress, false) == msg.sender, AsterizmErrors.INITIALIZER__WRONG_NONCE_ADDRESS__ERROR);
+
+        tvm.accept();
+
+        delete nonces[_transferHash];
+        _initTransferPrivate(dto,  sender, _nonce);
+    }
+
+    /// Init transfer (private)
+    /// @param _dto IzIninTransferRequestDto  Method DTO
+    /// @param _nonce uint  Nonce
+    /// @param _sender address  Sender (cilent) address
+    function _initTransferPrivate(IzIninTransferRequestDto _dto, address _sender, uint _nonce) private view {
+        tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
         TrSendMessageRequestDto dto = _buildTrSendMessageRequestDto(
-            msg.sender, _dto.dstChainId, _dto.dstAddress,
-            //TODO: допилить нонсы
-            // _dto.useForceOrder ? outboundNonce.increaseNonce(_dto.dstChainId, abi.encodePacked(msg.sender, _dto.dstAddress)) : 0,
-            0,
+            _sender.toUint(), _dto.dstChainId, _dto.dstAddress, _nonce,
             _dto.useForceOrder, _dto.txId, _dto.transferHash, _dto.payload
         );
-        translatorLib.sendMessage{value: msg.value}(dto);
+
+        translatorLib_.sendMessage{value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false}(dto);
+        emit InitTransferSuccessfullyEvent(_dto.transferHash);
     }
+
+
+    /** Receiving logic */
 
     /// Receive payload from translator
     /// @param _dto IzReceivePayloadRequestDto  Method DTO
-    function receivePayload(IzReceivePayloadRequestDto _dto) external override onlyTranslator {
-        require(!blockAddresses[_dto.dstAddress], AsterizmErrors.INITIALIZER__TARGET_ADDRESS_IS_BLOCKED__ERROR);
+    function receivePayload(IzReceivePayloadRequestDto _dto) external internalMsg override onlyTranslator {
+        require(_dto.dstAddress != blockAddresses[localChainId], AsterizmErrors.INITIALIZER__SENDER_ADDRESS_IS_BLOCKED__ERROR);
         if (_dto.forceOrder) {
-            //TODO: допилить нонсы
+            nonces[_dto.transferHash].exists = true;
+            nonces[_dto.transferHash].dto = abi.encode(_dto);
+            _getNonceContract(_dto.srcChainId, _dto.srcAddress, _dto.dstAddress, true, true).increaseNonceWithValidation{
+                value: AsterizmEnvs.NONCE__SET_REQUEST_VALUE,
+                bounce: true,
+                callback: onReceivePayloadCallback
+            }(_dto.transferHash, _dto.nonce);
+
+            return;
         }
 
-        require(_dto.dstAddress != address(this) && _dto.dstAddress != msg.sender, AsterizmErrors.INITIALIZER__WRONG_DESTINATION_ADDRESS__ERROR);
+        _receivePayloadPrivate(_dto);
+    }
 
+    /// Receive payload callback
+    /// @param _transferHash uint  Transfer hash
+    /// @param _nonce uint  Transfer nonce
+    function onReceivePayloadCallback(uint _transferHash, uint _nonce) public {
+        require(nonces[_transferHash].exists, AsterizmErrors.INITIALIZER__NONCE_DATA_NOT_FOUND__ERROR);
+        IzReceivePayloadRequestDto dto = abi.decode(nonces[_transferHash].dto, (IzReceivePayloadRequestDto));
+        require(_getNonceContractAddress(dto.srcChainId, dto.srcAddress, dto.dstAddress, true) == msg.sender, AsterizmErrors.INITIALIZER__WRONG_NONCE_ADDRESS__ERROR);
+        require(dto.nonce == _nonce, AsterizmErrors.INITIALIZER__WRONG_NONCE__ERROR);
+
+        tvm.accept();
+
+        delete nonces[_transferHash];
+        _receivePayloadPrivate(dto);
+    }
+
+    /// Receive payload (private)
+    /// @param _dto IzReceivePayloadRequestDto  Method DTO
+    function _receivePayloadPrivate(IzReceivePayloadRequestDto _dto) private view {
+        tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
         ClAsterizmReceiveRequestDto dto = _buildClAsterizmReceiveRequestDto(
             _dto.srcChainId, _dto.srcAddress, _dto.dstChainId,
             _dto.dstAddress, _dto.nonce, _dto.txId, _dto.transferHash, _dto.payload
         );
 
-        IClientReceiverContract(_dto.dstAddress).asterizmIzReceive{value: uint128(_dto.gasLimit)}(dto);
+        _deployTransferHashContract(_dto.transferHash);
 
-        outgoingTransfers[_dto.transferHash] = true;
+        IClientReceiverContract(_dto.dstAddress.toAddress()).asterizmIzReceive(dto);
+
         emit SentPayloadEvent(_dto.transferHash);
+
+        owner().transfer({ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false });
     }
 }

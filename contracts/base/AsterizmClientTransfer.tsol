@@ -1,0 +1,64 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+import "./AsterizmEnvs.tsol";
+import "./AsterizmTransferFlags.tsol";
+import "./AsterizmErrors.tsol";
+import "./AsterizmInitializerTransfer.tsol";
+import "../interfaces/IClientTransfer.tsol";
+import "./AsterizmOwnable.tsol";
+
+contract AsterizmClientTransfer is IClientTransfer, AsterizmOwnable {
+
+    /// Deploy contract event
+    event DeployContractEvent();
+
+    /// Deploy contract event
+    event ExecuteTransferEvent();
+    
+    uint static hash_;
+    /// Transfer type (true - inbound, false - outbound)
+    bool static type_;
+
+    bool private isExecutedFlag;
+
+    constructor() public {
+        require(tvm.pubkey() == 0, AsterizmErrors.TRANSFER__NON_ZERO_PUBLIC_KEY__ERROR);
+        require(owner_.value != 0, AsterizmErrors.TRANSFER__WRONG_WALLET_OWNER__ERROR);
+        tvm.rawReserve(AsterizmEnvs.TRANSFER__MIN_CONTRACT_BALANCE, 0);
+
+        emit DeployContractEvent();
+
+        msg.sender.transfer({ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false });
+    }
+
+    /// Is transfer exists
+    /// @param _transferHash uint
+    /// @return uint, bool, uint8
+    function isExists(uint _transferHash) external internalMsg view responsible override returns(uint, bool, uint8) {
+        require(hash_ == _transferHash, AsterizmErrors.TRANSFER__WRONG_HASH__ERROR);
+        tvm.rawReserve(AsterizmEnvs.TRANSFER__MIN_CONTRACT_BALANCE, 0);
+        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } (hash_, true, AsterizmEnvs.METHOD__CLIENT_HASH_EXISTS);
+    }
+
+    /// Is transfer executed
+    /// @param _transferHash uint
+    /// @return uint, bool, uint8
+    function isExecuted(uint _transferHash) external internalMsg view responsible override returns(uint, bool, uint8) {
+        require(hash_ == _transferHash, AsterizmErrors.TRANSFER__WRONG_HASH__ERROR);
+        tvm.rawReserve(AsterizmEnvs.TRANSFER__MIN_CONTRACT_BALANCE, 0);
+        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } (hash_, isExecutedFlag, AsterizmEnvs.METHOD__CLIENT_HASH_EXECUTED);
+    }
+
+    /// Execute transfer
+    /// @param _transferHash uint
+    function executeTransfer(uint _transferHash) external internalMsg override onlyOwner {
+        require(hash_ == _transferHash, AsterizmErrors.TRANSFER__WRONG_HASH__ERROR);
+        tvm.rawReserve(AsterizmEnvs.TRANSFER__MIN_CONTRACT_BALANCE, 0);
+        isExecutedFlag = true;
+
+        emit ExecuteTransferEvent();
+
+        msg.sender.transfer({ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false });
+    }
+}

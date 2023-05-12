@@ -21,6 +21,10 @@ library AsterizmErrors {
     uint16 constant INITIALIZER__TARGET_ADDRESS_IS_BLOCKED__ERROR = 3003;
     uint16 constant INITIALIZER__WRONG_NONCE__ERROR = 3004;
     uint16 constant INITIALIZER__WRONG_DESTINATION_ADDRESS__ERROR = 3005;
+    uint16 constant INITIALIZER__WRONG_NONCE_ADDRESS__ERROR = 3006;
+    uint16 constant INITIALIZER__NONCE_DATA_NOT_FOUND__ERROR = 3007;
+    uint16 constant INITIALIZER__NONCE_INCREACE__ERROR = 3008;
+    uint16 constant INITIALIZER__NONCE_INCREACE_WITH_VALIDATION__ERROR = 3008;
 
     // For Asterizm client contract
     uint16 constant CLIENT__ONLY_INITIALIZER__ERROR = 4001;
@@ -34,4 +38,20 @@ library AsterizmErrors {
     uint16 constant CLIENT__TRUSTED_ADDRESS_NOT_FOUND__ERROR = 4009;
     uint16 constant CLIENT__BALANCE_NOT_ENOUGH__ERROR = 4010;
     uint16 constant CLIENT__WRONG_TXID__ERROR = 4011;
+    uint16 constant CLIENT__ADDRESS_IS_NOT_BLOCKED__ERROR = 4012;
+    uint16 constant CLIENT__NOT_SUPPORTED_METHOD__ERROR = 4013;
+    uint16 constant CLIENT__TRANSFER_HASH_NOT_FOUND__ERROR = 4014;
+    uint16 constant CLIENT__INVALID_HASH_CALLBACK__ERROR = 4015;
+    uint16 constant CLIENT__OUTBOUND_TRANSFER_NOT_EXISTS_CALLBACK__ERROR = 4016;
+    uint16 constant CLIENT__WRONG_TRANSFER_HASH_ADDRESS__ERROR = 4017;
+
+    // For Transfer contract
+    uint16 constant TRANSFER__NON_ZERO_PUBLIC_KEY__ERROR = 5001;
+    uint16 constant TRANSFER__WRONG_WALLET_OWNER__ERROR = 5002;
+    uint16 constant TRANSFER__WRONG_HASH__ERROR = 5003;
+
+    // For Nonce contract
+    uint16 constant NONCE__NON_ZERO_PUBLIC_KEY__ERROR = 6001;
+    uint16 constant NONCE__WRONG_WALLET_OWNER__ERROR = 6002;
+    uint16 constant NONCE__WRONG_NONCE__ERROR = 6003;
 }

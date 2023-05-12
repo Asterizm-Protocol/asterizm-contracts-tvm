@@ -8,5 +8,5 @@ interface IInitializerReceiver is IAsterizmStructs {
 
     /// Receive payload from translator
     /// @param _dto IzReceivePayloadRequestDto  Method DTO
-    function receivePayload(IzReceivePayloadRequestDto _dto) external;
+    function receivePayload(IzReceivePayloadRequestDto _dto) external internalMsg;
 }

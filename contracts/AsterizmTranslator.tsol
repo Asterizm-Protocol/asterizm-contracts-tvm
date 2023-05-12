@@ -7,12 +7,12 @@ pragma AbiHeader pubkey;
 import "./interfaces/IInitializerReceiver.tsol";
 import "./interfaces/ITranslator.tsol";
 import "./base/AsterizmStructs.tsol";
-import "./libs/Ownable.tsol";
 import "./base/AsterizmErrors.tsol";
 import "./base/AsterizmTransferFlags.tsol";
 import "./base/AsterizmEnvs.tsol";
+import "./base/AsterizmOwnable.tsol";
 
-contract AsterizmTranslator is Ownable, ITranslator, AsterizmStructs {
+contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs {
 
     /// Set initializer event
     /// @param _initializerAddress address
@@ -47,12 +47,12 @@ contract AsterizmTranslator is Ownable, ITranslator, AsterizmStructs {
 
     /// Transfer send event
     /// @param _srcChainId uint64  Source chain ID
-    /// @param _srcAddress address  Source address
-    /// @param _dstAddress address  Destination address
+    /// @param _srcAddress uint  Source address
+    /// @param _dstAddress uint  Destination address
     /// @param _nonce uint  Nonce
-    /// @param _transferHash bytes32  Transfer hash
+    /// @param _transferHash uint  Transfer hash
     /// @param _payloadHash  bytes32  Payload hash
-    event TransferSendEvent(uint64 indexed _srcChainId, address indexed _srcAddress, address indexed _dstAddress, uint _nonce, bytes32 _transferHash, bytes32 _payloadHash);
+    event TransferSendEvent(uint64 indexed _srcChainId, uint indexed _srcAddress, uint indexed _dstAddress, uint _nonce, uint _transferHash, bytes32 _payloadHash);
 
     struct Chain {
         bool exists;
@@ -64,22 +64,25 @@ contract AsterizmTranslator is Ownable, ITranslator, AsterizmStructs {
     IInitializerReceiver private initializerLib;
     mapping(address => Relayer) private relayers;
     mapping(uint64 => Chain) public chains;
-    uint64 public localChainId;
 
-    constructor (uint64 _localChainId) public {
+    uint64 static localChainId_;
+
+    constructor () public {
         tvm.accept();
-        
-        addRelayer(owner());
-        addChain(_localChainId);
-        _setLocalChainId(_localChainId);
+
+        addRelayerPrivate(owner());
+        addChainPrivate(localChainId_);
+        emit SetLocalChainEvent(localChainId_);
 
         tvm.rawReserve(AsterizmEnvs.TRANSLATOR__MIN_CONTRACT_BALANCE, 0);
         msg.sender.transfer({
             value: 0,
-            flag: 128,
+            flag: AsterizmTransferFlags.ALL_NOT_RESERVED,
             bounce: false
         });
     }
+
+    /** Modifiers */
 
     /// Only initializer modifier
     modifier onlyInitializer() {
@@ -93,108 +96,126 @@ contract AsterizmTranslator is Ownable, ITranslator, AsterizmStructs {
         _;
     }
 
+    /// Send residue modifier
+    modifier sendResidue() {
+        tvm.rawReserve(AsterizmEnvs.TRANSLATOR__MIN_CONTRACT_BALANCE, 0);
+        _;
+        msg.sender.transfer({
+            value: 0,
+            flag: AsterizmTransferFlags.ALL_NOT_RESERVED,
+            bounce: false
+        });
+    }
+
+
+    /*******************/
     /** Internal logic */
+    /*******************/
 
     /// Add relayer
     /// @param _relayer address  Relayer address
-    function addRelayer(address _relayer) public onlyOwner {
+    function addRelayer(address _relayer) public onlyOwner sendResidue {
+        addRelayerPrivate(_relayer);
+    }
+
+    /// Add relayer (private)
+    /// @param _relayer address  Relayer address
+    function addRelayerPrivate(address _relayer) private {
         relayers[_relayer].exists = true;
         emit AddRelayerEvent(_relayer);
     }
 
     /// Remove relayer
     /// @param _relayer address  Relayer address
-    function removeRelayer(address _relayer) public onlyOwner {
+    function removeRelayer(address _relayer) public onlyOwner sendResidue {
         delete relayers[_relayer];
         emit RemoveRelayerEvent(_relayer);
     }
 
     /// Set initializer
     /// @param _initializerReceiver IInitializerReceiver  Initializer contract
-    function setInitializer(IInitializerReceiver _initializerReceiver) public onlyOwner {
+    function setInitializer(IInitializerReceiver _initializerReceiver) public onlyOwner sendResidue {
         initializerLib = _initializerReceiver;
         emit SetInitializerEvent(address(_initializerReceiver));
     }
 
     /// Add chain
     /// @param _chainId uint64  Chain ID
-    function addChain(uint64 _chainId) public onlyOwner {
+    function addChain(uint64 _chainId) public onlyOwner sendResidue {
+        addChainPrivate(_chainId);
+    }
+
+    /// Add chain (private)
+    /// @param _chainId uint64  Chain ID
+    function addChainPrivate(uint64 _chainId) private {
         chains[_chainId].exists = true;
         emit AddChainEvent(_chainId);
     }
 
     /// Add chains list
     /// @param _chainIds uint64[]  Chain IDs
-    function addChains(uint64[] _chainIds) public onlyOwner {
+    function addChains(uint64[] _chainIds) public onlyOwner sendResidue {
         for (uint i = 0; i < _chainIds.length; i++) {
-            addChain(_chainIds[i]);
+            addChainPrivate(_chainIds[i]);
         }
     }
 
     /// Remove chain
     /// @param _chainId uint64  Chain ID
-    function removeChainById(uint64 _chainId) public onlyOwner {
-        require(localChainId != _chainId, AsterizmErrors.TRANSLATOR__REMOVE_LOCAL_CHAIN__ERROR);
+    function removeChainById(uint64 _chainId) public onlyOwner sendResidue {
+        require(localChainId_ != _chainId, AsterizmErrors.TRANSLATOR__REMOVE_LOCAL_CHAIN__ERROR);
         delete chains[_chainId];
         emit RemoveChainEvent(_chainId);
     }
 
-    /// Set local chain
-    /// @param _chainId uint64  Chain ID
-    function _setLocalChainId(uint64 _chainId) private onlyOwner {
-        require(chains[_chainId].exists, AsterizmErrors.TRANSLATOR__CHAIN_NOT_EXISTS__ERROR);
-        localChainId = _chainId;
-        emit SetLocalChainEvent(_chainId);
-    }
 
+    /*******************/
     /** External logic */
+    /*******************/
+
+    /** Other external functions */
 
     /// Return local chain id
     /// @return uint64
     function getLocalChainId() external internalMsg view responsible override returns(uint64) {
-        uint128 balance = address(this).balance - msg.value;
-        tvm.rawReserve(balance >= AsterizmEnvs.TRANSLATOR__MIN_CONTRACT_BALANCE ? balance : AsterizmEnvs.TRANSLATOR__MIN_CONTRACT_BALANCE, 0);
-        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } localChainId;
+        tvm.rawReserve(AsterizmEnvs.TRANSLATOR__MIN_CONTRACT_BALANCE, 0);
+        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } localChainId_;
     }
+
+
+    /** Sending logic */
 
     /// Send transfer payload
     /// @param _dto TrSendMessageRequestDto  Method DTO
     function sendMessage(TrSendMessageRequestDto _dto) external internalMsg override onlyInitializer {
         require(chains[_dto.dstChainId].exists, AsterizmErrors.TRANSLATOR__WRONG_CHAIN_ID__ERROR);
+        tvm.rawReserve(AsterizmEnvs.TRANSLATOR__MIN_CONTRACT_BALANCE, 0);
 
         TvmCell payload = abi.encode(
-            _dto.nonce, localChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress,
+            _dto.nonce, localChainId_, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress,
             msg.value, _dto.forceOrder, _dto.txId, _dto.transferHash, _dto.payload
         );
-        if (_dto.dstChainId == localChainId) {
+        if (_dto.dstChainId == localChainId_) {
             // TODO: допилить расчет газа, не юзать msg.value!!!
             TrTransferMessageRequestDto dto = _buildTrTarnsferMessageRequestDto(msg.value, payload);
-            _internalTransferMessage(dto);
+            _baseTransferMessage(dto);
             emit SuccessTransferEvent();
             return;
         }
 
-        if (address(this).balance > 0) {
-            owner().transfer({
-                value: 0,
-                flag: AsterizmTransferFlags.ALL_NOT_RESERVED,
-                bounce: false
-            });
-        }
-
         emit SendMessageEvent(payload);
+
+        owner().transfer({ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false });
     }
 
-    /// Initernal transfer message (for transfers in one chain)
-    /// @param _dto TrTransferMessageRequestDto  Method DTO
-    function _internalTransferMessage(TrTransferMessageRequestDto _dto) private view {
-        _baseTransferMessage(_dto);
-    }
+
+    /** Receiving logic */
 
     /// External transfer message
     /// @param _gasLimit uint  Gas limit
     /// @param _payload TvmCell  Payload
     function transferMessage(uint _gasLimit, TvmCell _payload) external internalMsg view onlyRelayer {
+        tvm.rawReserve(AsterizmEnvs.TRANSLATOR__MIN_CONTRACT_BALANCE, 0);
         _baseTransferMessage(_buildTrTarnsferMessageRequestDto(_gasLimit, _payload));
     }
 
@@ -202,20 +223,20 @@ contract AsterizmTranslator is Ownable, ITranslator, AsterizmStructs {
     /// @param _dto TrTransferMessageRequestDto  Method DTO
     function _baseTransferMessage(TrTransferMessageRequestDto _dto) private view {
         (
-            uint nonce, uint64 srcChainId, address srcAddress, uint64 dstChainId,
-            address dstAddress, , bool forceOrder, uint txId,
-            bytes32 transferHash, TvmCell payload
+            uint nonce, uint64 srcChainId, uint srcAddress, uint64 dstChainId,
+            uint dstAddress, , bool forceOrder, uint txId,
+            uint transferHash, TvmCell payload
         ) = abi.decode(
             _dto.payload,
-            (uint, uint64, address, uint64, address, uint, bool, uint, bytes32, TvmCell)
+            (uint, uint64, uint, uint64, uint, uint128, bool, uint, uint, TvmCell)
         );
 
-        require(dstChainId == localChainId, AsterizmErrors.TRANSLATOR__WRONG_CHAIN_ID__ERROR);
+        require(dstChainId == localChainId_, AsterizmErrors.TRANSLATOR__WRONG_CHAIN_ID__ERROR);
 
         IzReceivePayloadRequestDto dto = _buildIzReceivePayloadRequestDto(
-            _buildBaseTransferDirectionDto(srcChainId, srcAddress, localChainId, dstAddress), nonce, _dto.gasLimit, forceOrder, txId, transferHash, payload
+            _buildBaseTransferDirectionDto(srcChainId, srcAddress, localChainId_, dstAddress), nonce, _dto.gasLimit, forceOrder, txId, transferHash, payload
         );
-        initializerLib.receivePayload(dto);
+        initializerLib.receivePayload{ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false }(dto);
 
         emit TransferSendEvent(srcChainId, srcAddress, dstAddress, nonce, transferHash, bytes32(tvm.hash(payload)));
     }

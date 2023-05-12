@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+import "../interfaces/IInitializerTransfer.tsol";
+
+/// Client transfer interface
+interface IClientTransfer is IInitializerTransfer {
+
+    /// Is transfer executed
+    /// @param _transferHash uint
+    /// @return uint, bool, uint8
+    function isExecuted(uint _transferHash) external internalMsg view responsible returns(uint, bool, uint8);
+
+    /// Execute transfer
+    /// @param _transferHash uint
+    function executeTransfer(uint _transferHash) external internalMsg;
+}

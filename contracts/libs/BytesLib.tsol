@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+library BytesLib {
+
+    /// Check if bytes quals
+    /// @param _a bytes
+    /// @param _b bytes
+    /// @return bool
+    function equal(bytes _a, bytes _b) internal returns(bool) {
+        return tvm.hash(_a) == tvm.hash(_b);
+    }
+
+    /// Convert bytes to uint format
+    /// @param _a bytes
+    /// @return uint
+    function toUint(bytes _a) internal returns(uint) {
+        return _a.toSlice().decode(uint);
+    }
+
+    /// Convert bytes to address format
+    /// @param _a bytes
+    /// @return address
+    function toAddress(bytes _a) internal returns(address) {
+        return _a.toSlice().decode(address);
+    }
+}

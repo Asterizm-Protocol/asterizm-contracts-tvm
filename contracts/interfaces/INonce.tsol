@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma ton-solidity >= 0.62.0;
 
+import "./IAsterizmStructs.tsol";
+
 /// Asterizm nonce interface
-interface INonce {
-
-    /// Increase nonce
-    /// @param _chainId uint64  Chain ID
-    /// @param _pathData bytes  Nonce data
-    function increaseNonce(uint64 _chainId, bytes _pathData) external returns (uint);
-
-    /// Increase nonce with validation
-    /// @param _chainId uint64  Chain ID
-    /// @param _pathData bytes  Nonce data
-    /// @param _nonce uint  External nonce
-    function increaseNonceWithValidation(uint64 _chainId, bytes _pathData, uint _nonce) external returns (uint);
+interface INonce is IAsterizmStructs {
 
     /// Return nonce
-    /// @param _chainId uint64  Chain ID
-    /// @param _pathData bytes  Nonce data
-    function getNonce(uint64 _chainId, bytes _pathData) external returns (uint);
+    function getNonce() external internalMsg view responsible returns(uint);
+
+    /// Increase nonce
+    /// @param _transferHash uint
+    /// @return uint, uint
+    function increaseNonce(uint _transferHash) external internalMsg responsible returns(uint, uint);
+
+    /// Increase nonce with validation
+    /// @param _transferHash uint
+    /// @param _nonce uint
+    /// @return IzIninTransferRequestDto, uint
+    function increaseNonceWithValidation(uint _transferHash, uint _nonce) external internalMsg responsible returns(uint, uint);
 }

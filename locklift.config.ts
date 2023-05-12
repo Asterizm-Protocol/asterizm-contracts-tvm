@@ -62,7 +62,7 @@ const config: LockliftConfig = {
       keys: {
         // Use everdev to generate your phrase
         // !!! Never commit it in your repos !!!
-        // phrase: "action inject penalty envelope rabbit element slim tornado dinner pizza off blood",
+        phrase: "convince taste cliff excite glow unknown science impact bacon film win unaware",
         amount: 20,
       },
     },

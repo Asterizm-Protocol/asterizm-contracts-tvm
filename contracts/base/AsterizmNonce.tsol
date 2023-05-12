@@ -1,0 +1,68 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+import "../interfaces/INonce.tsol";
+import "./AsterizmEnvs.tsol";
+import "./AsterizmTransferFlags.tsol";
+import "./AsterizmOwnable.tsol";
+
+contract AsterizmNonce is AsterizmOwnable, INonce {
+
+    /// Deploy contract event
+    event DeployContractEvent();
+
+    /// Nonce increacement event
+    /// @param _nonce uint  Nonce
+    event NonceIncreacementEvent(uint _nonce);
+
+    uint64 static chainId_;
+    uint static srcAddress_;
+    uint static dstAddress_;
+    /// Nonce type (false - source chain, true - destination chain)
+    bool static type_;
+
+    uint private currentNonce;
+
+    constructor() public {
+        require(tvm.pubkey() == 0, AsterizmErrors.NONCE__NON_ZERO_PUBLIC_KEY__ERROR);
+        require(owner_.value != 0, AsterizmErrors.NONCE__WRONG_WALLET_OWNER__ERROR);
+        tvm.rawReserve(AsterizmEnvs.NONCE__MIN_CONTRACT_BALANCE, 0);
+        emit DeployContractEvent();
+        msg.sender.transfer({ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false });
+    }
+
+    /// Return nonce
+    /// @return uint
+    function getNonce() external internalMsg view responsible override returns(uint) {
+        tvm.rawReserve(AsterizmEnvs.NONCE__MIN_CONTRACT_BALANCE, 0);
+        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } currentNonce;
+    }
+
+    /// Increace nonce (private)
+    function _inrreaceNoncePrivate() private {
+        currentNonce = ++currentNonce;
+        emit NonceIncreacementEvent(currentNonce);
+    }
+
+    /// Increase nonce
+    /// @param _transferHash uint
+    /// @return IzIninTransferRequestDto, uint
+    function increaseNonce(uint _transferHash) external internalMsg responsible override onlyOwner returns(uint, uint) {
+        tvm.rawReserve(AsterizmEnvs.NONCE__MIN_CONTRACT_BALANCE, 0);
+        _inrreaceNoncePrivate();
+
+        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } (_transferHash, currentNonce);
+    }
+
+    /// Increase nonce with validation
+    /// @param _transferHash uint
+    /// @param _nonce uint
+    /// @return IzIninTransferRequestDto, uint
+    function increaseNonceWithValidation(uint _transferHash, uint _nonce) external internalMsg responsible override onlyOwner returns(uint, uint) {
+        tvm.rawReserve(AsterizmEnvs.NONCE__MIN_CONTRACT_BALANCE, 0);
+        require(_nonce == currentNonce + 1, AsterizmErrors.NONCE__WRONG_NONCE__ERROR);
+        _inrreaceNoncePrivate();
+
+        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } (_transferHash, currentNonce);
+    }
+}

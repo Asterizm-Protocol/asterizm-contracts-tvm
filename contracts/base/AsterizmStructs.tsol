@@ -7,13 +7,13 @@ abstract contract AsterizmStructs is IAsterizmStructs {
 
     /// Build initializer receive payload request DTO
     /// @param _srcChainId uint64  Source chain ID
-    /// @param _srcAddress address  Source address
+    /// @param _srcAddress uint  Source address
     /// @param _dstChainId uint64  Destination chain ID
-    /// @param _dstAddress address  Destination address
+    /// @param _dstAddress uint  Destination address
     /// @return BaseTransferDirectionDto
     function _buildBaseTransferDirectionDto(
-        uint64 _srcChainId, address _srcAddress,
-        uint64 _dstChainId, address _dstAddress
+        uint64 _srcChainId, uint _srcAddress,
+        uint64 _dstChainId, uint _dstAddress
     ) internal pure returns(BaseTransferDirectionDto) {
         BaseTransferDirectionDto dto;
         dto.srcChainId = _srcChainId;
@@ -42,12 +42,12 @@ abstract contract AsterizmStructs is IAsterizmStructs {
     /// @param _gasLimit uint  Gas limit
     /// @param _forceOrder bool  Force order flag
     /// @param _txId uint  Transaction ID
-    /// @param _transferHash bytes32  Transfer hash
+    /// @param _transferHash uint  Transfer hash
     /// @param _payload TvmCell  Payload
     /// @return IzReceivePayloadRequestDto
     function _buildIzReceivePayloadRequestDto(
         BaseTransferDirectionDto _baseTransferDirectioDto,
-        uint _nonce, uint _gasLimit, bool _forceOrder, uint _txId, bytes32 _transferHash, TvmCell _payload
+        uint _nonce, uint _gasLimit, bool _forceOrder, uint _txId, uint _transferHash, TvmCell _payload
     ) internal pure returns(IzReceivePayloadRequestDto) {
         IzReceivePayloadRequestDto dto;
         dto.srcChainId = _baseTransferDirectioDto.srcChainId;
@@ -66,13 +66,13 @@ abstract contract AsterizmStructs is IAsterizmStructs {
 
     /// Build initializer init transfer request DTO
     /// @param _dstChainId uint64  Destination chain ID
-    /// @param _dstAddress address  Destination address
+    /// @param _dstAddress uint  Destination address
     /// @param _txId uint  Transaction ID
-    /// @param _transferHash bytes32  Transfer hash
+    /// @param _transferHash uint  Transfer hash
     /// @param _useForceOrder bool  Use force order flag
     /// @param _payload TvmCell  Payload
     /// @return IzIninTransferRequestDto
-    function _buildIzIninTransferRequestDto(uint64 _dstChainId, address _dstAddress, uint _txId, bytes32 _transferHash, bool _useForceOrder, TvmCell _payload) internal pure returns(IzIninTransferRequestDto) {
+    function _buildIzIninTransferRequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, uint _transferHash, bool _useForceOrder, TvmCell _payload) internal pure returns(IzIninTransferRequestDto) {
         IzIninTransferRequestDto dto;
         dto.dstChainId = _dstChainId;
         dto.dstAddress = _dstAddress;
@@ -86,17 +86,17 @@ abstract contract AsterizmStructs is IAsterizmStructs {
 
     /// Build client asterizm receive request DTO
     /// @param _srcChainId uint64  Source chain ID
-    /// @param _srcAddress address  Source address
+    /// @param _srcAddress uint  Source address
     /// @param _dstChainId uint64  Destination chain ID
-    /// @param _dstAddress address  Destination address
+    /// @param _dstAddress uint  Destination address
     /// @param _nonce uint  Nonce
     /// @param _txId uint  Transaction ID
-    /// @param _transferHash bytes32  Transfer hash
+    /// @param _transferHash uint  Transfer hash
     /// @param _payload TvmCell  Payload
     /// @return ClAsterizmReceiveRequestDto
     function _buildClAsterizmReceiveRequestDto(
-        uint64 _srcChainId, address _srcAddress, uint64 _dstChainId, address _dstAddress,
-        uint _nonce, uint _txId, bytes32 _transferHash, TvmCell _payload
+        uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress,
+        uint _nonce, uint _txId, uint _transferHash, TvmCell _payload
     ) internal pure returns(ClAsterizmReceiveRequestDto) {
         ClAsterizmReceiveRequestDto dto;
         dto.srcChainId = _srcChainId;
@@ -112,18 +112,18 @@ abstract contract AsterizmStructs is IAsterizmStructs {
     }
 
     /// Build translator send message request DTO
-    /// @param _srcAddress address  Source address
+    /// @param _srcAddress uint  Source address
     /// @param _dstChainId uint64  Destination chain ID
-    /// @param _dstAddress address  Destination address
+    /// @param _dstAddress uint  Destination address
     /// @param _nonce uint  Nonce
     /// @param _forceOrder bool  Force order flag
     /// @param _txId uint  Transaction ID
-    /// @param _transferHash bytes32  Transfer hash
+    /// @param _transferHash uint  Transfer hash
     /// @param _payload TvmCell  Payload
     /// @return TrSendMessageRequestDto
     function _buildTrSendMessageRequestDto(
-        address _srcAddress, uint64 _dstChainId, address _dstAddress, uint _nonce,
-        bool _forceOrder, uint _txId, bytes32 _transferHash, TvmCell _payload
+        uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _nonce,
+        bool _forceOrder, uint _txId, uint _transferHash, TvmCell _payload
     ) internal pure returns(TrSendMessageRequestDto) {
         TrSendMessageRequestDto dto;
         dto.srcAddress = _srcAddress;
@@ -140,13 +140,11 @@ abstract contract AsterizmStructs is IAsterizmStructs {
 
     /// Build client initiation transfer event DTO
     /// @param _dstChainId uint64  Destination chain ID
-    /// @param _dstAddress address  Destination address
     /// @param _payload TvmCell  Payload
     /// @return ClInitTransferEventDto
-    function _buildClInitTransferEventDto(uint64 _dstChainId, address _dstAddress, TvmCell _payload) internal pure returns(ClInitTransferEventDto) {
+    function _buildClInitTransferEventDto(uint64 _dstChainId, TvmCell _payload) internal pure returns(ClInitTransferEventDto) {
         ClInitTransferEventDto dto;
         dto.dstChainId = _dstChainId;
-        dto.dstAddress = _dstAddress;
         dto.payload = _payload;
 
         return dto;
@@ -154,13 +152,13 @@ abstract contract AsterizmStructs is IAsterizmStructs {
 
     /// Build client initiation transfer request DTO
     /// @param _dstChainId uint64  Destination chain ID
-    /// @param _dstAddress address  Destination address
-    /// @param _transferHash bytes32  Transfer hash
+    /// @param _dstAddress uint  Destination address
+    /// @param _transferHash uint  Transfer hash
     /// @param _feeAmount uint  Fee amount
     /// @param _txId uint  Transaction ID
     /// @param _payload TvmCell  Payload
     /// @return ClInitTransferRequestDto
-    function _buildClInitTransferRequestDto(uint64 _dstChainId, address _dstAddress, uint _txId, bytes32 _transferHash, uint _feeAmount, TvmCell _payload) internal pure returns(ClInitTransferRequestDto) {
+    function _buildClInitTransferRequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, uint _transferHash, uint _feeAmount, TvmCell _payload) internal pure returns(ClInitTransferRequestDto) {
         ClInitTransferRequestDto dto;
         dto.dstChainId = _dstChainId;
         dto.dstAddress = _dstAddress;
