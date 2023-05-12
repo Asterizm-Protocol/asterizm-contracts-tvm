@@ -4,4 +4,5 @@ node_modules
 *.tvc
 *.abi.json
 *.base64
+*.code
 .DS_Store
