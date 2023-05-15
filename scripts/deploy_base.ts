@@ -2,20 +2,14 @@ import {Address, WalletTypes} from "locklift";
 import {EverWalletAccount} from "everscale-standalone-client/nodejs";
 const bigInt = require("big-integer");
 
+require('dotenv').config();
+
 async function main() {
   const signer = (await locklift.keystore.getSigner("0"))!;
 
-  const owner = new Address('0:d1226076c76b63aeaec8ca37a822fd23e1ce40ec0e0133604f8de1ee712c06dc'); // EverWallet
-  // const owner = new Address('0:9f062880606756e61594d6371a28353bc7d16145d965a34c79a84b8fdbb8c3e5'); // WalletV3
-  const ownerPubkey = 'ded4f3d0207d3244acfb3823e273840023e7b50b20981ded94e3915293f698d4';
-
-  // await locklift.keystore.addKeyPair({
-  //   publicKey: ownerPubkey,
-  //   secretKey: "qwerty",
-  // });
-
-  // const ownerWallet = await EverWalletAccount.fromPubkey({publicKey: ownerPubkey, workchain: 0});
-  // await locklift.factory.accounts.storage.addAccount(ownerWallet);
+  //TODO: change it for different chains deployment!
+  const owner = new Address(process.env.TESTNET_EVER_OWNER_ADDRESS); // EverWallet
+  const ownerPubkey = process.env.TESTNET_EVER_OWNER_KEY;
 
   const ownerWallet = await locklift.factory.accounts.addExistingAccount({
     address: owner,

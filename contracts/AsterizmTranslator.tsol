@@ -196,7 +196,7 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs {
             msg.value, _dto.forceOrder, _dto.txId, _dto.transferHash, _dto.payload
         );
         if (_dto.dstChainId == localChainId_) {
-            // TODO: допилить расчет газа, не юзать msg.value!!!
+            // TODO: change it, dont use msg.value!
             TrTransferMessageRequestDto dto = _buildTrTarnsferMessageRequestDto(msg.value, payload);
             _baseTransferMessage(dto);
             emit SuccessTransferEvent();
