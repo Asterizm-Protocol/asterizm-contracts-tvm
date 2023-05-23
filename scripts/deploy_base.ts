@@ -8,13 +8,18 @@ async function main() {
   const signer = (await locklift.keystore.getSigner("0"))!;
 
   //TODO: change it for different chains deployment!
-  const owner = new Address(process.env.TESTNET_EVER_OWNER_ADDRESS); // EverWallet
-  const ownerPubkey = process.env.TESTNET_EVER_OWNER_KEY;
+  const owner = new Address(process.env.TESTNET_EVER_OWNER_ADDRESS || ''); // EverWallet
+  const ownerPubkey = process.env.TESTNET_EVER_OWNER_KEY || '';
 
   const ownerWallet = await locklift.factory.accounts.addExistingAccount({
     address: owner,
-    type: WalletTypes.EverWallet,
+    type: WalletTypes.MsigAccount,
+    mSigType: "SafeMultisig",
   });
+  // const ownerWallet = await locklift.factory.accounts.addExistingAccount({
+  //   address: owner,
+  //   type: WalletTypes.EverWallet,
+  // });
   // const ownerWallet = await locklift.factory.accounts.addExistingAccount({
   //   publicKey: ownerPubkey,
   //   type: WalletTypes.WalletV3,
@@ -23,8 +28,8 @@ async function main() {
   const localChainIds = [locklift.utils.getRandomNonce().toFixed(), locklift.utils.getRandomNonce().toFixed()];
   console.log(localChainIds);
   let translatorAddress1, translatorAddress2;
-  // translatorAddress1 = new Address("0:5c3374b7f0ea1b44c45a049bf95bbb01ff6c33b67911919e2fd2abeec7c200ce");
-  // translatorAddress2 = new Address("0:5c3374b7f0ea1b44c45a049bf95bbb01ff6c33b67911919e2fd2abeec7c200ce");
+  // translatorAddress1 = new Address("0:520237b291e5af75605228ede9b9fb56ddcd30574251d27490ca0a0418bf5fab");
+  // translatorAddress2 = new Address("0:14e197ff4f5243603ba435ca06edcf06790ac6c1cdd7e2d1a98c3d4ac682eabc");
   if (!translatorAddress1) {
     const { contract: translatorObj1 } = await locklift.factory.deployContract({
       contract: "AsterizmTranslator",
@@ -76,8 +81,8 @@ async function main() {
   const AsterizmNonce = locklift.factory.getContractArtifacts("AsterizmNonce");
 
   let initializerAddress1, initializerAddress2;
-  // initializerAddress1 = new Address("0:6517864315004e78a5e69f0be2fe6185bdd044751b82e38757d96cba108eb168");
-  // initializerAddress2 = new Address("0:6517864315004e78a5e69f0be2fe6185bdd044751b82e38757d96cba108eb168");
+  // initializerAddress1 = new Address("0:7dc4f2de520a9317aa4e24dcc08e18955d92765de70665dd0e1ca07935d2f5af");
+  // initializerAddress2 = new Address("0:e3b7d199fd7cf64ffc604ae47ff63b07d0f07413d86ad68049e1f7d79dd51b56");
   if (!initializerAddress1) {
     const { contract: initializer1 } = await locklift.factory.deployContract({
       contract: "AsterizmInitializer",

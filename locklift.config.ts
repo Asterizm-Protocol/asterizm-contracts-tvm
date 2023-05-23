@@ -55,8 +55,8 @@ const config: LockliftConfig = {
       // This giver is default local-node giverV2
       giver: {
         // Check if you need provide custom giver
-        address: process.env.LOCALHOST_GIVER_ADDRESS,
-        key: process.env.LOCALHOST_GIVER_KEY,
+        address: process.env.LOCALHOST_GIVER_ADDRESS || '',
+        key: process.env.LOCALHOST_GIVER_KEY || '',
       },
       tracing: {
         endpoint: LOCAL_NETWORK_ENDPOINT,
@@ -80,8 +80,8 @@ const config: LockliftConfig = {
         },
       },
       giver: {
-        address: process.env.TESTNET_EVER_GIVER_ADDRESS,
-        key: process.env.TESTNET_EVER_GIVER_KEY,
+        address: process.env.TESTNET_EVER_GIVER_ADDRESS || '',
+        key: process.env.TESTNET_EVER_GIVER_KEY || '',
       },
       tracing: {
         endpoint: DEV_NET_NETWORK_ENDPOINT,
@@ -103,8 +103,8 @@ const config: LockliftConfig = {
         },
       },
       giver: {
-        address: process.env.TESTNET_VENOM_GIVER_ADDRESS,
-        phrase: process.env.TESTNET_VENOM_GIVER_KEY,
+        address: process.env.TESTNET_VENOM_GIVER_ADDRESS || '',
+        phrase: process.env.TESTNET_VENOM_GIVER_KEY || '',
         accountId: 0,
       },
       tracing: {
@@ -131,8 +131,8 @@ const config: LockliftConfig = {
       },
       // This giver is default Wallet
       giver: {
-        address: process.env.MAINNET_EVER_GIVER_ADDRESS,
-        key: process.env.MAINNET_EVER_GIVER_KEY,
+        address: process.env.MAINNET_EVER_GIVER_ADDRESS || '',
+        key: process.env.MAINNET_EVER_GIVER_KEY || '',
       },
       tracing: {
         endpoint: MAIN_NET_NETWORK_ENDPOINT,

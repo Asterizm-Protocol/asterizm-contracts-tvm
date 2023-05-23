@@ -5,13 +5,8 @@ pragma AbiHeader time;
 // pragma AbiHeader pubkey;
 
 import "../base/AsterizmClient.tsol";
-import "../libs/AddressLib.tsol";
-import "../libs/BytesLib.tsol";
 
 contract AsterizmDemo is AsterizmClient {
-
-    using AddressLib for address;
-    using BytesLib for bytes;
 
     event SetChainMessageEvent(string message);
 

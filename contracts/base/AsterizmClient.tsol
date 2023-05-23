@@ -369,9 +369,9 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         uint dstAddress = _getTrustedAddressByChainId(_dto.dstChainId);
         uint transferHash = _buildTransferHash(_getLocalChainId(), currencAddress.toUint(), _dto.dstChainId, dstAddress, id, _dto.payload);
 
-        emit InitiateTransferEvent(_dto.dstChainId, dstAddress, id, transferHash, _dto.payload);
-
         _deployClientTransferContract(transferHash, false);
+
+        emit InitiateTransferEvent(_dto.dstChainId, dstAddress, id, transferHash, _dto.payload);
     }
 
     /// External initiation transfer

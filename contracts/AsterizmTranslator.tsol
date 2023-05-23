@@ -39,8 +39,9 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs {
     event SetLocalChainEvent(uint64 _chainId);
 
     /// Send message event
+    /// @param _feeValue uint128  Transfer fee value
     /// @param _payload TvmCell  Transfer payload
-    event SendMessageEvent(TvmCell _payload);
+    event SendMessageEvent(uint128 _feeValue, TvmCell _payload);
 
     /// Success transfer event
     event SuccessTransferEvent();
@@ -203,7 +204,8 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs {
             return;
         }
 
-        emit SendMessageEvent(payload);
+        // TODO: change it, dont use msg.value!
+        emit SendMessageEvent(msg.value, payload);
 
         owner().transfer({ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false });
     }
