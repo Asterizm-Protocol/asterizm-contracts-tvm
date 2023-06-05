@@ -1,0 +1,107 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+/// Asterizm nonce contract
+contract TestContract {
+
+    uint static count_;
+
+    function _buildHash(uint64 _srcChainId, uint64 _dstChainId, uint _srcAddress, uint _dstAddress, string _str) private pure returns(uint) {
+        return sha256(abi.encode(_srcChainId, _dstChainId, _srcAddress, _dstAddress, stringHash(_str)).toSlice());
+        // return sha256(abi.encode(_srcChainId, _dstChainId, _srcAddress, _dstAddress, _srcChainId, _dstChainId, _srcAddress, _dstAddress, _srcChainId, _dstChainId, _srcAddress, stringHash(_str)).toSlice());
+    }
+    
+    event GetHashEvent(uint _hash);
+    function getHash(uint64 _srcChainId, uint64 _dstChainId, uint _srcAddress, uint _dstAddress, string _str) public pure {
+        uint resultHash = _buildHash(_srcChainId, _dstChainId, _srcAddress, _dstAddress, _str);
+
+        emit GetHashEvent(resultHash);
+    }
+
+    event CheckHashEvent(bool _result, bytes32 _hash, uint _resultHash);
+    function checkHash(uint64 _srcChainId, uint64 _dstChainId, uint _srcAddress, uint _dstAddress, string _str, bytes32 _hash) public pure {
+        uint resultHash = _buildHash(_srcChainId, _dstChainId, _srcAddress, _dstAddress, _str);
+
+        emit CheckHashEvent(resultHash == uint(_hash), _hash, resultHash);
+    }
+
+
+
+    event TestDecodeEvent(string _str, uint _hash);
+    function testDecode(string _str) public pure {
+        emit TestDecodeEvent(_str, stringHash(_str));
+    }
+
+    function stringHash(string _str) internal pure returns(uint) {
+        return bytesHash(bytes(_str));
+    }
+
+    function bytesHash(bytes _data) internal pure returns(uint) {
+        uint length = _data.length;
+        uint8 chankLength = 127;
+        uint resHash;
+        for (uint i = 0; i < math.divc(length, chankLength); i++) {
+            uint from = chankLength * i;
+            uint to = from + chankLength;
+            bytes chank = _data[from:(to <= length ? to : length)];
+            resHash = sha256(abi.encode(resHash, sha256(chank)).toSlice());
+        }
+
+        return resHash;
+    }
+
+
+
+    event Test1Event(bool _equal, uint _hash1, uint _hash2);
+    function testHash(string _str1, string _str2) public pure {
+        uint resHash1 = sha256(bytes(_str1));
+        uint resHash2 = sha256(bytes(_str2));
+        emit Test1Event(resHash1 == resHash2, resHash1, resHash2);
+    }
+
+
+    event Test2Event(uint _length, uint16 _sliceBits, uint8 _sliceRefs, uint16 _sliceDepth, string _str, TvmCell _cell, bytes _bytes, uint _hashBytes, uint _hashCell);
+    function testHash2(string _str) public pure {
+        bytes plBytes = bytes(_str);
+        TvmCell plCell = abi.encode(_str);
+        TvmSlice plSlice = plCell.toSlice();
+        uint hashBytes = sha256(plBytes);
+        uint hashCell = sha256(plSlice);
+        // plSlice.skip(1);
+        // TvmSlice plSubSlice = plSlice.loadSlice(127);
+        // uint128 tons = plSlice.loadTons();
+        // optional(uint, uint, uint) dataSize = plSlice.dataSizeQ(0);
+
+        emit Test2Event(plBytes.length, plSlice.bits(), plSlice.refs(), plSlice.depth(), plSlice.decode(string), plCell, plBytes, hashBytes, hashCell);
+    }
+
+
+
+
+    event TestAbiEvent(TvmCell _payload);
+    function testAbi() public pure {
+        string stringVal = "stepan_pird_228";
+        bool boolVal = true;
+        int32 int321Val = -100;
+        int32 int322Val = 100;
+        int int1Val = -10000;
+        int int2Val = 10000;
+        int24 int24Val = 24;
+        int40 int40Val = 40;
+        uint32 uint32Val = 100;
+        uint uintVal = 10000;
+        bytes bytesVal = bytes(stringVal);
+        emit TestAbiEvent(abi.encode(
+            stringVal, boolVal, int321Val, int322Val, int1Val, int2Val, int24Val, int40Val, uint32Val, uintVal, bytesVal
+        ));
+    }
+
+    event ParceAbiEvent(string stringVal, bool boolVal, int32 int321Val, int32 int322Val, int int1Val, int int2Val, int24 int24Val, int40 int40Val, uint32 uint32Val, uint uintVal, bytes bytesVal);
+    function parceAbi(TvmCell _payload) public pure {
+        (string stringVal, bool boolVal, int32 int321Val, int32 int322Val, int int1Val, int int2Val, int24 int24Val, int40 int40Val, uint32 uint32Val, uint uintVal, bytes bytesVal) = abi.decode(
+            _payload, (string, bool, int32, int32, int, int, int24, int40, uint32, uint, bytes)
+        );
+
+        emit ParceAbiEvent(stringVal, boolVal, int321Val, int322Val, int1Val, int2Val, int24Val, int40Val, uint32Val, uintVal, bytesVal);
+    }
+}

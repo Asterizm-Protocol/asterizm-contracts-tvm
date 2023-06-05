@@ -7,12 +7,13 @@ pragma AbiHeader pubkey;
 import "./interfaces/IInitializerReceiver.tsol";
 import "./interfaces/ITranslator.tsol";
 import "./base/AsterizmStructs.tsol";
+import "./base/AsterizmChainEnv.tsol";
 import "./base/AsterizmErrors.tsol";
 import "./base/AsterizmTransferFlags.tsol";
 import "./base/AsterizmEnvs.tsol";
 import "./base/AsterizmOwnable.tsol";
 
-contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs {
+contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, AsterizmChainEnv {
 
     /// Set initializer event
     /// @param _initializerAddress address
@@ -36,7 +37,8 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs {
 
     /// Set local chain event
     /// @param _chainId uint64
-    event SetLocalChainEvent(uint64 _chainId);
+    /// @param _chainType uint8
+    event SetLocalChainEvent(uint64 _chainId, uint8 _chainType);
 
     /// Send message event
     /// @param _feeValue uint128  Transfer fee value
@@ -52,28 +54,33 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs {
     /// @param _dstAddress uint  Destination address
     /// @param _nonce uint  Nonce
     /// @param _transferHash uint  Transfer hash
-    /// @param _payloadHash  bytes32  Payload hash
-    event TransferSendEvent(uint64 indexed _srcChainId, uint indexed _srcAddress, uint indexed _dstAddress, uint _nonce, uint _transferHash, bytes32 _payloadHash);
+    /// @param _payloadHash  uint  Payload hash
+    event TransferSendEvent(uint64 indexed _srcChainId, uint indexed _srcAddress, uint indexed _dstAddress, uint _nonce, uint _transferHash, uint _payloadHash);
 
-    struct Chain {
-        bool exists;
-    }
     struct Relayer {
         bool exists;
     }
 
     IInitializerReceiver private initializerLib;
     mapping(address => Relayer) private relayers;
-    mapping(uint64 => Chain) public chains;
+    mapping(uint64 => AsterizmChain) public chains;
 
     uint64 static localChainId_;
+    uint8 static localChainType_;
+
+
+
+    uint static nonce_; //TODO: drop this after debeloplent
+
+
 
     constructor () public {
         tvm.accept();
 
+        _fillChainTypes();
         addRelayerPrivate(owner());
-        addChainPrivate(localChainId_);
-        emit SetLocalChainEvent(localChainId_);
+        addChainPrivate(localChainId_, localChainType_);
+        emit SetLocalChainEvent(localChainId_, localChainType_);
 
         tvm.rawReserve(AsterizmEnvs.TRANSLATOR__MIN_CONTRACT_BALANCE, 0);
         msg.sender.transfer({
@@ -142,22 +149,27 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs {
 
     /// Add chain
     /// @param _chainId uint64  Chain ID
-    function addChain(uint64 _chainId) public onlyOwner sendResidue {
-        addChainPrivate(_chainId);
+    /// @param _chainType uint8  Chain type
+    function addChain(uint64 _chainId, uint8 _chainType) public onlyOwner sendResidue {
+        addChainPrivate(_chainId, _chainType);
     }
 
     /// Add chain (private)
     /// @param _chainId uint64  Chain ID
-    function addChainPrivate(uint64 _chainId) private {
+    /// @param _chainType uint8  Chain type
+    function addChainPrivate(uint64 _chainId, uint8 _chainType) private {
+        require(_isChainTypeAwailable(_chainType), AsterizmErrors.TRANSLATOR__UNAVAILABLE_CHAIN_TYPE__ERROR);
         chains[_chainId].exists = true;
+        chains[_chainId].chainType = _chainType;
         emit AddChainEvent(_chainId);
     }
 
     /// Add chains list
     /// @param _chainIds uint64[]  Chain IDs
-    function addChains(uint64[] _chainIds) public onlyOwner sendResidue {
+    /// @param _chainTypes uint8[]  Chain types
+    function addChains(uint64[] _chainIds, uint8[] _chainTypes) public onlyOwner sendResidue {
         for (uint i = 0; i < _chainIds.length; i++) {
-            addChainPrivate(_chainIds[i]);
+            addChainPrivate(_chainIds[i], _chainTypes[i]);
         }
     }
 
@@ -183,6 +195,13 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs {
         return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } localChainId_;
     }
 
+    /// Return chains list
+    /// @return mapping(uint64 => AsterizmChain)
+    function getChainsList() external internalMsg view responsible override returns(mapping(uint64 => AsterizmChain)) {
+        tvm.rawReserve(AsterizmEnvs.TRANSLATOR__MIN_CONTRACT_BALANCE, 0);
+        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } chains;
+    }
+
 
     /** Sending logic */
 
@@ -194,18 +213,19 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs {
 
         TvmCell payload = abi.encode(
             _dto.nonce, localChainId_, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress,
-            msg.value, _dto.forceOrder, _dto.txId, _dto.transferHash, _dto.payload
+            _dto.forceOrder, _dto.txId, _dto.transferHash, _dto.payload
         );
+        uint128 feeValue = msg.value;
         if (_dto.dstChainId == localChainId_) {
             // TODO: change it, dont use msg.value!
-            TrTransferMessageRequestDto dto = _buildTrTarnsferMessageRequestDto(msg.value, payload);
+            TrTransferMessageRequestDto dto = _buildTrTarnsferMessageRequestDto(feeValue, payload);
             _baseTransferMessage(dto);
             emit SuccessTransferEvent();
             return;
         }
 
         // TODO: change it, dont use msg.value!
-        emit SendMessageEvent(msg.value, payload);
+        emit SendMessageEvent(feeValue, payload);
 
         owner().transfer({ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false });
     }
@@ -226,11 +246,11 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs {
     function _baseTransferMessage(TrTransferMessageRequestDto _dto) private view {
         (
             uint nonce, uint64 srcChainId, uint srcAddress, uint64 dstChainId,
-            uint dstAddress, , bool forceOrder, uint txId,
+            uint dstAddress, bool forceOrder, uint txId,
             uint transferHash, TvmCell payload
         ) = abi.decode(
             _dto.payload,
-            (uint, uint64, uint, uint64, uint, uint128, bool, uint, uint, TvmCell)
+            (uint, uint64, uint, uint64, uint, bool, uint, uint, TvmCell)
         );
 
         require(dstChainId == localChainId_, AsterizmErrors.TRANSLATOR__WRONG_CHAIN_ID__ERROR);
@@ -240,6 +260,6 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs {
         );
         initializerLib.receivePayload{ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false }(dto);
 
-        emit TransferSendEvent(srcChainId, srcAddress, dstAddress, nonce, transferHash, bytes32(tvm.hash(payload)));
+        emit TransferSendEvent(srcChainId, srcAddress, dstAddress, nonce, transferHash, tvm.hash(payload));
     }
 }

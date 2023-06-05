@@ -13,4 +13,8 @@ interface ITranslator is IAsterizmStructs {
     /// Return local chain id
     /// @return uint64
     function getLocalChainId() external internalMsg view responsible returns(uint64);
+
+    /// Return chains list
+    /// @return mapping(uint64 => AsterizmChain)
+    function getChainsList() external internalMsg view responsible returns(mapping(uint64 => AsterizmChain));
 }

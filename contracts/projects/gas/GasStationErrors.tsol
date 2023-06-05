@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+library GasStationErrors {
+
+    // For Ownable contract
+    uint16 constant GAS__BALANCE_NOT_ENOUQH__ERROR = 1001;
+    uint16 constant GAS__TOKEN_NOT_EXISTS__ERROR = 1002;
+    uint16 constant GAS__WRONG_AMOUNT__ERROR = 1003;
+    uint16 constant GAS__WRONG_AMOUNT_IN_USD__ERROR = 1004;
+    uint16 constant GAS__MINIMUM_AMOUNT_VALIDATION__ERROR = 1005;
+    uint16 constant GAS__MIXIMUM_AMOUNT_VALIDATION__ERROR = 1006;
+    uint16 constant GAS__INVALID_TRANSFER_HASH__ERROR = 1007;
+    uint16 constant GAS__TRANSFER_FAILED__ERROR = 1008;
+    uint16 constant GAS__STABLE_COIN_EXISTS_ALREADY__ERROR = 1009;
+    uint16 constant GAS__STABLE_COIN_NOT_EXISTS__ERROR = 1010;
+    uint16 constant GAS__WRONG_TOKEN_ROOT_SENDER__ERROR = 1011;
+    uint16 constant GAS__WRONG_TOKEN_AMOUNT__ERROR = 1012;
+}

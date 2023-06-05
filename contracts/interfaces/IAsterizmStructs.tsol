@@ -3,6 +3,14 @@ pragma ton-solidity >= 0.62.0;
 
 interface IAsterizmStructs {
 
+    /// Asterizm chain struct
+    /// @param exists bool  Exists flag
+    /// @param chainType uint8  Chain type (1 - EVM, 2 - TVM)
+    struct AsterizmChain {
+        bool exists;
+        uint8 chainType;
+    }
+
     /// Base transfer direction DTO
     /// @param srcChainId uint64  Source chain ID
     /// @param srcAddress uint  Source address
@@ -101,14 +109,6 @@ interface IAsterizmStructs {
         uint nonce;
         uint txId;
         uint transferHash;
-        TvmCell payload;
-    }
-
-    /// Client initiation transfer event DTO
-    /// @param dstChainId uint64  Destination chain ID
-    /// @param payload TvmCell  Payload
-    struct ClInitTransferEventDto {
-        uint64 dstChainId;
         TvmCell payload;
     }
 

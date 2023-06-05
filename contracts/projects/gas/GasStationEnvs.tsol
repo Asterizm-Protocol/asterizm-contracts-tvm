@@ -1,0 +1,14 @@
+// SPDX-License-Identifier: MIT
+pragma ton-solidity >= 0.62.0;
+
+library GasStationEnvs {
+
+    // For GasStation contract
+    uint128 constant GAS__MIN_CONTRACT_BALANCE = 1 ton;
+
+    // For stable coin wallets contract
+    uint128 constant GAS__MIN_STABLE_WALLET_BALANCE = 0.1 ton;
+
+    // For stable coin withdraw fee
+    uint128 constant GAS__WITHDRAW_TOKENS_AMOUNT = 0.5 ton;
+}

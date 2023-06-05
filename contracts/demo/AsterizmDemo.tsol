@@ -2,7 +2,6 @@
 pragma ton-solidity >= 0.62.0;
 pragma AbiHeader expire;
 pragma AbiHeader time;
-// pragma AbiHeader pubkey;
 
 import "../base/AsterizmClient.tsol";
 
@@ -21,7 +20,7 @@ contract AsterizmDemo is AsterizmClient {
     /// @param _message string  Message
     function sendMessage(uint64 _dstChainId, string _message) public {
         tvm.rawReserve(AsterizmEnvs.CLIENT__MIN_CONTRACT_BALANCE, 0);
-        _initAsterizmTransferEvent(_buildClInitTransferEventDto(_dstChainId, abi.encode(_message)));
+        _initAsterizmTransferEvent(_dstChainId, abi.encode(_message));
         msg.sender.transfer({ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false });
     }
 

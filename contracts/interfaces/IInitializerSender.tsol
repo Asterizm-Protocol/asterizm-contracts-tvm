@@ -21,4 +21,8 @@ interface IInitializerSender is IAsterizmStructs {
     /// Return client transfer code
     /// @return TvmCell
     function getClientTransferCode() external internalMsg view responsible returns(TvmCell);
+
+    /// Return chains list
+    /// @return mapping(uint64 => AsterizmChain)
+    function getChainsList() external internalMsg view responsible returns(mapping(uint64 => AsterizmChain));
 }
