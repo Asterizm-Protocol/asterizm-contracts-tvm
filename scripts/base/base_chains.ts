@@ -161,7 +161,7 @@ export const Chains = {
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0x6F6f570F45833E249e27022648a26F4076F48f78',
+                gas: '333569839214760763722405741441915060092788669041',
             },
             stableCoins: [
                 '0xc8e37E456c517D682ca8F343e46BF4DEFFd24D13',
@@ -173,7 +173,7 @@ export const Chains = {
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0x6F6f570F45833E249e27022648a26F4076F48f78',
+                gas: '1001792318131473935443371117546766492423376699260',
             },
             stableCoins: [
                 '0x7f4F94A70e5E7236c7a14D04fd749FF5b7023bE8',
@@ -185,19 +185,33 @@ export const Chains = {
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0x6F6f570F45833E249e27022648a26F4076F48f78',
+                gas: '518808823239964238596455561139580412774093272174',
             },
             stableCoins: [],
         },
         {
-            id: 10001,
+            id: 20001,
             title: "EVER",
             isCurrent: true,
             chainType: ChainTypes.TVM,
             trustAddresses: {
-                gas: '0x6F6f570F45833E249e27022648a26F4076F48f78',
+                gas: '18078528476164495385373164159684078115717938054061056179112352932299406526371',
             },
-            stableCoins: [],
+            stableCoins: [
+                '0:8c6dcaa30727458527e99a479dae92a92a51c24e235e5b531659e201204d79ee',
+            ],
+        },
+        {
+            id: 30001,
+            title: "VNM",
+            isCurrent: false,
+            chainType: ChainTypes.TVM,
+            trustAddresses: {
+                gas: '77013202391518145321148673299202649966980262903713046623642324291955393066991',
+            },
+            stableCoins: [
+                '0:d5756401c0e2ad938bb980e72846f22f02b15d83c2c9190f93c0c2ff44771336',
+            ],
         },
     ],
 };

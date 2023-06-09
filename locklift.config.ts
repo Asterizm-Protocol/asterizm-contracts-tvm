@@ -11,8 +11,7 @@ const LOCAL_NETWORK_ENDPOINT = process.env.NETWORK_ENDPOINT || "http://localhost
 const DEV_NET_NETWORK_ENDPOINT = process.env.DEV_NET_NETWORK_ENDPOINT || "https://devnet-sandbox.evercloud.dev/graphql";
 
 const VENOM_TESTNET_ENDPOINT = process.env.VENOM_TESTNET_ENDPOINT || "https://jrpc-testnet.venom.foundation/rpc";
-const VENOM_TESTNET_TRACE_ENDPOINT =
-  process.env.VENOM_TESTNET_TRACE_ENDPOINT || "https://gql-testnet.venom.foundation/graphql";
+const VENOM_TESTNET_TRACE_ENDPOINT = process.env.VENOM_TESTNET_TRACE_ENDPOINT || "https://gql-testnet.venom.foundation/graphql";
 
 // Create your own link on https://dashboard.evercloud.dev/
 const MAIN_NET_NETWORK_ENDPOINT = process.env.MAIN_NET_NETWORK_ENDPOINT || "https://mainnet.evercloud.dev/XXX/graphql";
@@ -96,15 +95,21 @@ const config: LockliftConfig = {
     venom_testnet: {
       connection: {
         id: 1000,
-        type: "jrpc",
         group: "dev",
+        type: "jrpc",
+        // type: "graphql",
+        // data: {
+        //   endpoints: [VENOM_TESTNET_ENDPOINT],
+        //   latencyDetectionInterval: 1000,
+        //   local: false,
+        // },
         data: {
-          endpoint: VENOM_TESTNET_ENDPOINT,
+          endpoint: "https://jrpc-devnet.venom.foundation/",
         },
       },
       giver: {
         address: process.env.TESTNET_VENOM_GIVER_ADDRESS || '',
-        phrase: process.env.TESTNET_VENOM_GIVER_KEY || '',
+        phrase: process.env.TESTNET_VENOM_SEED || '',
         accountId: 0,
       },
       tracing: {
@@ -113,7 +118,7 @@ const config: LockliftConfig = {
       keys: {
         // Use everdev to generate your phrase
         // !!! Never commit it in your repos !!!
-        phrase: process.env.ESTNET_VENOM_SEED,
+        phrase: process.env.TESTNET_VENOM_SEED,
         amount: 20,
       },
     },

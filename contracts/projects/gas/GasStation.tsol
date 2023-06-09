@@ -32,7 +32,7 @@ contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
         bool exists;
         bool deployed;
         address walletAddress;
-        uint128 balance;
+        uint balance;
         uint8 decimals;
     }
 
@@ -50,7 +50,7 @@ contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
 
     /// Withdraw coins
     /// @param _target address  Target address
-    function withdrawCoins(address _target) external onlyOwner {
+    function withdrawCoins(address _target) external view onlyOwner {
         tvm.rawReserve(GasStationEnvs.GAS__MIN_CONTRACT_BALANCE, 0);
         _target.transfer({ value: 0, flag: AsterizmTransferFlags.RECEIVER_PAYS_FEES, bounce: false });
         
@@ -138,7 +138,7 @@ contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
     /** External logic */
 
     event BuildGasPayloadEvent(TvmCell _payload);
-    function buildGasPayload(uint64[] _chainIds, uint128[] _amounts, uint[] _receivers) external {
+    function buildGasPayload(uint64[] _chainIds, uint[] _amounts, uint[] _receivers) external pure {
         emit BuildGasPayloadEvent(abi.encode(_chainIds, _amounts, _receivers));
     }
 
@@ -160,15 +160,15 @@ contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
         require(msg.sender == stableCoins[_tokenRoot].walletAddress, GasStationErrors.GAS__WRONG_TOKEN_ROOT_SENDER__ERROR);
         require(stableCoins[_tokenRoot].deployed, GasStationErrors.GAS__TOKEN_NOT_EXISTS__ERROR);
 
-        (uint64[] chainIds, uint128[] amounts, uint[] receivers) = abi.decode(_payload, (uint64[], uint128[], uint[]));
+        (uint64[] chainIds, uint[] amounts, uint[] receivers) = abi.decode(_payload, (uint64[], uint[], uint[]));
 
-        uint128 sum;
+        uint sum;
         for (uint i = 0; i < amounts.length; i++) {
             sum += amounts[i];
         }
 
         require(sum > 0, GasStationErrors.GAS__WRONG_AMOUNT__ERROR);
-        require(sum == _amount, GasStationErrors.GAS__WRONG_TOKEN_AMOUNT__ERROR);
+        require(sum == uint(_amount), GasStationErrors.GAS__WRONG_TOKEN_AMOUNT__ERROR);
 
         uint sumInUsd = sum / (10 ** uint(stableCoins[_tokenRoot].decimals));
         require(sumInUsd > 0, GasStationErrors.GAS__WRONG_AMOUNT_IN_USD__ERROR);
@@ -190,26 +190,31 @@ contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
 
     /// Receive payload
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function _asterizmReceive(ClAsterizmReceiveRequestDto _dto) internal override {
-        (uint dstAddressUint, uint amount, uint txId , uint tokenAddressUint, uint decimals, uint stableRate) = abi.decode(_dto.payload, (uint, uint, uint, uint, uint, uint));
-        if (_getChainType(_dto.srcChainId) == _getChainType(_dto.dstChainId)) {
-            require(
-                _validTransferHash(
-                    _dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId,
-                    abi.encode(dstAddressUint, amount, txId, tokenAddressUint, decimals), _dto.transferHash
-                ),
-                GasStationErrors.GAS__INVALID_TRANSFER_HASH__ERROR
-            );
+    /// @return uint16  Return error code. 0 - ok, >0 - error 
+    function _asterizmReceive(ClAsterizmReceiveRequestDto _dto) internal override returns(uint16) {
+        (uint dstAddressUint, uint amount, uint txId , uint tokenAddressUint, uint8 decimals, uint stableRate) = abi.decode(_dto.payload, (uint, uint, uint, uint, uint8, uint));
+        if (
+            _getChainType(_dto.srcChainId) == _getChainType(_dto.dstChainId) &&
+            !_validTransferHash(
+                _dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId,
+                abi.encode(dstAddressUint, amount, txId, tokenAddressUint, decimals), _dto.transferHash
+            )
+        ) {
+            return GasStationErrors.GAS__INVALID_TRANSFER_HASH__ERROR;
         }
 
         address dstAddress = dstAddressUint.toAddress();
-        uint amountToSend = amount * stableRate / (10 ** uint(decimals));
-        require(address(this).balance >= amountToSend, GasStationErrors.GAS__BALANCE_NOT_ENOUQH__ERROR);
+        uint128 amountToSend = uint128(amount * stableRate / (10 ** uint(decimals)));
+        if (address(this).balance < amountToSend) {
+            return GasStationErrors.GAS__BALANCE_NOT_ENOUQH__ERROR;
+        }
 
         if (dstAddress != address(this)) {
-            dstAddress.transfer({ value: 0, flag: AsterizmTransferFlags.RECEIVER_PAYS_FEES, bounce: false });
+            dstAddress.transfer({ value: amountToSend, flag: AsterizmTransferFlags.RECEIVER_PAYS_FEES, bounce: false });
         }
 
         emit CoinsReceivedEvent(amountToSend, _dto.txId, dstAddress);
+
+        return GasStationErrors.GAS__SUCCESS;
     }
 }

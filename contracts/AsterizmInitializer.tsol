@@ -413,7 +413,7 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
             return;
         }
 
-        _receivePayloadPrivate(_dto, false);
+        _receivePayloadPrivate(_dto);
     }
 
     /// Receive payload callback
@@ -428,12 +428,12 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
         tvm.accept();
 
         delete nonces[_transferHash];
-        _receivePayloadPrivate(dto, true);
+        _receivePayloadPrivate(dto);
     }
 
     /// Receive payload (private)
     /// @param _dto IzReceivePayloadRequestDto  Method DTO
-    function _receivePayloadPrivate(IzReceivePayloadRequestDto _dto, bool _withNonce) private view {
+    function _receivePayloadPrivate(IzReceivePayloadRequestDto _dto) private view {
         tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
         ClAsterizmReceiveRequestDto dto = _buildClAsterizmReceiveRequestDto(
             _dto.srcChainId, _dto.srcAddress, _dto.dstChainId,

@@ -26,10 +26,12 @@ contract AsterizmDemo is AsterizmClient {
 
     /// Receive non-encoded payload
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function _asterizmReceive(ClAsterizmReceiveRequestDto _dto) internal override {
+    /// @return uint16  Return error code. 0 - ok, > 0 - error 
+    function _asterizmReceive(ClAsterizmReceiveRequestDto _dto) internal override returns(uint16) {
         string message = abi.decode(_dto.payload, (string));
         chainMessage = message;
         emit SetChainMessageEvent(message);
-    }
 
+        return 0;
+    }
 }

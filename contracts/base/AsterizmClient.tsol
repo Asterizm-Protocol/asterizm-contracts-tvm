@@ -84,6 +84,15 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// Update chains list event
     event UpdateChainsListEvent();
 
+    /// Success executed transafer event
+    /// @param _transferHash uint  Transfer hash
+    event SuccessTransferExecutedEvent(uint _transferHash);
+
+    /// Error executed transafer event
+    /// @param _transferHash uint  Transfer hash
+    /// @param _errorCode uint16  Error code
+    event ErrorTransferExecutedEvent(uint _transferHash, uint16 _errorCode);
+
     struct AsterizmTransfer {
         bool exists;
         bool successIzReceive;
@@ -605,9 +614,19 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
             delete inboundTransfers[dto.transferHash];
             tvm.rawReserve(AsterizmEnvs.CLIENT__MIN_CONTRACT_BALANCE, 0);
 
-            _asterizmReceive(dto);
+            uint16 errorCode = _asterizmReceive(dto);
+            if (errorCode > 0) {
+                delete inboundTransfers[dto.transferHash];
+                emit ErrorTransferExecutedEvent(dto.transferHash, errorCode);
+                return;
+            }
 
-            clHashContract.executeTransfer{ value: AsterizmEnvs.TRANSFER__SET_REQUEST_VALUE }(dto.transferHash);
+            clHashContract.executeTransfer{
+                value: AsterizmEnvs.TRANSFER__SET_REQUEST_VALUE,
+                flag: AsterizmTransferFlags.SENDER_PAYS_FEES
+            }(dto.transferHash);
+
+            emit SuccessTransferExecutedEvent(dto.transferHash);
         }
     }
 
@@ -615,5 +634,6 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// You must realize this function if you want to transfer payload
     /// If disableHashValidation = true you must validate transferHash with _validTransferHash() method for more security!
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function _asterizmReceive(ClAsterizmReceiveRequestDto _dto) internal virtual {}
+    /// @return uint16  Return error code. 0 - ok, > 0 - error 
+    function _asterizmReceive(ClAsterizmReceiveRequestDto _dto) internal virtual returns(uint16) {}
 }
