@@ -1,0 +1,130 @@
+pragma ton-solidity >= 0.70.0;
+
+library AsterizmHashLib {
+
+    uint8 constant HASH_VERSION_1 = 1;
+    uint8 constant HASH_VERSION_2 = 2;
+
+    uint16 constant VERSION_ERROR_CODE = 999;
+
+    /// Build asterizm simple hash (used for transfer within same network types)
+    /// @param _packed TvmCell
+    /// @return uint
+    function buildSimpleHash(TvmCell _packed) internal returns(uint) {
+        return tvm.hash(_packed);
+    }
+
+    /// Build asterizm crosschain hash V1 (simple, cheapest realization)
+    /// @param _packed TvmCell
+    /// @param _version uint8
+    /// @return uint
+    function buildCrosschainHashWithVersion(TvmCell _packed, uint8 _version) internal returns(uint) {
+        if (_version == HASH_VERSION_1) {
+            return buildCrosschainHashV1(_packed);
+        } else if (_version == HASH_VERSION_2) {
+            return buildCrosschainHashV2(_packed);
+        } else {
+            require(false, VERSION_ERROR_CODE);
+        }
+    }
+
+    /// Build asterizm crosschain hash V1 (simple, cheapest realization)
+    /// @param _packed TvmCell
+    /// @return uint
+    function buildCrosschainHashV1(TvmCell _packed) internal returns(uint) {
+        TvmSlice encodedSlice = _packed.toSlice();
+        uint hash = sha256(encodedSlice);
+        TvmSlice payloadSlice = encodedSlice.loadRefAsSlice();
+        uint16 payloadDepth = payloadSlice.depth();
+
+        bytes chunk = "";
+        for (uint i = 0; i <= payloadDepth; i++) {   
+            uint8 r = payloadSlice.refs();
+            uint16 b = payloadSlice.bits();
+            // Main tree
+            if (b > 0) {
+                chunk.append(bytes(payloadSlice)[0:b / 8]);
+            }
+            if (r > 0) {
+                payloadSlice = payloadSlice.loadRefAsSlice();
+            }
+        }
+
+        TvmSlice chunkSlice = TvmSlice(chunk);
+        uint16 chunkDepth = chunkSlice.depth();
+
+        for (uint i = 0; i <= chunkDepth; i++) {   
+            uint8 r = chunkSlice.refs();
+            uint16 b = chunkSlice.bits();
+            if (b > 0) {
+                hash = sha256(abi.encode(hash, sha256(chunkSlice)).toSlice());
+            }
+            if (r > 0) {
+                chunkSlice = chunkSlice.loadRefAsSlice();
+            }
+        }
+
+        return hash;
+    }
+
+    /// Build asterizm crosschain hash V2 (more powerful, but more expensive realisation)
+    /// @param _packed TvmCell
+    /// @return uint
+    function buildCrosschainHashV2(TvmCell _packed) internal returns(uint) {
+        TvmSlice encodedSlice = _packed.toSlice();
+        uint hash = sha256(encodedSlice);
+        TvmSlice payloadSlice = encodedSlice.loadRefAsSlice();
+        uint16 payloadDepth = payloadSlice.depth();
+
+        bytes chunk = "";
+        for (uint i = 0; i <= payloadDepth; i++) {   
+            uint8 r = payloadSlice.refs();
+            uint16 b = payloadSlice.bits();
+            // Main tree
+            if (b > 0) {
+                chunk.append(bytes(payloadSlice)[0:b / 8]);
+            }
+            // Nested refs
+            if (r > 1) {
+                for (uint2 j = 1; j < r; j++) {   
+                    TvmCell nestedCell = payloadSlice.preloadRef(j);
+                    TvmSlice nestedSlice = nestedCell.toSlice();
+
+                    uint16 nestedDepth = nestedSlice.depth();
+
+                    for (uint k = 0; k <= nestedDepth; k++) {   
+
+                        uint8 nestedRefs = nestedSlice.refs();
+                        uint16 nestedBits = nestedSlice.bits();
+
+                        if (nestedBits > 0) {
+                            chunk.append(bytes(nestedSlice)[0:nestedBits / 8]);
+                        }
+                        if (nestedRefs > 0) {
+                            nestedSlice = nestedSlice.loadRefAsSlice();
+                        }
+                    }
+                }
+            }
+            if (r > 0) {
+                payloadSlice = payloadSlice.loadRefAsSlice();
+            }
+        }
+
+        TvmSlice chunkSlice = TvmSlice(chunk);
+        uint16 chunkDepth = chunkSlice.depth();
+    
+        for (uint i = 0; i <= chunkDepth; i++) {   
+            uint8 r = chunkSlice.refs();
+            uint16 b = chunkSlice.bits();
+            if (b > 0) {
+                hash = sha256(abi.encode(hash, sha256(chunkSlice)).toSlice());
+            }
+            if (r > 0) {
+                chunkSlice = chunkSlice.loadRefAsSlice();
+            }
+        }
+
+        return hash;
+    }
+}

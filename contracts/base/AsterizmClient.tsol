@@ -1,8 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma ton-solidity >= 0.62.0;
+pragma ton-solidity >= 0.70.0;
 pragma AbiHeader expire;
-pragma AbiHeader time;
-// pragma AbiHeader pubkey;
 
 import "../interfaces/IInitializerSender.tsol";
 import "../interfaces/IClientReceiverContract.tsol";
@@ -14,16 +11,16 @@ import "./AsterizmEnvs.tsol";
 import "./AsterizmTransferFlags.tsol";
 import "./AsterizmOwnable.tsol";
 import "../libs/AddressLib.tsol";
-import "../libs/BytesLib.tsol";
 import "../libs/UintLib.tsol";
+import "../libs/AsterizmHashLib.tsol";
 import "./AsterizmInitializerTransfer.tsol";
 import "./AsterizmClientTransfer.tsol";
 
 abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, AsterizmStructs {
 
     using AddressLib for address;
-    using BytesLib for bytes;
     using UintLib for uint;
+    using AsterizmHashLib for TvmCell;
 
     /// Set initializer event
     /// @param _initializerAddress address  Initializer address
@@ -115,8 +112,9 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     IInitializerSender static initializerLib_;
     bool static useForceOrder_;
     bool static disableHashValidation_;
+    uint8 static hashVersion_; // see AsterizmHashLib for available versions information
 
-    constructor() public {
+    constructor() {
         tvm.accept();
 
         emit SetInitializerEvent(address(initializerLib_));
@@ -139,9 +137,9 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     }
 
     onBounce(TvmSlice slice) external {
-        uint32 functionId = slice.decode(uint32);
+        uint32 functionId = slice.load(uint32);
         if (functionId == tvm.functionId(AsterizmInitializerTransfer.isExists)) {
-            ( , uint transferHash) = slice.decodeFunctionParams(AsterizmInitializerTransfer.isExists);
+            ( , uint transferHash) = slice.loadFunctionParams(AsterizmInitializerTransfer.isExists);
             delete inboundTransfers[transferHash];
             emit TransferErrorEvent(transferHash, AsterizmErrors.CLIENT__INVALID_HASH_CALLBACK__ERROR);
         }
@@ -151,7 +149,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
             functionId == tvm.functionId(AsterizmClientTransfer.isExecuted) ||
             functionId == tvm.functionId(AsterizmClientTransfer.executeTransfer)
         ) {
-            ( , uint transferHash) = slice.decodeFunctionParams(AsterizmClientTransfer.isExists);
+            ( , uint transferHash) = slice.loadFunctionParams(AsterizmClientTransfer.isExists);
             delete outboundTransfers[transferHash];
             delete inboundTransfers[transferHash];
             emit TransferErrorEvent(transferHash, AsterizmErrors.CLIENT__OUTBOUND_TRANSFER_NOT_EXISTS_CALLBACK__ERROR);
@@ -181,7 +179,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// Only nvalid transfer hash modifier
     /// @param _dto ClAsterizmReceiveRequestDto  Transfer data
     modifier onlyValidTransferHash(ClAsterizmReceiveRequestDto _dto) {
-        if (!disableHashValidation_ && _getChainType(_dto.srcChainId) == _getChainType(_dto.dstChainId)) {
+        if (!disableHashValidation_) {
             require(
                 _validTransferHash(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.payload, _dto.transferHash),
                 AsterizmErrors.CLIENT__INVALID_HASH__ERROR
@@ -291,6 +289,13 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         emit SetLocalChainIdEvent(_localChainId);
     }
 
+    /// Return chain type by id
+    /// @param _chainId uint64  Chain id
+    /// @return uint8  Chain type
+    function _getChainType(uint64 _chainId) internal view returns(uint8) {
+        return chains[_chainId].chainType;
+    }
+
 
     /// Add trusted source address (private)
     /// @param _chainId uint64  Chain ID
@@ -301,11 +306,11 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         emit AddTrustedSourceAddressEvent(_chainId, _trustedAddress);
     }
 
-    /// Return chain type by id
-    /// @param _chainId uint64  Chain id
-    /// @return uint8  Chain type
-    function _getChainType(uint64 _chainId) internal view returns(uint8) {
-        return chains[_chainId].chainType;
+    /// Add trusted addresses
+    /// @param _chainIds uint64  Chain ID
+    /// @param _trustedAddresses uint  Trusted address
+    function addTrustedAddress(uint64 _chainIds, uint _trustedAddresses) external onlyOwner sendResidue {
+        _addTrustedAddressPrivate(_chainIds, _trustedAddresses);
     }
 
     /// Add trusted addresses
@@ -357,8 +362,10 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// @param _txId uint  Transaction ID
     /// @param _payload TvmCell  Payload
     /// @return bytes32
-    function _buildTransferHash(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId, TvmCell _payload) internal pure returns(uint) {
-        return tvm.hash(abi.encode(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _payload));
+    function _buildTransferHash(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId, TvmCell _payload) internal view returns(uint) {
+        TvmCell fullPayload = abi.encode(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, bytes(_payload.toSlice()));
+
+        return _getChainType(_srcChainId) == _getChainType(_dstChainId) ? fullPayload.buildSimpleHash() : fullPayload.buildCrosschainHashWithVersion(hashVersion_);
     }
 
     /// Check is transfer hash valid
@@ -370,7 +377,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// @param _payload TvmCell  Payload
     /// @param _transferHash uint  Transfer hash
     /// @return bool
-    function _validTransferHash(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId, TvmCell _payload, uint _transferHash) internal pure returns(bool) {
+    function _validTransferHash(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId, TvmCell _payload, uint _transferHash) internal view returns(bool) {
         return _buildTransferHash(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _payload) == _transferHash;
     }
 
@@ -434,7 +441,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// @param _dto ClInitTransferRequestDto  Init transfer DTO
     function _initAsterizmTransferPrivate(ClInitTransferRequestDto _dto) private {
         //TODO: check transfer amount
-        require(address(this).balance >= _dto.feeAmount, AsterizmErrors.CLIENT__BALANCE_NOT_ENOUGH__ERROR);
+        require(address(this).balance >= _dto.dstFeeAmount, AsterizmErrors.CLIENT__BALANCE_NOT_ENOUGH__ERROR);
         require(_dto.txId <= _getTxId(), AsterizmErrors.CLIENT__WRONG_TXID__ERROR);
 
         outboundTransfers[_dto.transferHash].exists = true;
@@ -470,16 +477,16 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         if (_method == AsterizmEnvs.METHOD__CLIENT_HASH_EXISTS) {
             if (!_flag) { // if hash not exists
                 delete outboundTransfers[_transferHash];
+                emit ErrorTransferExecutedEvent(_transferHash, AsterizmErrors.CLIENT__TRANSFER_NOT_RECEIVED__ERROR);
                 return;
-                // require(false, AsterizmErrors.CLIENT__TRANSFER_NOT_RECEIVED__ERROR);
             }
 
             outboundTransfers[_transferHash].successClReceive = true;
         } else if (_method == AsterizmEnvs.METHOD__CLIENT_HASH_EXECUTED) {
             if (_flag) { // if hash executed already
                 delete outboundTransfers[_transferHash];
+                emit ErrorTransferExecutedEvent(_transferHash, AsterizmErrors.CLIENT__TRANSFER_EXECUTED_ALREADY__ERROR);
                 return;
-                // require(false, AsterizmErrors.CLIENT__TRANSFER_EXECUTED_ALREADY__ERROR);
             }
 
             outboundTransfers[_transferHash].successClExecute = true;
@@ -490,7 +497,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
             uint128 msgValue = outboundTransfers[_transferHash].msgValue;
             delete outboundTransfers[dto.transferHash];
             initializerLib_.initTransfer{value: msgValue, flag: AsterizmTransferFlags.SENDER_PAYS_FEES, bounce: false} (
-                _buildIzIninTransferRequestDto(dto.dstChainId, dto.dstAddress, dto.txId, dto.transferHash, useForceOrder_, dto.payload)
+                _buildIzIninTransferRequestDto(dto.dstChainId, dto.dstAddress, dto.txId, dto.transferHash, useForceOrder_, dto.dstFeeAmount, dto.payload)
             );
 
             hashContract.executeTransfer{ value: AsterizmEnvs.TRANSFER__SET_REQUEST_VALUE }(dto.transferHash);
@@ -582,24 +589,24 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         if (_method == AsterizmEnvs.METHOD__INITIALIZER_HASH_EXISTS) {
             if (!_flag) { // if hash not exists
                 delete inboundTransfers[_transferHash];
+                emit ErrorTransferExecutedEvent(_transferHash, AsterizmErrors.CLIENT__INVALID_HASH__ERROR);
                 return;
-                // require(false, AsterizmErrors.CLIENT__INVALID_HASH__ERROR);
             }
 
             inboundTransfers[_transferHash].successIzReceive = true;
         } else if (_method == AsterizmEnvs.METHOD__CLIENT_HASH_EXISTS) {
             if (!_flag) { // if hash not exists
                 delete inboundTransfers[_transferHash];
+                emit ErrorTransferExecutedEvent(_transferHash, AsterizmErrors.CLIENT__TRANSFER_NOT_RECEIVED__ERROR);
                 return;
-                // require(false, AsterizmErrors.CLIENT__TRANSFER_NOT_RECEIVED__ERROR);
             }
 
             inboundTransfers[_transferHash].successClReceive = true;
         } else if (_method == AsterizmEnvs.METHOD__CLIENT_HASH_EXECUTED) {
             if (_flag) { // if hash executed already
                 delete inboundTransfers[_transferHash];
+                emit ErrorTransferExecutedEvent(_transferHash, AsterizmErrors.CLIENT__TRANSFER_EXECUTED_ALREADY__ERROR);
                 return;
-                // require(false, AsterizmErrors.CLIENT__TRANSFER_EXECUTED_ALREADY__ERROR);
             }
 
             inboundTransfers[_transferHash].successClExecute = true;

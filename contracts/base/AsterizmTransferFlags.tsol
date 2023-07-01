@@ -1,5 +1,4 @@
-// SPDX-License-Identifier: MIT
-pragma ton-solidity >= 0.62.0;
+pragma ton-solidity >= 0.70.0;
 
 /**
     @dev flag that used to send the internal outbound message. Defaults to 0.

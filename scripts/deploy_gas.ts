@@ -4,6 +4,7 @@ const bigInt = require("big-integer");
 import { Chains } from './base/base_chains';
 import { ChainTypes } from './base/base_chain_types';
 import { NetworkTypes } from './base/base_network_types';
+import { HashHersions } from './base/base_hash_versions';
 import { parseArgs } from './base/base_parce_args';
 
 require('dotenv').config();
@@ -71,7 +72,7 @@ async function main() {
     currentChain = currentChain ? currentChain : chains[0];
   
     let translatorAddress;
-    // translatorAddress = new Address("0:520237b291e5af75605228ede9b9fb56ddcd30574251d27490ca0a0418bf5fab");
+    // translatorAddress = new Address("0:065cfd2bbf05b8de3fa3e0c82255112aebaaf5e2b1f5b38105c80e2f6d02fbf7");
     if (!translatorAddress) {
       const { contract: translatorObj1 } = await locklift.factory.deployContract({
         contract: "AsterizmTranslator",
@@ -113,7 +114,7 @@ async function main() {
     const AsterizmNonce = locklift.factory.getContractArtifacts("AsterizmNonce");
   
     let initializerAddress;
-    // initializerAddress = new Address("0:7dc4f2de520a9317aa4e24dcc08e18955d92765de70665dd0e1ca07935d2f5af");
+    // initializerAddress = new Address("0:43f889ac19adae08735f639672d0c6df7d41a55313a5dacad4d32637ae6b787a");
     if (!initializerAddress) {
       const { contract: initializer1 } = await locklift.factory.deployContract({
         contract: "AsterizmInitializer",
@@ -165,6 +166,7 @@ async function main() {
             useForceOrder_: false,
             disableHashValidation_: true,
             nonce_: locklift.utils.getRandomNonce().toFixed(),
+            hashVersion_: HashHersions.CrosschainV1,
         },
         constructorParams: {},
         value: locklift.utils.toNano(2),
@@ -194,6 +196,21 @@ async function main() {
     await gas.methods.addStableCoin({
         _tokenRoot: tokenRootAddress,
         _decimals: decimals
+    }).send({
+        from: ownerWallet.address,
+        amount: locklift.utils.toNano(1)
+    });
+
+    // tracing = await locklift.tracing.trace(
+    //     gas.methods.setMinUsdAmount({
+    //         _amount: 100
+    //     }).send({
+    //         from: ownerWallet.address,
+    //         amount: locklift.utils.toNano(1)
+    //     })
+    // );
+    await gas.methods.setMinUsdAmount({
+        _amount: 100
     }).send({
         from: ownerWallet.address,
         amount: locklift.utils.toNano(1)

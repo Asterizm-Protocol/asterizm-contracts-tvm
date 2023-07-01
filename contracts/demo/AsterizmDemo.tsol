@@ -1,18 +1,26 @@
-// SPDX-License-Identifier: MIT
-pragma ton-solidity >= 0.62.0;
+pragma ton-solidity >= 0.70.0;
 pragma AbiHeader expire;
-pragma AbiHeader time;
 
 import "../base/AsterizmClient.tsol";
 
 contract AsterizmDemo is AsterizmClient {
 
     event SetChainMessageEvent(string message);
+    event WithdrawCoinsEvent(address _target, uint128 _amount);
 
     string public chainMessage;
 
-    constructor () AsterizmClient() public {
+    constructor () AsterizmClient() {
         chainMessage = "Chain message";
+    }
+
+    /// Withdraw coins
+    /// @param _target address  Target address
+    function withdrawCoins(address _target, uint128 _amount) external view onlyOwner {
+        tvm.rawReserve(AsterizmEnvs.CLIENT__MIN_CONTRACT_BALANCE, 0);
+        _target.transfer({ value: _amount, flag: AsterizmTransferFlags.RECEIVER_PAYS_FEES, bounce: false });
+
+        emit WithdrawCoinsEvent(_target, _amount);
     }
 
     /// Send message

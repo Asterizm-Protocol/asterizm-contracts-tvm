@@ -1,5 +1,4 @@
-// SPDX-License-Identifier: MIT
-pragma ton-solidity >= 0.62.0;
+pragma ton-solidity >= 0.70.0;
 
 library AsterizmErrors {
 

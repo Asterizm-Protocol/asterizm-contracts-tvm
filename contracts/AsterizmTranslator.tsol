@@ -1,7 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma ton-solidity >= 0.62.0;
+pragma ton-solidity >= 0.70.0;
 pragma AbiHeader expire;
-pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
 import "./interfaces/IInitializerReceiver.tsol";
@@ -74,7 +72,7 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
 
 
 
-    constructor () public {
+    constructor () {
         tvm.accept();
 
         _fillChainTypes();
@@ -215,17 +213,14 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
             _dto.nonce, localChainId_, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress,
             _dto.forceOrder, _dto.txId, _dto.transferHash, _dto.payload
         );
-        uint128 feeValue = msg.value;
         if (_dto.dstChainId == localChainId_) {
-            // TODO: change it, dont use msg.value!
-            TrTransferMessageRequestDto dto = _buildTrTarnsferMessageRequestDto(feeValue, payload);
+            TrTransferMessageRequestDto dto = _buildTrTarnsferMessageRequestDto(_dto.dstFeeAmount, payload);
             _baseTransferMessage(dto);
             emit SuccessTransferEvent();
             return;
         }
 
-        // TODO: change it, dont use msg.value!
-        emit SendMessageEvent(feeValue, payload);
+        emit SendMessageEvent(_dto.dstFeeAmount, payload);
 
         owner().transfer({ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false });
     }

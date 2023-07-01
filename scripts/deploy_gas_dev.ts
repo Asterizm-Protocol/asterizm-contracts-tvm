@@ -3,6 +3,7 @@ import {EverWalletAccount} from "everscale-standalone-client/nodejs";
 const bigInt = require("big-integer");
 import { Chains } from './base/base_chains';
 import { ChainTypes } from './base/base_chain_types';
+import { HashHersions } from './base/base_hash_versions';
 
 require('dotenv').config();
 
@@ -16,7 +17,8 @@ async function main() {
   // const ownerPubkey = process.env.TESTNET_EVER_OWNER_KEY || '';
 
   // TODO: change it for stable coin address
-  const tokenRootAddress = '0:4ead8fa1a11d62cc0e73f6d0ecb7cdb23db1d61f21cb78901035357765e0fad0';
+  const tokenRootAddress = new Address('0:4ead8fa1a11d62cc0e73f6d0ecb7cdb23db1d61f21cb78901035357765e0fad0');
+  const decimals = 9;
 
   const ownerWallet = await locklift.factory.accounts.addExistingAccount({
     address: owner,
@@ -148,38 +150,42 @@ async function main() {
   const initializer1 = locklift.factory.getDeployedContract("AsterizmInitializer", initializerAddress1);
   const initializer2 = locklift.factory.getDeployedContract("AsterizmInitializer", initializerAddress2);
 
-  const { contract: demo1 } = await locklift.factory.deployContract({
-    contract: "AsterizmDemo",
+  const { contract: gas1 } = await locklift.factory.deployContract({
+    contract: "GasStation",
     publicKey: signer.publicKey,
     initParams: {
       owner_: owner,
       initializerLib_: initializer1.address,
       useForceOrder_: false,
       disableHashValidation_: false,
+      nonce_: locklift.utils.getRandomNonce().toFixed(),
+      hashVersion_: HashHersions.CrosschainV1,
     },
     constructorParams: {},
     value: locklift.utils.toNano(2),
   });
-  console.log(`Demo1 deployed at: ${demo1.address.toString()}`);
-  const demoObj1 = new bigInt(demo1.address.toString().substring(2), 16);
+  console.log(`Gas1 deployed at: ${gas1.address.toString()}`);
+  const demoObj1 = new bigInt(gas1.address.toString().substring(2), 16);
 
-  const { contract: demo2 } = await locklift.factory.deployContract({
-    contract: "AsterizmDemo",
+  const { contract: gas2 } = await locklift.factory.deployContract({
+    contract: "GasStation",
     publicKey: signer.publicKey,
     initParams: {
       owner_: owner,
       initializerLib_: initializer2.address,
       useForceOrder_: false,
       disableHashValidation_: false,
+      nonce_: locklift.utils.getRandomNonce().toFixed(),
+      hashVersion_: HashHersions.CrosschainV1,
     },
     constructorParams: {},
     value: locklift.utils.toNano(2),
   });
-  console.log(`Demo2 deployed at: ${demo2.address.toString()}`);
-  const demoObj2 = new bigInt(demo2.address.toString().substring(2), 16);
+  console.log(`Gas2 deployed at: ${gas2.address.toString()}`);
+  const demoObj2 = new bigInt(gas2.address.toString().substring(2), 16);
 
   const tracing1 = await locklift.tracing.trace(
-    demo1.methods.addTrustedAddresses({
+    gas1.methods.addTrustedAddresses({
       _chainIds: chainIds,
       _trustedAddresses: [demoObj1.toString(), demoObj2.toString()]
     }).send({
@@ -189,7 +195,7 @@ async function main() {
   );
 
   const tracing2 = await locklift.tracing.trace(
-    demo2.methods.addTrustedAddresses({
+    gas2.methods.addTrustedAddresses({
       _chainIds: chainIds,
       _trustedAddresses: [demoObj1.toString(), demoObj2.toString()]
     }).send({
@@ -197,6 +203,22 @@ async function main() {
       amount: locklift.utils.toNano(1)
     })
   );
+
+  await gas1.methods.addStableCoin({
+    _tokenRoot: tokenRootAddress,
+    _decimals: decimals
+}).send({
+    from: ownerWallet.address,
+    amount: locklift.utils.toNano(1)
+});
+
+await gas2.methods.addStableCoin({
+  _tokenRoot: tokenRootAddress,
+  _decimals: decimals
+}).send({
+  from: ownerWallet.address,
+  amount: locklift.utils.toNano(1)
+});
 
 }
 

@@ -1,15 +1,6 @@
-// SPDX-License-Identifier: MIT
-pragma ton-solidity >= 0.62.0;
+pragma ton-solidity >= 0.70.0;
 
 library AddressLib {
-
-    /// Convert address to bytes format
-    /// @param _address address
-    /// @return bytes
-    function toBytes(address _address) internal returns(bytes) {
-        //TODO: возможно это херня, кто знает
-        return abi.encode(_address).toSlice().decode(bytes);
-    }
 
     /// Convert address to uint (uint256) format
     /// @param _address address

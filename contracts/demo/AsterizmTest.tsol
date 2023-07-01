@@ -1,0 +1,28 @@
+pragma ton-solidity >= 0.70.0;
+pragma AbiHeader expire;
+
+import "../base/AsterizmClient.tsol";
+
+contract AsterizmTest is AsterizmClient {
+
+    event SetChainMessageEvent(uint24 uint24Data, uint72 uint72Data, int24 int24Data, int72 int72Data);
+
+    constructor () AsterizmClient() {}
+
+    /// Send message
+    function sendMessage(uint64 _dstChainId, uint24 _uint24Data, uint72 _uint72Data, int24 _int24Data, int72 _int72Data) public {
+        tvm.rawReserve(AsterizmEnvs.CLIENT__MIN_CONTRACT_BALANCE, 0);
+        _initAsterizmTransferEvent(_dstChainId, abi.encode(_uint24Data, _uint72Data, _int24Data, _int72Data));
+        msg.sender.transfer({ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false });
+    }
+
+    /// Receive non-encoded payload
+    /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
+    /// @return uint16  Return error code. 0 - ok, > 0 - error 
+    function _asterizmReceive(ClAsterizmReceiveRequestDto _dto) internal override returns(uint16) {
+        (uint24 uint24Data, uint72 uint72Data, int24 int24Data, int72 int72Data) = abi.decode(_dto.payload, (uint24, uint72, int24, int72));
+        emit SetChainMessageEvent(uint24Data, uint72Data, int24Data, int72Data);
+
+        return 0;
+    }
+}

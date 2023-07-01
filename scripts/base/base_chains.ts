@@ -161,7 +161,7 @@ export const Chains = {
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '333569839214760763722405741441915060092788669041',
+                gas: '1389994807113895668742586980493099848731845241920',
             },
             stableCoins: [
                 '0xc8e37E456c517D682ca8F343e46BF4DEFFd24D13',
@@ -173,7 +173,7 @@ export const Chains = {
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '1001792318131473935443371117546766492423376699260',
+                gas: '350986775366171753722411460791258692847517948188',
             },
             stableCoins: [
                 '0x7f4F94A70e5E7236c7a14D04fd749FF5b7023bE8',
@@ -185,17 +185,27 @@ export const Chains = {
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '518808823239964238596455561139580412774093272174',
+                gas: '516993189345011224628327415305693039147059015087',
+            },
+            stableCoins: [],
+        },
+        {
+            id: 4002,
+            title: "FTM",
+            isCurrent: false,
+            chainType: ChainTypes.EVM,
+            trustAddresses: {
+                gas: '604310581401012142295609633700276062260547048368',
             },
             stableCoins: [],
         },
         {
             id: 20001,
             title: "EVER",
-            isCurrent: true,
+            isCurrent: false,
             chainType: ChainTypes.TVM,
             trustAddresses: {
-                gas: '18078528476164495385373164159684078115717938054061056179112352932299406526371',
+                gas: '14343096937700679744343233029027375202682348240768210538310188629637320800317',
             },
             stableCoins: [
                 '0:8c6dcaa30727458527e99a479dae92a92a51c24e235e5b531659e201204d79ee',
@@ -204,10 +214,10 @@ export const Chains = {
         {
             id: 30001,
             title: "VNM",
-            isCurrent: false,
+            isCurrent: true,
             chainType: ChainTypes.TVM,
             trustAddresses: {
-                gas: '77013202391518145321148673299202649966980262903713046623642324291955393066991',
+                gas: '7618002218203172803264880100801528684811477250390419151077356660617890120024',
             },
             stableCoins: [
                 '0:d5756401c0e2ad938bb980e72846f22f02b15d83c2c9190f93c0c2ff44771336',

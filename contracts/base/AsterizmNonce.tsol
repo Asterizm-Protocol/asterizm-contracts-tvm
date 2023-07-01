@@ -1,5 +1,4 @@
-// SPDX-License-Identifier: MIT
-pragma ton-solidity >= 0.62.0;
+pragma ton-solidity >= 0.70.0;
 
 import "../interfaces/INonce.tsol";
 import "./AsterizmEnvs.tsol";
@@ -23,7 +22,7 @@ contract AsterizmNonce is AsterizmOwnable, INonce {
 
     uint private currentNonce;
 
-    constructor() public {
+    constructor() {
         require(tvm.pubkey() == 0, AsterizmErrors.NONCE__NON_ZERO_PUBLIC_KEY__ERROR);
         require(owner_.value != 0, AsterizmErrors.NONCE__WRONG_WALLET_OWNER__ERROR);
         tvm.rawReserve(AsterizmEnvs.NONCE__MIN_CONTRACT_BALANCE, 0);

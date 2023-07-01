@@ -1,5 +1,4 @@
-// SPDX-License-Identifier: MIT
-pragma ton-solidity >= 0.62.0;
+pragma ton-solidity >= 0.70.0;
 
 library BytesLib {
 
@@ -15,13 +14,13 @@ library BytesLib {
     /// @param _a bytes
     /// @return uint
     function toUint(bytes _a) internal returns(uint) {
-        return _a.toSlice().decode(uint);
+        return (TvmSlice(_a)).load(uint);
     }
 
     /// Convert bytes to address format
     /// @param _a bytes
     /// @return address
     function toAddress(bytes _a) internal returns(address) {
-        return _a.toSlice().decode(address);
+        return (TvmSlice(_a)).load(address);
     }
 }

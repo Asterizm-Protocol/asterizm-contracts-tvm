@@ -1,5 +1,4 @@
-// SPDX-License-Identifier: MIT
-pragma ton-solidity >= 0.62.0;
+pragma ton-solidity >= 0.70.0;
 
 interface IAsterizmStructs {
 
@@ -33,6 +32,7 @@ interface IAsterizmStructs {
     /// @param shouldCheckFee bool  Should check fee flag
     /// @param txId uint  Transaction ID
     /// @param transferHash uint  Transfer hash
+    /// @param dstFeeAmount uint128  Fee amount
     /// @param payload TvmCell  Payload
     struct TrSendMessageRequestDto {
         uint srcAddress;
@@ -42,6 +42,7 @@ interface IAsterizmStructs {
         bool forceOrder;
         uint txId;
         uint transferHash;
+        uint128 dstFeeAmount;
         TvmCell payload;
     }
 
@@ -82,6 +83,7 @@ interface IAsterizmStructs {
     /// @param dstAddress uint  Destination address
     /// @param transferHash uint  Transfer hash
     /// @param txId uint  Transaction ID
+    /// @param dstFeeAmount uint128  Fee amount
     /// @param payload TvmCell  Payload
     struct IzIninTransferRequestDto {
         uint64 dstChainId;
@@ -89,6 +91,7 @@ interface IAsterizmStructs {
         uint transferHash;
         bool useForceOrder;
         uint txId;
+        uint128 dstFeeAmount;
         TvmCell payload;
     }
 
@@ -115,16 +118,16 @@ interface IAsterizmStructs {
     /// Client initiation transfer request DTO
     /// @param dstChainId uint64  Destination chain ID
     /// @param dstAddress uint  Destination address
-    /// @param feeAmount uint  Fee amount
     /// @param txId uint  Transaction ID
     /// @param transferHash uint  Transfer hash
+    /// @param dstFeeAmount uint128  Fee amount
     /// @param payload TvmCell  Payload
     struct ClInitTransferRequestDto {
         uint64 dstChainId;
         uint dstAddress;
-        uint feeAmount;
         uint txId;
         uint transferHash;
+        uint128 dstFeeAmount;
         TvmCell payload;
     }
 }

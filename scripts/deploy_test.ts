@@ -16,7 +16,7 @@ async function main() {
     type: WalletTypes.EverWallet,
   });
 
-  const { contract: demo1 } = await locklift.factory.deployContract({
+  const { contract: testContract } = await locklift.factory.deployContract({
     contract: "TestContract",
     publicKey: signer.publicKey,
     initParams: {
@@ -25,7 +25,17 @@ async function main() {
     constructorParams: {},
     value: locklift.utils.toNano(2),
   });
-  console.log(`Test deployed at: ${demo1.address.toString()}`);
+  console.log(`TestContract deployed at: ${testContract.address.toString()}`);
+  // const { contract: demo1 } = await locklift.factory.deployContract({
+  //   contract: "AsterizmTest",
+  //   publicKey: signer.publicKey,
+  //   initParams: {
+  //     count_: locklift.utils.getRandomNonce().toFixed(),
+  //   },
+  //   constructorParams: {},
+  //   value: locklift.utils.toNano(2),
+  // });
+  // console.log(`Test deployed at: ${demo1.address.toString()}`);
 
 }
 

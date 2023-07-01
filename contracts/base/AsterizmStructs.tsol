@@ -1,5 +1,4 @@
-// SPDX-License-Identifier: MIT
-pragma ton-solidity >= 0.62.0;
+pragma ton-solidity >= 0.70.0;
 
 import "../interfaces/IAsterizmStructs.tsol";
 
@@ -70,15 +69,17 @@ abstract contract AsterizmStructs is IAsterizmStructs {
     /// @param _txId uint  Transaction ID
     /// @param _transferHash uint  Transfer hash
     /// @param _useForceOrder bool  Use force order flag
+    /// @param _dstFeeAmount uint  Fee amount
     /// @param _payload TvmCell  Payload
     /// @return IzIninTransferRequestDto
-    function _buildIzIninTransferRequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, uint _transferHash, bool _useForceOrder, TvmCell _payload) internal pure returns(IzIninTransferRequestDto) {
+    function _buildIzIninTransferRequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, uint _transferHash, bool _useForceOrder, uint128 _dstFeeAmount, TvmCell _payload) internal pure returns(IzIninTransferRequestDto) {
         IzIninTransferRequestDto dto;
         dto.dstChainId = _dstChainId;
         dto.dstAddress = _dstAddress;
         dto.txId = _txId;
         dto.transferHash = _transferHash;
         dto.useForceOrder = _useForceOrder;
+        dto.dstFeeAmount = _dstFeeAmount;
         dto.payload = _payload;
 
         return dto;
@@ -119,11 +120,12 @@ abstract contract AsterizmStructs is IAsterizmStructs {
     /// @param _forceOrder bool  Force order flag
     /// @param _txId uint  Transaction ID
     /// @param _transferHash uint  Transfer hash
+    /// @param _dstFeeAmount uint  Fee amount
     /// @param _payload TvmCell  Payload
     /// @return TrSendMessageRequestDto
     function _buildTrSendMessageRequestDto(
         uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _nonce,
-        bool _forceOrder, uint _txId, uint _transferHash, TvmCell _payload
+        bool _forceOrder, uint _txId, uint _transferHash, uint128 _dstFeeAmount, TvmCell _payload
     ) internal pure returns(TrSendMessageRequestDto) {
         TrSendMessageRequestDto dto;
         dto.srcAddress = _srcAddress;
@@ -133,6 +135,7 @@ abstract contract AsterizmStructs is IAsterizmStructs {
         dto.forceOrder = _forceOrder;
         dto.txId = _txId;
         dto.transferHash = _transferHash;
+        dto.dstFeeAmount = _dstFeeAmount;
         dto.payload = _payload;
 
         return dto;
@@ -142,17 +145,17 @@ abstract contract AsterizmStructs is IAsterizmStructs {
     /// @param _dstChainId uint64  Destination chain ID
     /// @param _dstAddress uint  Destination address
     /// @param _transferHash uint  Transfer hash
-    /// @param _feeAmount uint  Fee amount
     /// @param _txId uint  Transaction ID
+    /// @param _dstFeeAmount uint128  Fee amount
     /// @param _payload TvmCell  Payload
     /// @return ClInitTransferRequestDto
-    function _buildClInitTransferRequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, uint _transferHash, uint _feeAmount, TvmCell _payload) internal pure returns(ClInitTransferRequestDto) {
+    function _buildClInitTransferRequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, uint _transferHash, uint128 _dstFeeAmount, TvmCell _payload) internal pure returns(ClInitTransferRequestDto) {
         ClInitTransferRequestDto dto;
         dto.dstChainId = _dstChainId;
         dto.dstAddress = _dstAddress;
         dto.transferHash = _transferHash;
-        dto.feeAmount = _feeAmount;
         dto.txId = _txId;
+        dto.dstFeeAmount = _dstFeeAmount;
         dto.payload = _payload;
 
         return dto;

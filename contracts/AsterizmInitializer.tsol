@@ -1,7 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma ton-solidity >= 0.62.0;
+pragma ton-solidity >= 0.70.0;
 pragma AbiHeader expire;
-pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
 import "./interfaces/INonce.tsol";
@@ -100,7 +98,7 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
     TvmCell static clientTransferCode_;
     TvmCell static nonceCode_;
 
-    constructor () public {
+    constructor () {
         tvm.accept();
 
         emit SetTranslatorEvent(address(translatorLib_));
@@ -116,15 +114,15 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
     }
 
     onBounce(TvmSlice slice) external {
-        uint32 functionId = slice.decode(uint32);
+        uint32 functionId = slice.load(uint32);
         if (functionId == tvm.functionId(AsterizmNonce.increaseNonce)) {
-            (uint transferHash, ) = slice.decodeFunctionParams(AsterizmNonce.increaseNonce);
+            (uint transferHash, ) = slice.loadFunctionParams(AsterizmNonce.increaseNonce);
             delete nonces[transferHash];
             emit NonceErrorEvent(transferHash, AsterizmErrors.INITIALIZER__NONCE_INCREACE__ERROR);
         }
     
         if (functionId == tvm.functionId(AsterizmNonce.increaseNonceWithValidation)) {
-            (uint transferHash, ) = slice.decodeFunctionParams(AsterizmNonce.increaseNonce);
+            (uint transferHash, ) = slice.loadFunctionParams(AsterizmNonce.increaseNonce);
             delete nonces[transferHash];
             emit NonceErrorEvent(transferHash, AsterizmErrors.INITIALIZER__NONCE_INCREACE_WITH_VALIDATION__ERROR);
         }
@@ -354,7 +352,7 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
             return;
         }
 
-        _initTransferPrivate(_dto, sender, 0, false);
+        _initTransferPrivate(_dto, sender, 0);
     }
 
     /// Init transfer callback
@@ -369,19 +367,18 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
         tvm.accept();
 
         delete nonces[_transferHash];
-        _initTransferPrivate(dto,  sender, _nonce, true);
+        _initTransferPrivate(dto,  sender, _nonce);
     }
 
     /// Init transfer (private)
     /// @param _dto IzIninTransferRequestDto  Method DTO
     /// @param _nonce uint  Nonce
     /// @param _sender address  Sender (cilent) address
-    /// @param _withNonce bool  With nonce flag
-    function _initTransferPrivate(IzIninTransferRequestDto _dto, address _sender, uint _nonce, bool _withNonce) private view {
+    function _initTransferPrivate(IzIninTransferRequestDto _dto, address _sender, uint _nonce) private view {
         tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
         TrSendMessageRequestDto dto = _buildTrSendMessageRequestDto(
             _sender.toUint(), _dto.dstChainId, _dto.dstAddress, _nonce,
-            _dto.useForceOrder, _dto.txId, _dto.transferHash, _dto.payload
+            _dto.useForceOrder, _dto.txId, _dto.transferHash, _dto.dstFeeAmount, _dto.payload
         );
 
         translatorLib_.sendMessage{
