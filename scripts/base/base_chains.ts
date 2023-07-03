@@ -5,8 +5,8 @@ export const Chains = {
     mainnet: [
         {
             id: 1,
-            title: "ETH",
-            isCurrent: true,
+            title: "ETH", // Ethereum
+            isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
                 gas: '0x6F6f570F45833E249e27022648a26F4076F48f78',
@@ -20,7 +20,7 @@ export const Chains = {
         },
         {
             id: 137,
-            title: "POL",
+            title: "POL", // Polygon
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
@@ -35,7 +35,7 @@ export const Chains = {
         },
         {
             id: 250,
-            title: "FTM",
+            title: "FTM", // Fantom
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
@@ -48,7 +48,7 @@ export const Chains = {
         },
         {
             id: 10,
-            title: "OPT",
+            title: "OPT", // Optimizm
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
@@ -62,7 +62,7 @@ export const Chains = {
         },
         {
             id: 56,
-            title: "BSC",
+            title: "BSC", // Bsc
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
@@ -77,7 +77,7 @@ export const Chains = {
         },
         {
             id: 43114,
-            title: "AVA",
+            title: "AVA", // Avalanche
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
@@ -90,7 +90,7 @@ export const Chains = {
         },
         {
             id: 42161,
-            title: "ARB",
+            title: "ARB", // Arbitrum
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
@@ -104,7 +104,7 @@ export const Chains = {
         },
         {
             id: 288,
-            title: "BOB",
+            title: "BOB", // Boba
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
@@ -116,7 +116,7 @@ export const Chains = {
         },
         {
             id: 42220,
-            title: "CEL",
+            title: "CEL", // Calo
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
@@ -130,7 +130,7 @@ export const Chains = {
         },
         {
             id: 1313161554,
-            title: "AUR",
+            title: "AUR", // Aurora
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
@@ -143,7 +143,27 @@ export const Chains = {
         },
         {
             id: 4919,
-            title: "XVM",
+            title: "XVM", // Venidium
+            isCurrent: false,
+            chainType: ChainTypes.EVM,
+            trustAddresses: {
+                gas: '0x6F6f570F45833E249e27022648a26F4076F48f78',
+            },
+            stableCoins: [],
+        },
+        {
+            id: 32520,
+            title: "BTG", // BitGert
+            isCurrent: false,
+            chainType: ChainTypes.EVM,
+            trustAddresses: {
+                gas: '0x6F6f570F45833E249e27022648a26F4076F48f78',
+            },
+            stableCoins: [],
+        },
+        {
+            id: 1101,
+            title: "ZKP", // Polygon ZkEVM
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
@@ -214,7 +234,7 @@ export const Chains = {
         {
             id: 30001,
             title: "VNM",
-            isCurrent: true,
+            isCurrent: false,
             chainType: ChainTypes.TVM,
             trustAddresses: {
                 gas: '7618002218203172803264880100801528684811477250390419151077356660617890120024',
