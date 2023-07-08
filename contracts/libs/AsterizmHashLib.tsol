@@ -23,9 +23,9 @@ library AsterizmHashLib {
             return buildCrosschainHashV1(_packed);
         } else if (_version == HASH_VERSION_2) {
             return buildCrosschainHashV2(_packed);
-        } else {
-            require(false, VERSION_ERROR_CODE);
         }
+
+        require(false, VERSION_ERROR_CODE);
     }
 
     /// Build asterizm crosschain hash V1 (simple, cheapest realization)
