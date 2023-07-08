@@ -11,7 +11,7 @@ async function main() {
     const chains = commandArgs.network == NetworkTypes.localhost || commandArgs.network == NetworkTypes.testnet || commandArgs.network == NetworkTypes.testnetVenom ?
         Chains.testnet : Chains.mainnet;
   
-    const gas = locklift.factory.getDeployedContract("GasStation", new Address('0:10d7a2eed64bf120c34a71e8ff802e57e467e7728c48a7145408347d572a4158'));
+    const gas = locklift.factory.getDeployedContract("GasStation", new Address('0:7b5328b981a618b705b67d9b3a61afc6f3cecf04b0d6269f04e4b426ab7dbee0'));
 
     let owner;
     let ownerPubkey;

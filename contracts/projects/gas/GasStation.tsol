@@ -99,14 +99,14 @@ contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
     /// @param _amount uint  Amount
     function setMinUsdAmountPerChain(uint _amount) external onlyOwner {
         minUsdAmountPerChain = _amount;
-        emit SetMinUsdAmountEvent(_amount);
+        emit SetMinUsdAmountPerChainEvent(_amount);
     }
 
     /// Set maximum amount in USD per chain
     /// @param _amount uint  Amount
     function setMaxUsdAmountPerChain(uint _amount) external onlyOwner {
         maxUsdAmountPerChain = _amount;
-        emit SetMaxUsdAmountEvent(_amount);
+        emit SetMaxUsdAmountPerChainEvent(_amount);
     }
 
     /** Stable coins logic */
@@ -178,14 +178,15 @@ contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
 
         (uint64[] chainIds, uint[] amounts, uint[] receivers) = abi.decode(_payload, (uint64[], uint[], uint[]));
 
+        uint tokenDecimals = 10 ** uint(stableCoins[_tokenRoot].decimals);
         uint sum;
         for (uint i = 0; i < amounts.length; i++) {
             if (minUsdAmountPerChain > 0) {
-                uint amountInUsd = _amounts[i] / (10 ** stableCoins[_tokenRoot].decimals);
+                uint amountInUsd = amounts[i] / tokenDecimals;
                 require(amountInUsd >= minUsdAmountPerChain, GasStationErrors.GAS__MINIMUM_AMOUNT_PER_CHAIN_VALIDATION__ERROR);
             }
             if (maxUsdAmountPerChain > 0) {
-                uint amountInUsd = _amounts[i] / (10 ** stableCoins[_tokenRoot].decimals);
+                uint amountInUsd = amounts[i] / tokenDecimals;
                 require(amountInUsd <= maxUsdAmountPerChain, GasStationErrors.GAS__MIXIMUM_AMOUNT_PER_CHAIN_VALIDATION__ERROR);
             }
 
@@ -195,7 +196,7 @@ contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
         require(sum > 0, GasStationErrors.GAS__WRONG_AMOUNT__ERROR);
         require(sum == uint(_amount), GasStationErrors.GAS__WRONG_TOKEN_AMOUNT__ERROR);
 
-        uint sumInUsd = sum / (10 ** uint(stableCoins[_tokenRoot].decimals));
+        uint sumInUsd = sum / tokenDecimals;
         require(sumInUsd > 0, GasStationErrors.GAS__WRONG_AMOUNT_IN_USD__ERROR);
         if (minUsdAmount > 0) {
             require(sumInUsd >= minUsdAmount, GasStationErrors.GAS__MINIMUM_AMOUNT_VALIDATION__ERROR);

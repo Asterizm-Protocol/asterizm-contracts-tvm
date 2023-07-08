@@ -181,7 +181,7 @@ export const Chains = {
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '1389994807113895668742586980493099848731845241920',
+                gas: '1091313221966408868913347237915118571507129432647',
             },
             stableCoins: [
                 '0xc8e37E456c517D682ca8F343e46BF4DEFFd24D13',
@@ -193,7 +193,7 @@ export const Chains = {
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '350986775366171753722411460791258692847517948188',
+                gas: '524483678252950907191462497318668706849509749841',
             },
             stableCoins: [
                 '0x7f4F94A70e5E7236c7a14D04fd749FF5b7023bE8',
@@ -205,7 +205,7 @@ export const Chains = {
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '516993189345011224628327415305693039147059015087',
+                gas: '314889688339176324098060599865391262698455262059',
             },
             stableCoins: [],
         },
@@ -215,7 +215,7 @@ export const Chains = {
             isCurrent: false,
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '604310581401012142295609633700276062260547048368',
+                gas: '262254645447925333379275843488529411462343473272',
             },
             stableCoins: [],
         },
@@ -225,7 +225,7 @@ export const Chains = {
             isCurrent: false,
             chainType: ChainTypes.TVM,
             trustAddresses: {
-                gas: '14343096937700679744343233029027375202682348240768210538310188629637320800317',
+                gas: '55781409753215990494429610500862081143106455110780343957069048257042337087200',
             },
             stableCoins: [
                 '0:8c6dcaa30727458527e99a479dae92a92a51c24e235e5b531659e201204d79ee',
@@ -237,7 +237,7 @@ export const Chains = {
             isCurrent: false,
             chainType: ChainTypes.TVM,
             trustAddresses: {
-                gas: '7618002218203172803264880100801528684811477250390419151077356660617890120024',
+                gas: '115189678983306427205412323202937228852812607524563886901978387947065467765239',
             },
             stableCoins: [
                 '0:d5756401c0e2ad938bb980e72846f22f02b15d83c2c9190f93c0c2ff44771336',
