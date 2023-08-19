@@ -4,7 +4,7 @@ const bigInt = require("big-integer");
 import { Chains } from './base/base_chains';
 import { ChainTypes } from './base/base_chain_types';
 import { NetworkTypes } from './base/base_network_types';
-import { HashHersions } from './base/base_hash_versions';
+import { HashVersions } from './base/base_hash_versions';
 import { parseArgs } from './base/base_parce_args';
 
 require('dotenv').config();
@@ -32,7 +32,8 @@ async function main() {
     } else if (commandArgs.network == NetworkTypes.testnetVenom) {
         owner = new Address(process.env.TESTNET_VENOM_OWNER_ADDRESS || '');
         ownerPubkey = process.env.TESTNET_VENOM_OWNER_KEY || '';
-        tokenRootAddress = new Address('0:d5756401c0e2ad938bb980e72846f22f02b15d83c2c9190f93c0c2ff44771336');
+        // tokenRootAddress = new Address('0:d5756401c0e2ad938bb980e72846f22f02b15d83c2c9190f93c0c2ff44771336');
+        tokenRootAddress = new Address('0:4a2219d92ed7971c16093c04dc2f442925fcfb4f1c7f18fc4b6b18cf100b27aa');
     } else {
         owner = new Address(process.env.MAINNET_EVER_OWNER_ADDRESS || '');
         ownerPubkey = process.env.MAINNET_EVER_OWNER_KEY || '';
@@ -66,13 +67,16 @@ async function main() {
 
         chainIds.push(chains[i].id);
         chainTypes.push(chains[i].chainType);
-        trustedAddresses.push(chains[i].trustAddresses.gas);
+        if (chains[i].trustAddresses.gas.uint != '0') {
+          trustedAddresses.push(chains[i].trustAddresses.gas.uint);
+        }
     }
 
     currentChain = currentChain ? currentChain : chains[0];
   
     let translatorAddress;
-    translatorAddress = new Address("0:29e584c3166ae61198623e35c48772300f7d983e85010449d216b222403e68bc");
+    let tracing;
+    // translatorAddress = new Address("0:3a46266d9bf069762fbb36eaea854dac90157308dccc9a57c6a50f4b0e1f6d65");
     if (!translatorAddress) {
       const { contract: translatorObj1 } = await locklift.factory.deployContract({
         contract: "AsterizmTranslator",
@@ -88,22 +92,22 @@ async function main() {
       });
       translatorAddress = translatorObj1.address;
   
-    //   let tracing = await locklift.tracing.trace(
-    //     translatorObj1.methods.addChains({
-    //       _chainIds: chainIds,
-    //       _chainTypes: chainTypes,
-    //     }).send({
-    //       from: ownerWallet.address,
-    //       amount: locklift.utils.toNano(1)
-    //     })
-    //   );
-        await translatorObj1.methods.addChains({
-            _chainIds: chainIds,
-            _chainTypes: chainTypes,
+      tracing = await locklift.tracing.trace(
+        translatorObj1.methods.addChains({
+          _chainIds: chainIds,
+          _chainTypes: chainTypes,
         }).send({
-            from: ownerWallet.address,
-            amount: locklift.utils.toNano(1)
-        });
+          from: ownerWallet.address,
+          amount: locklift.utils.toNano(1)
+        })
+      );
+        // await translatorObj1.methods.addChains({
+        //     _chainIds: chainIds,
+        //     _chainTypes: chainTypes,
+        // }).send({
+        //     from: ownerWallet.address,
+        //     amount: locklift.utils.toNano(1)
+        // });
     }
   
     const translator = locklift.factory.getDeployedContract("AsterizmTranslator", translatorAddress);
@@ -114,7 +118,7 @@ async function main() {
     const AsterizmNonce = locklift.factory.getContractArtifacts("AsterizmNonce");
   
     let initializerAddress;
-    initializerAddress = new Address("0:ded7d5c7decefe1324ac2eaa7d1bc84c552ac769499b3dbb7076ed957d5bba73");
+    // initializerAddress = new Address("0:55402fc4799d6e7e2cb86f70cc6ea922090538dffb19d08ecce85dfb4c392de9");
     if (!initializerAddress) {
       const { contract: initializer1 } = await locklift.factory.deployContract({
         contract: "AsterizmInitializer",
@@ -131,20 +135,20 @@ async function main() {
       });
       initializerAddress = initializer1.address;
   
-    //   const tracing = await locklift.tracing.trace(
-    //     translator.methods.setInitializer({
-    //     _initializerReceiver: initializer1.address,
-    //   }).send({
-    //     from: ownerWallet.address,
-    //     amount: locklift.utils.toNano(1)
-    //   })
-    // );
-        await translator.methods.setInitializer({
-            _initializerReceiver: initializer1.address,
-        }).send({
-            from: ownerWallet.address,
-            amount: locklift.utils.toNano(1)
-        });
+      tracing = await locklift.tracing.trace(
+        translator.methods.setInitializer({
+        _initializerReceiver: initializer1.address,
+      }).send({
+        from: ownerWallet.address,
+        amount: locklift.utils.toNano(1)
+      })
+    );
+        // await translator.methods.setInitializer({
+        //     _initializerReceiver: initializer1.address,
+        // }).send({
+        //     from: ownerWallet.address,
+        //     amount: locklift.utils.toNano(1)
+        // });
     }
 
 
@@ -157,24 +161,30 @@ async function main() {
 
 
 
-    const { contract: gas } = await locklift.factory.deployContract({
-        contract: "GasStation",
-        publicKey: signer.publicKey,
-        initParams: {
-            owner_: owner,
-            initializerLib_: initializer.address,
-            useForceOrder_: false,
-            disableHashValidation_: true,
-            nonce_: locklift.utils.getRandomNonce().toFixed(),
-            hashVersion_: HashHersions.CrosschainV1,
-        },
-        constructorParams: {},
-        value: locklift.utils.toNano(2),
-    });
+    let gasAddress;
+    // gasAddress = new Address("0:bbc77c9530eb2911428f0073348fbf4c7c9c77566b5fb91a17133ccb29bbc34e");
+    if (!gasAddress) {
+        const {contract: gasObject} = await locklift.factory.deployContract({
+            contract: "GasStation",
+            publicKey: signer.publicKey,
+            initParams: {
+                owner_: owner,
+                initializerLib_: initializer.address,
+                useForceOrder_: false,
+                disableHashValidation_: true,
+                nonce_: locklift.utils.getRandomNonce().toFixed(),
+                hashVersion_: HashVersions.CrosschainV1,
+            },
+            constructorParams: {},
+            value: locklift.utils.toNano(2),
+        });
+        gasAddress = gasObject.address;
+    }
+
+    const gas = locklift.factory.getDeployedContract("GasStation", gasAddress);
     console.log(`GasSender deployed at: ${gas.address.toString()}`);
 
-    const gasAddressUint = new bigInt(gas.address.toString().substring(2), 16);
-
+    const gasAddressUint = new bigInt(gasAddress.toString().substring(2), 16);
 
     for (let i = 0; i < chainIds.length; i++) {
         if (chainIds[i] == currentChain.id) {
@@ -183,53 +193,67 @@ async function main() {
         }
     }
 
-    let tracing;
-    // tracing = await locklift.tracing.trace(
-    //     gas.methods.addStableCoin({
-    //         _tokenRoot: tokenRootAddress,
-    //         _decimals: decimals
-    //     }).send({
-    //         from: ownerWallet.address,
-    //         amount: locklift.utils.toNano(1)
-    //     })
-    // );
-    await gas.methods.addStableCoin({
-        _tokenRoot: tokenRootAddress,
-        _decimals: decimals
-    }).send({
-        from: ownerWallet.address,
-        amount: locklift.utils.toNano(1)
-    });
+    tracing = await locklift.tracing.trace(
+        gas.methods.addStableCoin({
+            _tokenRoot: tokenRootAddress,
+            _decimals: decimals
+        }).send({
+            from: ownerWallet.address,
+            amount: locklift.utils.toNano(1)
+        })
+    );
+    // await gas.methods.addStableCoin({
+    //     _tokenRoot: tokenRootAddress,
+    //     _decimals: decimals
+    // }).send({
+    //     from: ownerWallet.address,
+    //     amount: locklift.utils.toNano(1)
+    // });
 
-    // tracing = await locklift.tracing.trace(
-    //     gas.methods.setMinUsdAmount({
-    //         _amount: 100
-    //     }).send({
-    //         from: ownerWallet.address,
-    //         amount: locklift.utils.toNano(1)
-    //     })
-    // );
-    await gas.methods.setMinUsdAmount({
-        _amount: 15
-    }).send({
-        from: ownerWallet.address,
-        amount: locklift.utils.toNano(1)
-    });
+    tracing = await locklift.tracing.trace(
+        gas.methods.setMinUsdAmount({
+            _amount: 100
+        }).send({
+            from: ownerWallet.address,
+            amount: locklift.utils.toNano(1)
+        })
+    );
+    // await gas.methods.setMinUsdAmount({
+    //     _amount: 15
+    // }).send({
+    //     from: ownerWallet.address,
+    //     amount: locklift.utils.toNano(1)
+    // });
 
-    // tracing = await locklift.tracing.trace(
-    //     gas.methods.setMinUsdAmountPerChain({
-    //         _amount: 10
-    //     }).send({
-    //         from: ownerWallet.address,
-    //         amount: locklift.utils.toNano(1)
-    //     })
-    // );
-    await gas.methods.setMinUsdAmountPerChain({
-        _amount: 10
-    }).send({
-        from: ownerWallet.address,
-        amount: locklift.utils.toNano(1)
-    });
+    tracing = await locklift.tracing.trace(
+        gas.methods.setMaxUsdAmount({
+            _amount: 200
+        }).send({
+            from: ownerWallet.address,
+            amount: locklift.utils.toNano(1)
+        })
+    );
+    // await gas.methods.setMaxUsdAmount({
+    //     _amount: 200
+    // }).send({
+    //     from: ownerWallet.address,
+    //     amount: locklift.utils.toNano(1)
+    // });
+
+    tracing = await locklift.tracing.trace(
+        gas.methods.setMinUsdAmountPerChain({
+            _amount: 10
+        }).send({
+            from: ownerWallet.address,
+            amount: locklift.utils.toNano(1)
+        })
+    );
+    // await gas.methods.setMinUsdAmountPerChain({
+    //     _amount: 10
+    // }).send({
+    //     from: ownerWallet.address,
+    //     amount: locklift.utils.toNano(1)
+    // });
 
     // tracing = await locklift.tracing.trace(
     //     gas.methods.addTrustedAddresses({

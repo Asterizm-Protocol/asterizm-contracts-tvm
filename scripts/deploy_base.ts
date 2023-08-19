@@ -13,10 +13,12 @@ async function main() {
   const signer = (await locklift.keystore.getSigner("0"))!;
 
   //TODO: change it for different chains deployment!
-  const owner = new Address(process.env.LOCALHOST_OWNER_ADDRESS || '');
-  const ownerPubkey = process.env.LOCALHOST_OWNER_KEY || '';
+  // const owner = new Address(process.env.LOCALHOST_OWNER_ADDRESS || '');
+  // const ownerPubkey = process.env.LOCALHOST_OWNER_KEY || '';
   // const owner = new Address(process.env.TESTNET_EVER_OWNER_ADDRESS || '');
   // const ownerPubkey = process.env.TESTNET_EVER_OWNER_KEY || '';
+  const owner = new Address(process.env.TESTNET_VENOM_OWNER_ADDRESS || '');
+  const ownerPubkey = process.env.TESTNET_VENOM_OWNER_KEY || '';
 
   const ownerWallet = await locklift.factory.accounts.addExistingAccount({
     address: owner,

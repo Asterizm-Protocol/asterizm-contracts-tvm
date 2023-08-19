@@ -26,15 +26,15 @@ async function main() {
     ownerPubkey = process.env.MAINNET_EVER_OWNER_KEY || '';
   }
   
-    // const ownerWallet = await locklift.factory.accounts.addExistingAccount({
-    //   address: owner,
-    //   type: WalletTypes.MsigAccount,
-    //   mSigType: "multisig2",
-    // });
     const ownerWallet = await locklift.factory.accounts.addExistingAccount({
       address: owner,
-      type: WalletTypes.EverWallet,
+      type: WalletTypes.MsigAccount,
+      mSigType: "multisig2",
     });
+    // const ownerWallet = await locklift.factory.accounts.addExistingAccount({
+    //   address: owner,
+    //   type: WalletTypes.EverWallet,
+    // });
     // const ownerWallet = await locklift.factory.accounts.addExistingAccount({
     //   publicKey: ownerPubkey,
     //   type: WalletTypes.WalletV3,
@@ -45,7 +45,7 @@ async function main() {
 
     let tokenRootContract;
     let tokenRootAddress;
-    // tokenRootAddress = new Address("0:bdf496b4067d570d82210564e75e0cfed9e4c794e05a95e0ce802028599e3190");
+    // tokenRootAddress = new Address("0:e5adba28e71d4dbf8463cbab336447c6e0c9accf56b90cf3afc8f0c5a2292c1e");
 
     if (tokenRootAddress) {
       tokenRootContract = locklift.factory.getDeployedContract("AsterizmTestTokenRoot", tokenRootAddress);
@@ -81,28 +81,28 @@ async function main() {
 
     console.log(`Token root deployed at: ${tokenRoot.address.toString()}`);
 
-    // const tracing = await locklift.tracing.trace(tokenRoot.methods.mint({
-    //     amount: 1000000 * (10 ** decimals),
-    //     recipient: ownerWallet.address,
-    //     deployWalletValue: locklift.utils.toNano(0.1), // 0.1 ever
-    //     remainingGasTo: ownerWallet.address,
-    //     notify: false,
-    //     payload: "",
-    //   }).send({
-    //     from: ownerWallet.address,
-    //     amount: locklift.utils.toNano(1)
-    //   }));
-    await tokenRoot.methods.mint({
-      amount: 1000000 * (10 ** decimals),
-      recipient: ownerWallet.address,
-      deployWalletValue: locklift.utils.toNano(0.1), // 0.1 ever
-      remainingGasTo: ownerWallet.address,
-      notify: false,
-      payload: "",
-    }).send({
-      from: ownerWallet.address,
-      amount: locklift.utils.toNano(1)
-    });
+    const tracing = await locklift.tracing.trace(tokenRoot.methods.mint({
+        amount: 100000000 * (10 ** decimals),
+        recipient: ownerWallet.address,
+        deployWalletValue: locklift.utils.toNano(0.1), // 0.1 ever
+        remainingGasTo: ownerWallet.address,
+        notify: false,
+        payload: "",
+      }).send({
+        from: ownerWallet.address,
+        amount: locklift.utils.toNano(1)
+      }));
+    // await tokenRoot.methods.mint({
+    //   amount: 100000000000 * (10 ** decimals),
+    //   recipient: ownerWallet.address,
+    //   deployWalletValue: locklift.utils.toNano(0.1), // 0.1 ever
+    //   remainingGasTo: ownerWallet.address,
+    //   notify: false,
+    //   payload: "",
+    // }).send({
+    //   from: ownerWallet.address,
+    //   amount: locklift.utils.toNano(1)
+    // });
     
     
       const tokenWalletAddress = (await tokenRoot.methods.walletOf({answerId: 0, walletOwner: ownerWallet.address}).call()).value0;

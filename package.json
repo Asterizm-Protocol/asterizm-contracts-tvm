@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "npx locklift test --network local"
+    "test": "npx locklift test -n local",
+    "test:base": "npx locklift test -n local --tests ./test/BaseLayerTest.ts",
+    "test:gas": "npx locklift test -n local --tests ./test/GasStationTest.ts"
   },
   "author": "",
   "license": "ISC",

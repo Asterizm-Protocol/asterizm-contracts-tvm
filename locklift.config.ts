@@ -104,7 +104,7 @@ const config: LockliftConfig = {
         //   local: false,
         // },
         data: {
-          endpoint: "https://jrpc-devnet.venom.foundation/",
+          endpoint: "https://jrpc-testnet.venom.foundation/",
         },
       },
       giver: {

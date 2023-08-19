@@ -55,6 +55,12 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
     /// @param _payloadHash  uint  Payload hash
     event TransferSendEvent(uint64 indexed _srcChainId, uint indexed _srcAddress, uint indexed _dstAddress, uint _nonce, uint _transferHash, uint _payloadHash);
 
+    /// Resend feiled transfer event
+    /// @param _transferHash uint
+    /// @param _senderAddress uint
+    /// @param _feeAmount uint128
+    event ResendFailedTransferEvent(uint _transferHash, uint _senderAddress, uint128 _feeAmount);
+
     struct Relayer {
         bool exists;
     }
@@ -92,7 +98,7 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
 
     /// Only initializer modifier
     modifier onlyInitializer() {
-        require(msg.sender == address(initializerLib), AsterizmErrors.TRANSLATOR__ONLY_INITIALIZER__ERROR);
+        require(msg.sender.value != 0 && address(initializerLib).value != 0 && msg.sender == address(initializerLib), AsterizmErrors.TRANSLATOR__ONLY_INITIALIZER__ERROR);
         _;
     }
 
@@ -127,6 +133,7 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
     /// Add relayer (private)
     /// @param _relayer address  Relayer address
     function addRelayerPrivate(address _relayer) private {
+        require(_relayer.value != 0 && _relayer != address(this), AsterizmErrors.TRANSLATOR__WRONG_RELAYER_ADDRESS__ERROR);
         relayers[_relayer].exists = true;
         emit AddRelayerEvent(_relayer);
     }
@@ -157,8 +164,7 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
     /// @param _chainType uint8  Chain type
     function addChainPrivate(uint64 _chainId, uint8 _chainType) private {
         require(_isChainTypeAwailable(_chainType), AsterizmErrors.TRANSLATOR__UNAVAILABLE_CHAIN_TYPE__ERROR);
-        chains[_chainId].exists = true;
-        chains[_chainId].chainType = _chainType;
+        chains[_chainId] = AsterizmChain(true, _chainType);
         emit AddChainEvent(_chainId);
     }
 
@@ -189,15 +195,13 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
     /// Return local chain id
     /// @return uint64
     function getLocalChainId() external internalMsg view responsible override returns(uint64) {
-        tvm.rawReserve(AsterizmEnvs.TRANSLATOR__MIN_CONTRACT_BALANCE, 0);
-        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } localChainId_;
+        return { value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false } localChainId_;
     }
 
     /// Return chains list
     /// @return mapping(uint64 => AsterizmChain)
     function getChainsList() external internalMsg view responsible override returns(mapping(uint64 => AsterizmChain)) {
-        tvm.rawReserve(AsterizmEnvs.TRANSLATOR__MIN_CONTRACT_BALANCE, 0);
-        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } chains;
+        return { value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false } chains;
     }
 
 
@@ -223,6 +227,21 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
         emit SendMessageEvent(_dto.dstFeeAmount, payload);
 
         owner().transfer({ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false });
+    }
+
+    /// Resend failed by fee amount transfer
+    /// @param _transferHash uint  Transfer hash
+    /// @param _senderAddress uint  Sender address
+    /// @param _feeAmount uint128  Transfer fee amount
+    function resendMessage(uint _transferHash, uint _senderAddress, uint128 _feeAmount) external onlyInitializer {
+        require(_feeAmount < msg.value, AsterizmErrors.TRANSLATOR__TRANSFER_FEE_VALUE_IS_TOO_SMALL_ERROR);
+        require(address(this).balance >= _feeAmount, AsterizmErrors.TRANSLATOR__BALANCE_NOT_ENOUGH__ERROR);
+        tvm.rawReserve(AsterizmEnvs.TRANSLATOR__MIN_CONTRACT_BALANCE, 0);
+        if (_feeAmount > 0) {
+            owner().transfer({ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false });
+        }
+
+        emit ResendFailedTransferEvent(_transferHash, _senderAddress, _feeAmount);
     }
 
 

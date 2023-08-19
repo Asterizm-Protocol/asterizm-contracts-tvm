@@ -90,6 +90,11 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// @param _errorCode uint16  Error code
     event ErrorTransferExecutedEvent(uint _transferHash, uint16 _errorCode);
 
+    /// Resend Asterizm transfer event
+    /// @param _transferHash uint  Transfer hash
+    /// @param _feeAmount uint128  Additional fee amount
+    event ResendAsterizmTransferEvent(uint _transferHash, uint128 _feeAmount);
+
     struct AsterizmTransfer {
         bool exists;
         bool successIzReceive;
@@ -120,10 +125,10 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         emit SetInitializerEvent(address(initializerLib_));
         emit SetUseForceOrderEvent(useForceOrder_);
         emit SetDisableHashValidationEvent(disableHashValidation_);
-        _setLocalChainId(initializerLib_.getLocalChainId{ value: AsterizmEnvs.CLIENT__MIN_CONTRACT_BALANCE }().await);
-        initializerTransferCode = initializerLib_.getInitializerTransferCode{ value: AsterizmEnvs.CLIENT__MIN_CONTRACT_BALANCE }().await;
-        clientTransferCode = initializerLib_.getClientTransferCode{ value: AsterizmEnvs.CLIENT__MIN_CONTRACT_BALANCE }().await;
-        chains = initializerLib_.getChainsList{ value: AsterizmEnvs.CLIENT__MIN_CONTRACT_BALANCE }().await;
+        _setLocalChainId(initializerLib_.getLocalChainId{ value: AsterizmEnvs.CLIENT__GETTER_VALUE }().await);
+        initializerTransferCode = initializerLib_.getInitializerTransferCode{ value: AsterizmEnvs.CLIENT__GETTER_VALUE }().await;
+        clientTransferCode = initializerLib_.getClientTransferCode{ value: AsterizmEnvs.CLIENT__GETTER_VALUE }().await;
+        chains = initializerLib_.getChainsList{ value: AsterizmEnvs.CLIENT__GETTER_VALUE }().await;
 
         address currencAddress = address(this);
         _addTrustedAddressPrivate(localChainId, currencAddress.toUint());
@@ -368,6 +373,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         return _getChainType(_srcChainId) == _getChainType(_dstChainId) ? fullPayload.buildSimpleHash() : fullPayload.buildCrosschainHashWithVersion(hashVersion_);
     }
 
+    event TestEvent(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId, TvmCell _payload, uint _transferHashOld, uint _transferHashNew);
     /// Check is transfer hash valid
     /// @param _srcChainId uint64  Chain ID
     /// @param _srcAddress uint  Address
@@ -378,6 +384,8 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// @param _transferHash uint  Transfer hash
     /// @return bool
     function _validTransferHash(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId, TvmCell _payload, uint _transferHash) internal view returns(bool) {
+        emit TestEvent(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _payload, _transferHash, _buildTransferHash(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _payload));
+        emit TestEvent(_srcChainId, _srcAddress, _dstChainId, _dstAddress, 9999999999, _payload, _transferHash, _buildTransferHash(_srcChainId, _srcAddress, _dstChainId, _dstAddress, 9999999999, _payload));
         return _buildTransferHash(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _payload) == _transferHash;
     }
 
@@ -504,6 +512,21 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         }
     }
 
+    /// Resend failed by fee amount transfer
+    /// @param _transferHash uint  Transfer hash
+    /// @param _feeAmount uint128  Transfer fee amount
+    function resendAsterizmTransfer(uint _transferHash, uint128 _feeAmount) external onlyOwner {
+        uint128 resendTransferLogicFee = 0.5 ton;
+        uint128 fullAmount = _feeAmount + resendTransferLogicFee;
+        require(fullAmount <= msg.value, AsterizmErrors.CLIENT__TRANSFER_FEE_VALUE_IS_TOO_SMALL_ERROR);
+        require(address(this).balance >= fullAmount, AsterizmErrors.CLIENT__BALANCE_NOT_ENOUGH__ERROR);
+
+        tvm.accept();
+
+        emit ResendAsterizmTransferEvent(_transferHash, _feeAmount);
+        initializerLib_.resendTransfer{ value: fullAmount, flag: AsterizmTransferFlags.SENDER_PAYS_FEES, bounce: false }(_transferHash, _feeAmount);
+    }
+
 
     /** Receiving logic */
 
@@ -522,9 +545,9 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         onlyTrustedAddress(_dto.srcChainId, _dto.srcAddress)
     {
         tvm.accept();
-        emit PayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.txId, _dto.transferHash, _dto.payload);
 
         _deployClientTransferContract(_dto.transferHash, true);
+        emit PayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.txId, _dto.transferHash, _dto.payload);
     }
 
     /// Receive payload from client server
@@ -546,8 +569,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         onlyTrustedAddress(_dto.srcChainId, _dto.srcAddress)
         onlyValidTransferHash(_dto)
     {
-        inboundTransfers[_dto.transferHash].exists = true;
-        inboundTransfers[_dto.transferHash].dto = abi.encode(_dto);
+        inboundTransfers[_dto.transferHash] = AsterizmTransfer(true, false, false, false, 0, abi.encode(_dto));
 
         AsterizmClientTransfer clHashContract = _getClientTransferContract(_dto.transferHash, true);
 
@@ -612,18 +634,19 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
             inboundTransfers[_transferHash].successClExecute = true;
         }
 
+        AsterizmTransfer currentTransfer = inboundTransfers[_transferHash];
+
         if (
-            inboundTransfers[_transferHash].successIzReceive &&
-            inboundTransfers[_transferHash].successClReceive &&
-            inboundTransfers[_transferHash].successClExecute
+            currentTransfer.successIzReceive &&
+            currentTransfer.successClReceive &&
+            currentTransfer.successClExecute
         ) {
-            ClAsterizmReceiveRequestDto dto = abi.decode(inboundTransfers[_transferHash].dto, (ClAsterizmReceiveRequestDto));
+            ClAsterizmReceiveRequestDto dto = abi.decode(currentTransfer.dto, (ClAsterizmReceiveRequestDto));
             delete inboundTransfers[dto.transferHash];
             tvm.rawReserve(AsterizmEnvs.CLIENT__MIN_CONTRACT_BALANCE, 0);
 
             uint16 errorCode = _asterizmReceive(dto);
             if (errorCode > 0) {
-                delete inboundTransfers[dto.transferHash];
                 emit ErrorTransferExecutedEvent(dto.transferHash, errorCode);
                 return;
             }

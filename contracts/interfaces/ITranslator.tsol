@@ -9,6 +9,12 @@ interface ITranslator is IAsterizmStructs {
     /// @param _dto TrSendMessageRequestDto  Method DTO
     function sendMessage(TrSendMessageRequestDto _dto) external internalMsg;
 
+    /// Resend failed by fee amount transfer
+    /// @param _transferHash uint  Transfer hash
+    /// @param _senderAddress uint  Sender address
+    /// @param _feeAmount uint128  Transfer fee amount
+    function resendMessage(uint _transferHash, uint _senderAddress, uint128 _feeAmount) external;
+
     /// Return local chain id
     /// @return uint64
     function getLocalChainId() external internalMsg view responsible returns(uint64);

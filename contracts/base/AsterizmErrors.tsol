@@ -14,6 +14,9 @@ library AsterizmErrors {
     uint16 constant TRANSLATOR__WRONG_CHAIN_ID__ERROR = 2005;
     uint16 constant TRANSLATOR__TRANSFER__ERROR = 2006;
     uint16 constant TRANSLATOR__UNAVAILABLE_CHAIN_TYPE__ERROR = 2007;
+    uint16 constant TRANSLATOR__TRANSFER_FEE_VALUE_IS_TOO_SMALL_ERROR = 2008;
+    uint16 constant TRANSLATOR__BALANCE_NOT_ENOUGH__ERROR = 2009;
+    uint16 constant TRANSLATOR__WRONG_RELAYER_ADDRESS__ERROR = 2010;
 
     // For Initializer contract
     uint16 constant INITIALIZER__ONLY_TRANSLATOR__ERROR = 3001;
@@ -25,6 +28,8 @@ library AsterizmErrors {
     uint16 constant INITIALIZER__NONCE_DATA_NOT_FOUND__ERROR = 3007;
     uint16 constant INITIALIZER__NONCE_INCREACE__ERROR = 3008;
     uint16 constant INITIALIZER__NONCE_INCREACE_WITH_VALIDATION__ERROR = 3008;
+    uint16 constant INITIALIZER__TRANSFER_FEE_VALUE_IS_TOO_SMALL_ERROR = 3009;
+    uint16 constant INITIALIZER__BALANCE_NOT_ENOUGH__ERROR = 3010;
 
     // For Asterizm client contract
     uint16 constant CLIENT__ONLY_INITIALIZER__ERROR = 4001;

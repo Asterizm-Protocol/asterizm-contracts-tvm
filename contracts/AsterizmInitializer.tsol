@@ -90,7 +90,6 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
 
     uint64 private localChainId;
     mapping(uint64 => uint) public blockAddresses;
-    mapping(uint => Nonce) private nonces;
     mapping(uint64 => AsterizmChain) private chains;
 
     ITranslator static translatorLib_;
@@ -111,21 +110,6 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
             flag: AsterizmTransferFlags.ALL_NOT_RESERVED,
             bounce: false
         });
-    }
-
-    onBounce(TvmSlice slice) external {
-        uint32 functionId = slice.load(uint32);
-        if (functionId == tvm.functionId(AsterizmNonce.increaseNonce)) {
-            (uint transferHash, ) = slice.loadFunctionParams(AsterizmNonce.increaseNonce);
-            delete nonces[transferHash];
-            emit NonceErrorEvent(transferHash, AsterizmErrors.INITIALIZER__NONCE_INCREACE__ERROR);
-        }
-    
-        if (functionId == tvm.functionId(AsterizmNonce.increaseNonceWithValidation)) {
-            (uint transferHash, ) = slice.loadFunctionParams(AsterizmNonce.increaseNonce);
-            delete nonces[transferHash];
-            emit NonceErrorEvent(transferHash, AsterizmErrors.INITIALIZER__NONCE_INCREACE_WITH_VALIDATION__ERROR);
-        }
     }
 
     /** Modifiers */
@@ -301,29 +285,25 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
     /// Return local chain id
     /// @return uint64
     function getLocalChainId() external internalMsg view responsible override returns(uint64) {
-        tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
-        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } localChainId;
+        return { value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false } localChainId;
     }
 
     /// Return initializer transfer code
     /// @return TvmCell
     function getInitializerTransferCode() external internalMsg view responsible override returns(TvmCell) {
-        tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
-        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } initializerTransferCode_;
+        return { value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false } initializerTransferCode_;
     }
 
     /// Return client transfer code
     /// @return TvmCell
     function getClientTransferCode() external internalMsg view responsible override returns(TvmCell) {
-        tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
-        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } clientTransferCode_;
+        return { value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false } clientTransferCode_;
     }
 
     /// Return chains list
     /// @return mapping(uint64 => AsterizmChain)
     function getChainsList() external internalMsg view responsible override returns(mapping(uint64 => AsterizmChain)) {
-        tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
-        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } chains;
+        return { value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false } chains;
     }
 
 
@@ -337,37 +317,7 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
         require(sender.toUint() != blockAddresses[localChainId], AsterizmErrors.INITIALIZER__SENDER_ADDRESS_IS_BLOCKED__ERROR);
         require(_dto.dstAddress != blockAddresses[_dto.dstChainId], AsterizmErrors.INITIALIZER__TARGET_ADDRESS_IS_BLOCKED__ERROR);
 
-        if (_dto.useForceOrder) {
-            tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
-            nonces[_dto.transferHash].exists = true;
-            nonces[_dto.transferHash].sender = sender;
-            nonces[_dto.transferHash].dto = abi.encode(_dto);
-            _getNonceContract(_dto.dstChainId, sender.toUint(), _dto.dstAddress, false, true).increaseNonce{
-                value: 0,
-                flag: AsterizmTransferFlags.ALL_NOT_RESERVED,
-                bounce: true,
-                callback: onInitTransferCallback
-            }(_dto.transferHash);
-
-            return;
-        }
-
         _initTransferPrivate(_dto, sender, 0);
-    }
-
-    /// Init transfer callback
-    /// @param _transferHash uint  Transfer hash
-    /// @param _nonce uint  Transfer nonce
-    function onInitTransferCallback(uint _transferHash, uint _nonce) public {
-        require(nonces[_transferHash].exists, AsterizmErrors.INITIALIZER__NONCE_DATA_NOT_FOUND__ERROR);
-        IzIninTransferRequestDto dto = abi.decode(nonces[_transferHash].dto, (IzIninTransferRequestDto));
-        address sender = nonces[_transferHash].sender;
-        require(_getNonceContractAddress(dto.dstChainId, sender.toUint(), dto.dstAddress, false) == msg.sender, AsterizmErrors.INITIALIZER__WRONG_NONCE_ADDRESS__ERROR);
-
-        tvm.accept();
-
-        delete nonces[_transferHash];
-        _initTransferPrivate(dto,  sender, _nonce);
     }
 
     /// Init transfer (private)
@@ -389,6 +339,17 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
         emit InitTransferSuccessfullyEvent(_dto.transferHash);
     }
 
+    /// Resend failed by fee amount transfer
+    /// @param _transferHash uint  Transfer hash
+    /// @param _feeAmount uint128  Transfer fee amount
+    function resendTransfer(uint _transferHash, uint128 _feeAmount) external {
+        require(_feeAmount < msg.value, AsterizmErrors.INITIALIZER__TRANSFER_FEE_VALUE_IS_TOO_SMALL_ERROR);
+        require(address(this).balance >= _feeAmount, AsterizmErrors.INITIALIZER__BALANCE_NOT_ENOUGH__ERROR);
+        address sender = msg.sender;
+
+        translatorLib_.resendMessage{ value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false }(_transferHash, sender.toUint(), _feeAmount);
+    }
+
 
     /** Receiving logic */
 
@@ -396,36 +357,8 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
     /// @param _dto IzReceivePayloadRequestDto  Method DTO
     function receivePayload(IzReceivePayloadRequestDto _dto) external internalMsg override onlyTranslator {
         require(_dto.dstAddress != blockAddresses[localChainId], AsterizmErrors.INITIALIZER__SENDER_ADDRESS_IS_BLOCKED__ERROR);
-        if (_dto.forceOrder) {
-            tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
-            nonces[_dto.transferHash].exists = true;
-            nonces[_dto.transferHash].dto = abi.encode(_dto);
-            _getNonceContract(_dto.srcChainId, _dto.srcAddress, _dto.dstAddress, true, true).increaseNonceWithValidation{
-                value: 0,
-                flag: AsterizmTransferFlags.ALL_NOT_RESERVED,
-                bounce: true,
-                callback: onReceivePayloadCallback
-            }(_dto.transferHash, _dto.nonce);
-
-            return;
-        }
 
         _receivePayloadPrivate(_dto);
-    }
-
-    /// Receive payload callback
-    /// @param _transferHash uint  Transfer hash
-    /// @param _nonce uint  Transfer nonce
-    function onReceivePayloadCallback(uint _transferHash, uint _nonce) public {
-        require(nonces[_transferHash].exists, AsterizmErrors.INITIALIZER__NONCE_DATA_NOT_FOUND__ERROR);
-        IzReceivePayloadRequestDto dto = abi.decode(nonces[_transferHash].dto, (IzReceivePayloadRequestDto));
-        require(_getNonceContractAddress(dto.srcChainId, dto.srcAddress, dto.dstAddress, true) == msg.sender, AsterizmErrors.INITIALIZER__WRONG_NONCE_ADDRESS__ERROR);
-        require(dto.nonce == _nonce, AsterizmErrors.INITIALIZER__WRONG_NONCE__ERROR);
-
-        tvm.accept();
-
-        delete nonces[_transferHash];
-        _receivePayloadPrivate(dto);
     }
 
     /// Receive payload (private)
@@ -446,7 +379,6 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
         } (dto);
 
         emit SentPayloadEvent(_dto.transferHash, _dto.dstAddress.toAddress());
-
         owner().transfer({ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false });
     }
 }

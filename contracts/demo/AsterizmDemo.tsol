@@ -9,18 +9,10 @@ contract AsterizmDemo is AsterizmClient {
     event WithdrawCoinsEvent(address _target, uint128 _amount);
 
     string public chainMessage;
+    uint static nonce_; //TODO: drop this after debeloplent
 
     constructor () AsterizmClient() {
         chainMessage = "Chain message";
-    }
-
-    /// Withdraw coins
-    /// @param _target address  Target address
-    function withdrawCoins(address _target, uint128 _amount) external view onlyOwner {
-        tvm.rawReserve(AsterizmEnvs.CLIENT__MIN_CONTRACT_BALANCE, 0);
-        _target.transfer({ value: _amount, flag: AsterizmTransferFlags.RECEIVER_PAYS_FEES, bounce: false });
-
-        emit WithdrawCoinsEvent(_target, _amount);
     }
 
     /// Send message

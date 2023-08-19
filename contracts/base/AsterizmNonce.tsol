@@ -33,8 +33,7 @@ contract AsterizmNonce is AsterizmOwnable, INonce {
     /// Return nonce
     /// @return uint
     function getNonce() external internalMsg view responsible override returns(uint) {
-        tvm.rawReserve(AsterizmEnvs.NONCE__MIN_CONTRACT_BALANCE, 0);
-        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } currentNonce;
+        return { value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false } currentNonce;
     }
 
     /// Increace nonce (private)

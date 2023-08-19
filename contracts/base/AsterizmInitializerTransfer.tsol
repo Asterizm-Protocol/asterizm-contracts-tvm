@@ -28,7 +28,6 @@ contract AsterizmInitializerTransfer is IInitializerTransfer, AsterizmOwnable {
     /// @return uint, bool, uint8
     function isExists(uint _transferHash) external internalMsg view responsible override returns(uint, bool, uint8) {
         require(hash_ == _transferHash, AsterizmErrors.TRANSFER__WRONG_HASH__ERROR);
-        tvm.rawReserve(AsterizmEnvs.TRANSFER__MIN_CONTRACT_BALANCE, 0);
-        return { value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false } (hash_, true, AsterizmEnvs.METHOD__INITIALIZER_HASH_EXISTS);
+        return { value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false } (hash_, true, AsterizmEnvs.METHOD__INITIALIZER_HASH_EXISTS);
     }
 }
