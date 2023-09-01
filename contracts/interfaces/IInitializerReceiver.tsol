@@ -1,9 +1,10 @@
 pragma ton-solidity >= 0.70.0;
 
 import "./IAsterizmStructs.tsol";
+import "./IConfig.tsol";
 
 /// Initializer receive interface
-interface IInitializerReceiver is IAsterizmStructs {
+interface IInitializerReceiver is IAsterizmStructs, IConfig {
 
     /// Receive payload from translator
     /// @param _dto IzReceivePayloadRequestDto  Method DTO

@@ -33,7 +33,6 @@ interface IAsterizmStructs {
     /// @param txId uint  Transaction ID
     /// @param transferHash uint  Transfer hash
     /// @param dstFeeAmount uint128  Fee amount
-    /// @param payload TvmCell  Payload
     struct TrSendMessageRequestDto {
         uint srcAddress;
         uint64 dstChainId;
@@ -43,7 +42,6 @@ interface IAsterizmStructs {
         uint txId;
         uint transferHash;
         uint128 dstFeeAmount;
-        TvmCell payload;
     }
 
     /// Initializator receive payload request DTO
@@ -84,7 +82,7 @@ interface IAsterizmStructs {
     /// @param transferHash uint  Transfer hash
     /// @param txId uint  Transaction ID
     /// @param dstFeeAmount uint128  Fee amount
-    /// @param payload TvmCell  Payload
+    /// @param relay address  External relay address
     struct IzIninTransferRequestDto {
         uint64 dstChainId;
         uint dstAddress;
@@ -92,7 +90,25 @@ interface IAsterizmStructs {
         bool useForceOrder;
         uint txId;
         uint128 dstFeeAmount;
-        TvmCell payload;
+        address relay;
+    }
+
+    /// Initializer asterizm receive request DTO
+    /// @param srcChainId uint64  Source chain ID
+    /// @param srcAddress uint  Source address
+    /// @param dstChainId uint64  Destination chain ID
+    /// @param dstAddress uint  Destination address
+    /// @param nonce uint  Nonce
+    /// @param txId uint  Transaction ID
+    /// @param transferHash uint  Transfer hash
+    struct IzAsterizmReceiveRequestDto {
+        uint64 srcChainId;
+        uint srcAddress;
+        uint64 dstChainId;
+        uint dstAddress;
+        uint nonce;
+        uint txId;
+        uint transferHash;
     }
 
     /// Client asterizm receive request DTO
@@ -103,7 +119,7 @@ interface IAsterizmStructs {
     /// @param nonce uint  Nonce
     /// @param txId uint  Transaction ID
     /// @param transferHash uint  Transfer hash
-    /// @param payload TvmCell  Payload
+    /// @param payload TvmCell  Transfer payload
     struct ClAsterizmReceiveRequestDto {
         uint64 srcChainId;
         uint srcAddress;
@@ -121,13 +137,11 @@ interface IAsterizmStructs {
     /// @param txId uint  Transaction ID
     /// @param transferHash uint  Transfer hash
     /// @param dstFeeAmount uint128  Fee amount
-    /// @param payload TvmCell  Payload
     struct ClInitTransferRequestDto {
         uint64 dstChainId;
         uint dstAddress;
         uint txId;
         uint transferHash;
         uint128 dstFeeAmount;
-        TvmCell payload;
     }
 }

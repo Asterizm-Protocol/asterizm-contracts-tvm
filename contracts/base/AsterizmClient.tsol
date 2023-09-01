@@ -26,6 +26,10 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// @param _initializerAddress address  Initializer address
     event SetInitializerEvent(address _initializerAddress);
 
+    /// Set external relay event
+    /// @param _externalRelayAddress address  External relay address
+    event SetExternalRelayEvent(address _externalRelayAddress);
+
     /// Set local chain id event
     /// @param _localChainId uint64
     event SetLocalChainIdEvent(uint64 _localChainId);
@@ -44,8 +48,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// @param _nonce uint  Transaction nonce
     /// @param _txId uint  Transfer ID
     /// @param _transferHash uint  Transaction hash
-    /// @param _payload TvmCell  Payload
-    event PayloadReceivedEvent(uint64 _srcChainId, uint _srcAddress, uint _nonce, uint _txId, uint _transferHash, TvmCell _payload);
+    event PayloadReceivedEvent(uint64 _srcChainId, uint _srcAddress, uint _nonce, uint _txId, uint _transferHash);
 
     /// Add trusted address event
     /// @param _chainId uint64  Chain ID
@@ -113,6 +116,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     uint64 private localChainId;
     TvmCell private initializerTransferCode;
     TvmCell private clientTransferCode;
+    address private externalRelay;
 
     IInitializerSender static initializerLib_;
     bool static useForceOrder_;
@@ -301,6 +305,13 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         return chains[_chainId].chainType;
     }
 
+    /// Set external relay address (one-time initiation)
+    /// _externalRelay address  External relay address
+    function setExternalRelay(address _externalRelay) public onlyOwner {
+        require(externalRelay == address(0), AsterizmErrors.CLIENT__EXTERNAL_RELAY_SET_ALREADY__ERROR);
+        externalRelay = _externalRelay;
+        emit SetExternalRelayEvent(_externalRelay);
+    }
 
     /// Add trusted source address (private)
     /// @param _chainId uint64  Chain ID
@@ -373,7 +384,6 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         return _getChainType(_srcChainId) == _getChainType(_dstChainId) ? fullPayload.buildSimpleHash() : fullPayload.buildCrosschainHashWithVersion(hashVersion_);
     }
 
-    event TestEvent(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId, TvmCell _payload, uint _transferHashOld, uint _transferHashNew);
     /// Check is transfer hash valid
     /// @param _srcChainId uint64  Chain ID
     /// @param _srcAddress uint  Address
@@ -384,8 +394,6 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// @param _transferHash uint  Transfer hash
     /// @return bool
     function _validTransferHash(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId, TvmCell _payload, uint _transferHash) internal view returns(bool) {
-        emit TestEvent(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _payload, _transferHash, _buildTransferHash(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _payload));
-        emit TestEvent(_srcChainId, _srcAddress, _dstChainId, _dstAddress, 9999999999, _payload, _transferHash, _buildTransferHash(_srcChainId, _srcAddress, _dstChainId, _dstAddress, 9999999999, _payload));
         return _buildTransferHash(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _payload) == _transferHash;
     }
 
@@ -436,11 +444,10 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// @param _txId uint  Transaction ID
     /// @param _transferHash uint  Transfer hash
     /// @param _transferFeeValue uint128  Transfer fee value (payment for destination chain contracts + system fee)
-    /// @param _payload TvmCell  Payload
-    function initAsterizmTransfer(uint64 _dstChainId, uint _txId, uint _transferHash, uint128 _transferFeeValue, TvmCell _payload) external onlyOwner {
+    function initAsterizmTransfer(uint64 _dstChainId, uint _txId, uint _transferHash, uint128 _transferFeeValue) external onlyOwner {
          // msg.value include payment for contracts logic in source chain + payment for destination chain contracts + system fee
         require(_transferFeeValue < msg.value, AsterizmErrors.CLIENT__TRANSFER_FEE_VALUE_IS_TOO_SMALL_ERROR);
-        ClInitTransferRequestDto dto = _buildClInitTransferRequestDto(_dstChainId, _getTrustedAddressByChainId(_dstChainId), _txId, _transferHash, _transferFeeValue, _payload);
+        ClInitTransferRequestDto dto = _buildClInitTransferRequestDto(_dstChainId, _getTrustedAddressByChainId(_dstChainId), _txId, _transferHash, _transferFeeValue);
         _initAsterizmTransferPrivate(dto);
     }
 
@@ -505,7 +512,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
             uint128 msgValue = outboundTransfers[_transferHash].msgValue;
             delete outboundTransfers[dto.transferHash];
             initializerLib_.initTransfer{value: msgValue, flag: AsterizmTransferFlags.SENDER_PAYS_FEES, bounce: false} (
-                _buildIzIninTransferRequestDto(dto.dstChainId, dto.dstAddress, dto.txId, dto.transferHash, useForceOrder_, dto.dstFeeAmount, dto.payload)
+                _buildIzIninTransferRequestDto(dto.dstChainId, dto.dstAddress, dto.txId, dto.transferHash, useForceOrder_, dto.dstFeeAmount, externalRelay)
             );
 
             hashContract.executeTransfer{ value: AsterizmEnvs.TRANSFER__SET_REQUEST_VALUE }(dto.transferHash);
@@ -524,30 +531,30 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         tvm.accept();
 
         emit ResendAsterizmTransferEvent(_transferHash, _feeAmount);
-        initializerLib_.resendTransfer{ value: fullAmount, flag: AsterizmTransferFlags.SENDER_PAYS_FEES, bounce: false }(_transferHash, _feeAmount);
+        initializerLib_.resendTransfer{ value: fullAmount, flag: AsterizmTransferFlags.SENDER_PAYS_FEES, bounce: false }(_transferHash, _feeAmount, externalRelay);
     }
 
 
     /** Receiving logic */
 
     /// Receive payload from initializer
-    /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function asterizmIzReceive(ClAsterizmReceiveRequestDto _dto) external internalMsg override onlyInitializer {
+    /// @param _dto IzAsterizmReceiveRequestDto  Method DTO
+    function asterizmIzReceive(IzAsterizmReceiveRequestDto _dto) external internalMsg override onlyInitializer {
         _asterizmReceiveEncoded(_dto);
     }
 
     /// Receive encoded payload
     /// This methos needs for transfer encoded data
     /// You must use onlyTrustedAddress modifier!
-    /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function _asterizmReceiveEncoded(ClAsterizmReceiveRequestDto _dto) private view
+    /// @param _dto IzAsterizmReceiveRequestDto  Method DTO
+    function _asterizmReceiveEncoded(IzAsterizmReceiveRequestDto _dto) private view
         onlyOwnerOrInitializer
         onlyTrustedAddress(_dto.srcChainId, _dto.srcAddress)
     {
         tvm.accept();
 
         _deployClientTransferContract(_dto.transferHash, true);
-        emit PayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.txId, _dto.transferHash, _dto.payload);
+        emit PayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.txId, _dto.transferHash);
     }
 
     /// Receive payload from client server

@@ -1,0 +1,15 @@
+pragma ton-solidity >= 0.70.0;
+
+/// Client transfer interface
+interface IAsterizmConfigEnv {
+
+    /// Base transfer direction DTO
+    /// @param externalRelayExists bool  Is external relay exists flag
+    /// @param externalRelayFee uint128  External relay fee
+    /// @param systemFee uint128  System fee
+    struct ConfigDataResponseDto {
+        bool externalRelayExists;
+        uint128 externalRelayFee;
+        uint128 systemFee;
+    }
+}

@@ -1,0 +1,11 @@
+pragma ton-solidity >= 0.70.0;
+
+import "./IAsterizmConfigEnv.tsol";
+
+/// Client transfer interface
+interface IConfig is IAsterizmConfigEnv {
+    
+    /// Update trusted relay fee
+    /// @param _fee uint128  Relay fee
+    function updateTrustedRelayFee(uint128 _fee) external;
+}

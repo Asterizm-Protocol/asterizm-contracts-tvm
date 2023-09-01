@@ -44,7 +44,7 @@ describe("Gas station tests", async function () {
         });
     });
     describe("Contract data", async function () {
-        it("Load contract factory", async function () {
+        it("Should load contract factory", async function () {
             const translatorData = await locklift.factory.getContractArtifacts("AsterizmTranslator");
             expect(translatorData.code).not.to.equal(undefined, "Code should be available");
             expect(translatorData.abi).not.to.equal(undefined, "ABI should be available");
@@ -73,7 +73,7 @@ describe("Gas station tests", async function () {
     });
 
     describe("Deploy", async function () {
-        it("Deploy translator contracts", async function () {
+        it("Should deploy translator contracts", async function () {
             let { contract: translatorObj1 } = await locklift.factory.deployContract({
                 contract: "AsterizmTranslator",
                 publicKey: signer.publicKey,
@@ -119,7 +119,7 @@ describe("Gas station tests", async function () {
             });
         });
 
-        it("Deploy initializer contracts", async function () {
+        it("Should deploy initializer contracts", async function () {
             let { contract: initializerObj1 } = await locklift.factory.deployContract({
                 contract: "AsterizmInitializer",
                 publicKey: signer.publicKey,
@@ -170,7 +170,7 @@ describe("Gas station tests", async function () {
             expect(trFields2.fields.initializerLib.toString()).to.be.equal(initializer2.address.toString());
         });
 
-        it("Deploy token contracts", async function () {
+        it("Should deploy token contracts", async function () {
             let { contract: tokenObj1 } = await locklift.factory.deployContract({
                 contract: "AsterizmTestTokenRoot",
                 publicKey: signer.publicKey,
@@ -217,7 +217,7 @@ describe("Gas station tests", async function () {
             expect(tokenWalletBalance).to.be.equals(totalSupply);
         });
 
-        it("Deploy gas contracts", async function () {
+        it("Should deploy gas contracts", async function () {
             let { contract: gas1Obj1 } = await locklift.factory.deployContract({
                 contract: "GasStation",
                 publicKey: signer.publicKey,
@@ -291,7 +291,7 @@ describe("Gas station tests", async function () {
     });
 
     describe("Logic", async function () {
-        it("Deposit and withdraw coins and tokens", async function () {
+        it("Should deposit and withdraw coins and tokens", async function () {
             const gasTokenWalletAddress = (await token.methods.walletOf({answerId: 0, walletOwner: gas1.address}).call()).value0;
             const gasTokenWallet = locklift.factory.getDeployedContract('AsterizmTestTokenWallet', gasTokenWalletAddress);
             const ownerTokenWalletAddress = (await token.methods.walletOf({answerId: 0, walletOwner: ownerWallet.address}).call()).value0;
@@ -585,8 +585,7 @@ describe("Gas station tests", async function () {
                     _dstChainId: parseInt(firstGasEvent1._dstChainId),
                     _txId: parseInt(firstGasEvent1._txId),
                     _transferHash: firstGasEvent1._transferHash,
-                    _transferFeeValue: 0,
-                    _payload: firstGasEvent1._payload
+                    _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
                     amount: locklift.utils.toNano(1)
@@ -607,7 +606,6 @@ describe("Gas station tests", async function () {
                     { name: 'useForceOrder', type: 'bool' },
                     { name: 'txId', type: 'uint256' },
                     { name: 'transferHash', type: 'uint256' },
-                    { name: 'payload', type: 'cell' },
                 ],
                 boc: eventTr1[0]._payload,
                 allowPartial: true
@@ -621,7 +619,6 @@ describe("Gas station tests", async function () {
             expect(unpackPayload.data.useForceOrder).to.be.equals(false);
             expect(unpackPayload.data.txId).to.be.equals(firstGasEvent1._txId);
             expect(unpackPayload.data.transferHash).to.be.equals(firstGasEvent1._transferHash);
-            expect(unpackPayload.data.payload).to.be.equals(firstGasEvent1._payload);
             trace = await locklift.tracing.trace(
                 translator2.methods.transferMessage({
                     _gasLimit: parseInt(eventTr1[0]._feeValue),
@@ -647,7 +644,6 @@ describe("Gas station tests", async function () {
             expect(firstGasEvent2._nonce).to.be.equals(unpackPayload.data.nonce);
             expect(firstGasEvent2._txId).to.be.equals(unpackPayload.data.txId);
             expect(firstGasEvent2._transferHash).to.be.equals(unpackPayload.data.transferHash);
-            expect(firstGasEvent2._payload).to.be.equals(unpackPayload.data.payload);
 
             let gasUnpackPayload = await locklift.provider.unpackFromCell({
                 structure: [
@@ -657,7 +653,7 @@ describe("Gas station tests", async function () {
                     { name: 'tokenAddress', type: 'uint256' },
                     { name: 'decimals', type: 'uint8' },
                 ],
-                boc: firstGasEvent2._payload,
+                boc: firstGasEvent1._payload,
                 allowPartial: true
             });
             let resultPayload = (await locklift.provider.packIntoCell({
@@ -760,8 +756,7 @@ describe("Gas station tests", async function () {
                     _dstChainId: parseInt(firstGasEvent1._dstChainId),
                     _txId: parseInt(firstGasEvent1._txId),
                     _transferHash: wrongHash,
-                    _transferFeeValue: 0,
-                    _payload: firstGasEvent1._payload
+                    _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
                     amount: locklift.utils.toNano(1)
@@ -825,8 +820,7 @@ describe("Gas station tests", async function () {
                     _dstChainId: parseInt(firstGasEvent1._dstChainId),
                     _txId: parseInt(firstGasEvent1._txId),
                     _transferHash: firstGasEvent1._transferHash,
-                    _transferFeeValue: 0,
-                    _payload: firstGasEvent1._payload
+                    _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
                     amount: locklift.utils.toNano(1)
@@ -847,7 +841,6 @@ describe("Gas station tests", async function () {
                     { name: 'useForceOrder', type: 'bool' },
                     { name: 'txId', type: 'uint256' },
                     { name: 'transferHash', type: 'uint256' },
-                    { name: 'payload', type: 'cell' },
                 ],
                 boc: eventTr1[0]._payload,
                 allowPartial: true
@@ -861,15 +854,13 @@ describe("Gas station tests", async function () {
             expect(unpackPayload.data.useForceOrder).to.be.equals(false);
             expect(unpackPayload.data.txId).to.be.equals(firstGasEvent1._txId);
             expect(unpackPayload.data.transferHash).to.be.equals(firstGasEvent1._transferHash);
-            expect(unpackPayload.data.payload).to.be.equals(firstGasEvent1._payload);
             
             trace = await locklift.tracing.trace(
                 gas1.methods.initAsterizmTransfer({
                     _dstChainId: parseInt(firstGasEvent1._dstChainId),
                     _txId: parseInt(firstGasEvent1._txId),
                     _transferHash: firstGasEvent1._transferHash,
-                    _transferFeeValue: 0,
-                    _payload: firstGasEvent1._payload
+                    _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
                     amount: locklift.utils.toNano(1)

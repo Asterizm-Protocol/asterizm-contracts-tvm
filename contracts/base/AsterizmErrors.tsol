@@ -30,6 +30,8 @@ library AsterizmErrors {
     uint16 constant INITIALIZER__NONCE_INCREACE_WITH_VALIDATION__ERROR = 3008;
     uint16 constant INITIALIZER__TRANSFER_FEE_VALUE_IS_TOO_SMALL_ERROR = 3009;
     uint16 constant INITIALIZER__BALANCE_NOT_ENOUGH__ERROR = 3010;
+    uint16 constant INITIALIZER__ONLY_TRANSLATOR_OR_EXTERNAL_RELAY__ERROR = 3011;
+    uint16 constant INITIALIZER__FEE_NOT_ENOUGH__ERROR = 3012;
 
     // For Asterizm client contract
     uint16 constant CLIENT__ONLY_INITIALIZER__ERROR = 4001;
@@ -50,6 +52,7 @@ library AsterizmErrors {
     uint16 constant CLIENT__OUTBOUND_TRANSFER_NOT_EXISTS_CALLBACK__ERROR = 4016;
     uint16 constant CLIENT__WRONG_TRANSFER_HASH_ADDRESS__ERROR = 4017;
     uint16 constant CLIENT__TRANSFER_FEE_VALUE_IS_TOO_SMALL_ERROR = 4018;
+    uint16 constant CLIENT__EXTERNAL_RELAY_SET_ALREADY__ERROR = 4019;
 
     // For Transfer contract
     uint16 constant TRANSFER__NON_ZERO_PUBLIC_KEY__ERROR = 5001;
@@ -60,4 +63,8 @@ library AsterizmErrors {
     uint16 constant NONCE__NON_ZERO_PUBLIC_KEY__ERROR = 6001;
     uint16 constant NONCE__WRONG_WALLET_OWNER__ERROR = 6002;
     uint16 constant NONCE__WRONG_NONCE__ERROR = 6003;
+
+    // For Config logic
+    uint16 constant CONFIG__ONLY_TRUSTED_RELAY__ERROR = 7001;
+    uint16 constant CONFIG__RELAY_NOT_EXISTS__ERROR = 7002;
 }

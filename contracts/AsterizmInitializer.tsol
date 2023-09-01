@@ -17,8 +17,9 @@ import "./libs/BytesLib.tsol";
 import "./libs/UintLib.tsol";
 import "./base/AsterizmInitializerTransfer.tsol";
 import "./base/AsterizmNonce.tsol";
+import "./base/AsterizmConfig.tsol";
 
-contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitializerReceiver, AsterizmStructs {
+contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitializerReceiver, AsterizmStructs, AsterizmConfig {
 
     using AddressLib for address;
     using BytesLib for bytes;
@@ -117,6 +118,12 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
     /// Only translator modifier
     modifier onlyTranslator() {
         require(msg.sender == address(translatorLib_), AsterizmErrors.INITIALIZER__ONLY_TRANSLATOR__ERROR);
+        _;
+    }
+
+    /// Only translator modifier
+    modifier onlyTranslatorOrExternalRelay() {
+        require(msg.sender == address(translatorLib_) || getRelayData(msg.sender).externalRelayExists, AsterizmErrors.INITIALIZER__ONLY_TRANSLATOR_OR_EXTERNAL_RELAY__ERROR);
         _;
     }
 
@@ -328,8 +335,19 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
         tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
         TrSendMessageRequestDto dto = _buildTrSendMessageRequestDto(
             _sender.toUint(), _dto.dstChainId, _dto.dstAddress, _nonce,
-            _dto.useForceOrder, _dto.txId, _dto.transferHash, _dto.dstFeeAmount, _dto.payload
+            _dto.useForceOrder, _dto.txId, _dto.transferHash, _dto.dstFeeAmount
         );
+
+        if (_dto.relay != address(0) && _dto.relay != address(translatorLib_)) { // External relays logic
+            ConfigDataResponseDto configDto = getRelayData(_dto.relay);
+            if (configDto.externalRelayExists) {
+                uint128 logFee = 0.1 ton;
+                require(msg.value > configDto.systemFee + configDto.externalRelayFee + logFee, AsterizmErrors.INITIALIZER__FEE_NOT_ENOUGH__ERROR);
+                translatorLib_.logExternalMessage{ value: configDto.systemFee + logFee, flag: AsterizmTransferFlags.SENDER_PAYS_FEES, bounce: false }(_dto.relay, dto);
+                ITranslator(_dto.relay).sendMessage{ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false }(dto);
+                return;
+            }
+        }
 
         translatorLib_.sendMessage{
             value: 0,
@@ -342,10 +360,19 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
     /// Resend failed by fee amount transfer
     /// @param _transferHash uint  Transfer hash
     /// @param _feeAmount uint128  Transfer fee amount
-    function resendTransfer(uint _transferHash, uint128 _feeAmount) external {
+    /// @param _relay address  External relay address
+    function resendTransfer(uint _transferHash, uint128 _feeAmount, address _relay) external {
         require(_feeAmount < msg.value, AsterizmErrors.INITIALIZER__TRANSFER_FEE_VALUE_IS_TOO_SMALL_ERROR);
         require(address(this).balance >= _feeAmount, AsterizmErrors.INITIALIZER__BALANCE_NOT_ENOUGH__ERROR);
         address sender = msg.sender;
+
+        if (_relay != address(0) && _relay != address(translatorLib_)) { // External relays logic
+            ConfigDataResponseDto configDto = getRelayData(_relay);
+            if (configDto.externalRelayExists) {
+                ITranslator(_relay).resendMessage{ value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false }(_transferHash, sender.toUint(), _feeAmount);
+                return;
+            }
+        }
 
         translatorLib_.resendMessage{ value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false }(_transferHash, sender.toUint(), _feeAmount);
     }
@@ -355,7 +382,7 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
 
     /// Receive payload from translator
     /// @param _dto IzReceivePayloadRequestDto  Method DTO
-    function receivePayload(IzReceivePayloadRequestDto _dto) external internalMsg override onlyTranslator {
+    function receivePayload(IzReceivePayloadRequestDto _dto) external internalMsg override onlyTranslatorOrExternalRelay {
         require(_dto.dstAddress != blockAddresses[localChainId], AsterizmErrors.INITIALIZER__SENDER_ADDRESS_IS_BLOCKED__ERROR);
 
         _receivePayloadPrivate(_dto);
@@ -365,9 +392,9 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
     /// @param _dto IzReceivePayloadRequestDto  Method DTO
     function _receivePayloadPrivate(IzReceivePayloadRequestDto _dto) private view {
         tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
-        ClAsterizmReceiveRequestDto dto = _buildClAsterizmReceiveRequestDto(
+        IzAsterizmReceiveRequestDto dto = _buildIzAsterizmReceiveRequestDto(
             _dto.srcChainId, _dto.srcAddress, _dto.dstChainId,
-            _dto.dstAddress, _dto.nonce, _dto.txId, _dto.transferHash, _dto.payload
+            _dto.dstAddress, _dto.nonce, _dto.txId, _dto.transferHash
         );
 
         _deployTransferHashContract(_dto.transferHash);

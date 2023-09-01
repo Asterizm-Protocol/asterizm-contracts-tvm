@@ -9,6 +9,11 @@ interface ITranslator is IAsterizmStructs {
     /// @param _dto TrSendMessageRequestDto  Method DTO
     function sendMessage(TrSendMessageRequestDto _dto) external internalMsg;
 
+    /// Log external transfer payload
+    /// @param _externalRelayAddress address  External relay address
+    /// @param _dto TrSendMessageRequestDto  Method DTO
+    function logExternalMessage(address _externalRelayAddress, TrSendMessageRequestDto _dto) external;
+
     /// Resend failed by fee amount transfer
     /// @param _transferHash uint  Transfer hash
     /// @param _senderAddress uint  Sender address

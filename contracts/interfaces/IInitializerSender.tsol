@@ -28,5 +28,6 @@ interface IInitializerSender is IAsterizmStructs {
     /// Resend failed by fee amount transfer
     /// @param _transferHash uint  Transfer hash
     /// @param _feeAmount uint128  Transfer fee amount
-    function resendTransfer(uint _transferHash, uint128 _feeAmount) external;
+    /// @param _relay address  Relay address
+    function resendTransfer(uint _transferHash, uint128 _feeAmount, address _relay) external;
 }

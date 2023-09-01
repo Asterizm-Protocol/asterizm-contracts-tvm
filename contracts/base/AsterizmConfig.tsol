@@ -1,0 +1,83 @@
+pragma ton-solidity >= 0.70.0;
+pragma AbiHeader expire;
+pragma AbiHeader pubkey;
+
+import "./AsterizmOwnable.tsol";
+import "../interfaces/IConfig.tsol";
+import "./AsterizmErrors.tsol";
+
+abstract contract AsterizmConfig is AsterizmOwnable, IConfig {
+
+    /// Set initializer event
+    /// @param _address address  Initializer address
+    event SetInitializerEvent(address _address);
+
+    /// Trusted relay event
+    /// @param _initializer address  Update initializer address
+    /// @param _relayAddress address  Relay address
+    /// @param _fee uint  Relay fee
+    /// @param _systemFee uint128  System fee
+    event TrustedRelayEvent(address _initializer, address _relayAddress, uint128 _fee, uint128 _systemFee);
+
+    /// Remove trusted relay event
+    /// @param _relayAddress address  Relay address
+    event RemoveTrustedRelayEvent(address _relayAddress);
+
+    /// External relay structure
+    /// @param exists bool  Is relay exists flag
+    /// @param fee uint128  Relay fee
+    /// @param systemFee uint128  System fee
+    struct Relay {
+        bool exists;
+        uint128 fee;
+        uint128 systemFee;
+    }
+
+    mapping(address => Relay) private trustedRelays;
+
+    /// Only trusted relay modifier
+    modifier onlyTrustedRelay() {
+        require(trustedRelays[msg.sender].exists, AsterizmErrors.CONFIG__ONLY_TRUSTED_RELAY__ERROR);
+        _;
+    }
+
+    /// Managing trusted relay
+    /// @param _relayAddress address  Relay address
+    /// @param _fee uint128  Relay fee
+    /// @param _systemFee uint128  System fee
+    function manageTrustedRelay(address _relayAddress, uint128 _fee, uint128 _systemFee) external onlyOwner {
+        trustedRelays[_relayAddress] = Relay(true, _fee, _systemFee);
+
+        emit TrustedRelayEvent(msg.sender, _relayAddress, _fee, _systemFee);
+    }
+
+    /// Update trusted relay fee
+    /// @param _fee uint128  Relay fee
+    function updateTrustedRelayFee(uint128 _fee) external onlyTrustedRelay {
+        trustedRelays[msg.sender].fee = _fee;
+
+        emit TrustedRelayEvent(msg.sender, msg.sender, _fee, trustedRelays[msg.sender].systemFee);
+    }
+
+    /// Remove trusted relay
+    /// @param _relayAddress address  Relay address
+    function removeTrustedRelay(address _relayAddress) external onlyOwner {
+        require(trustedRelays[_relayAddress].exists, AsterizmErrors.CONFIG__RELAY_NOT_EXISTS__ERROR);
+        delete trustedRelays[_relayAddress];
+
+        emit RemoveTrustedRelayEvent(_relayAddress);
+    }
+
+    /// Return relay data
+    /// @param _relayAddress address  External relay address
+    /// @return ConfigDataResponseDto
+    function getRelayData(address _relayAddress) public view returns(ConfigDataResponseDto) {
+        Relay findedRelay = trustedRelays[_relayAddress];
+        ConfigDataResponseDto dto;
+        dto.externalRelayExists = findedRelay.exists;
+        dto.externalRelayFee = findedRelay.fee;
+        dto.systemFee = findedRelay.systemFee;
+
+        return dto;
+    }
+}

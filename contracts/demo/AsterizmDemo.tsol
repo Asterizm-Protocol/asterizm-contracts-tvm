@@ -5,7 +5,7 @@ import "../base/AsterizmClient.tsol";
 
 contract AsterizmDemo is AsterizmClient {
 
-    event SetChainMessageEvent(string message);
+    event SetChainMessageEvent(string _message);
     event WithdrawCoinsEvent(address _target, uint128 _amount);
 
     string public chainMessage;

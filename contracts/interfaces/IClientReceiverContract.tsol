@@ -5,8 +5,8 @@ import "./IAsterizmStructs.tsol";
 interface IClientReceiverContract is IAsterizmStructs {
 
     /// Receive payload from initializer
-    /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function asterizmIzReceive(ClAsterizmReceiveRequestDto _dto) external internalMsg;
+    /// @param _dto IzAsterizmReceiveRequestDto  Method DTO
+    function asterizmIzReceive(IzAsterizmReceiveRequestDto _dto) external internalMsg;
 
     /// Receive payload from client server
     /// @param _srcChainId uint64  Source chain ID
