@@ -26,11 +26,9 @@ async function main() {
     mSigType: "multisig2",
   });
 
-
-
-
   let chainIds = [];
   let chainTypes = [];
+  let trustedAddresses = [];
   let currentChain;
   for (let i = 0; i < chains.length; i++) {
       if (chains[i].isCurrent) {
@@ -39,7 +37,12 @@ async function main() {
 
       chainIds.push(chains[i].id);
       chainTypes.push(chains[i].chainType);
+      if (chains[i].trustAddresses.gas.uint != '0') {
+        trustedAddresses.push(chains[i].trustAddresses.gas.uint);
+      }
   }
+
+  currentChain = currentChain ? currentChain : chains[0];
 
   let translatorAddress1;
   // translatorAddress1 = new Address("0:520237b291e5af75605228ede9b9fb56ddcd30574251d27490ca0a0418bf5fab");
