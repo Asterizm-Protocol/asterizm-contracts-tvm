@@ -313,6 +313,12 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         emit SetExternalRelayEvent(_externalRelay);
     }
 
+    /// Return external relay
+    /// @return address  External relay address
+    function getExternalRelay() external view returns(address) {
+        return externalRelay;
+    }
+
     /// Add trusted source address (private)
     /// @param _chainId uint64  Chain ID
     /// @param _trustedAddress uint  Trusted address
