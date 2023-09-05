@@ -40,11 +40,7 @@ contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
     uint public minUsdAmountPerChain;
     uint public maxUsdAmountPerChain;
 
-
-
     uint static nonce_; //TODO: drop this after debeloplent
-
-
 
     constructor() AsterizmClient() {}
 

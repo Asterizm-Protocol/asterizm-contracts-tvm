@@ -72,7 +72,7 @@ async function main() {
         })
     );
 
-    console.log("Added trusted addresses successfully\n");
+    console.log("\nAdded trusted addresses successfully\n");
     console.log("Target contract address: %s", targetContract.address);
     console.log("Transfer hash: %s\n", trace.inMessage.hash);
 }

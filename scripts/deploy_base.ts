@@ -71,7 +71,6 @@ async function main() {
             value: locklift.utils.toNano(1.5),
         });
         translatorAddress = translatorObj.address;
-        console.log(`Translator deployed at: ${translatorAddress.toString()}`);
 
         trace = await locklift.tracing.trace(
             translatorObj.methods.addChains({
@@ -89,7 +88,6 @@ async function main() {
 
     const AsterizmInitializerTransfer = locklift.factory.getContractArtifacts("AsterizmInitializerTransfer");
     const AsterizmClientTransfer = locklift.factory.getContractArtifacts("AsterizmClientTransfer");
-    const AsterizmNonce = locklift.factory.getContractArtifacts("AsterizmNonce");
 
     let initializerAddress;
     // initializerAddress = new Address("0:7dc4f2de520a9317aa4e24dcc08e18955d92765de70665dd0e1ca07935d2f5af");
@@ -102,13 +100,11 @@ async function main() {
                 translatorLib_: translator.address,
                 initializerTransferCode_: AsterizmInitializerTransfer.code,
                 clientTransferCode_: AsterizmClientTransfer.code,
-                nonceCode_: AsterizmNonce.code,
             },
             constructorParams: {},
             value: locklift.utils.toNano(1.5),
         });
         initializerAddress = initializer.address;
-        console.log(`Initializer deployed at: ${initializerAddress.toString()}`);
 
         trace = await locklift.tracing.trace(
             translator.methods.setInitializer({
@@ -119,6 +115,13 @@ async function main() {
             })
         );
     }
+
+    const initializer = locklift.factory.getDeployedContract("AsterizmInitializer", initializerAddress);
+
+    console.log("\nDeployment was done\n");
+    console.log("Owner address: %s", owner.toString());
+    console.log("Translator address: %s", translator.address.toString());
+    console.log("Initializer address: %s\n", initializer.address.toString());
 }
 
 main()

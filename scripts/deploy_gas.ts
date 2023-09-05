@@ -63,7 +63,6 @@ async function main() {
             initParams: {
                 owner_: owner,
                 initializerLib_: initializer.address,
-                useForceOrder_: false,
                 disableHashValidation_: true,
                 nonce_: locklift.utils.getRandomNonce().toFixed(),
                 hashVersion_: HashVersions.CrosschainV1,

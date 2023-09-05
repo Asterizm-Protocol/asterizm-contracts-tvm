@@ -26,9 +26,6 @@ interface IAsterizmStructs {
     /// @param srcAddress uint  Source address
     /// @param dstChainId uint64  Destination chain ID
     /// @param dstAddress uint  Destination address
-    /// @param nonce uint  Nonce
-    /// @param useEncryption bool  Use encryption flag
-    /// @param forceOrder bool  Force order flag
     /// @param shouldCheckFee bool  Should check fee flag
     /// @param txId uint  Transaction ID
     /// @param transferHash uint  Transfer hash
@@ -37,8 +34,6 @@ interface IAsterizmStructs {
         uint srcAddress;
         uint64 dstChainId;
         uint dstAddress;
-        uint nonce;
-        bool forceOrder;
         uint txId;
         uint transferHash;
         uint128 dstFeeAmount;
@@ -49,9 +44,7 @@ interface IAsterizmStructs {
     /// @param srcAddress uint  Source address
     /// @param dstChainId uint64  Destination chain ID
     /// @param dstAddress uint  Destination address
-    /// @param nonce uint  Nonce
     /// @param gasLimit uint  Gas limit
-    /// @param forceOrder bool  Force order flag
     /// @param txId uint  Transaction ID
     /// @param transferHash uint  Transfer hash
     /// @param payload TvmCell  Payload
@@ -60,9 +53,7 @@ interface IAsterizmStructs {
         uint srcAddress;
         uint64 dstChainId;
         uint dstAddress;
-        uint nonce;
         uint gasLimit;
-        bool forceOrder;
         uint txId;
         uint transferHash;
         TvmCell payload;
@@ -87,7 +78,6 @@ interface IAsterizmStructs {
         uint64 dstChainId;
         uint dstAddress;
         uint transferHash;
-        bool useForceOrder;
         uint txId;
         uint128 dstFeeAmount;
         address relay;
@@ -106,7 +96,6 @@ interface IAsterizmStructs {
         uint srcAddress;
         uint64 dstChainId;
         uint dstAddress;
-        uint nonce;
         uint txId;
         uint transferHash;
     }
@@ -125,7 +114,6 @@ interface IAsterizmStructs {
         uint srcAddress;
         uint64 dstChainId;
         uint dstAddress;
-        uint nonce;
         uint txId;
         uint transferHash;
         TvmCell payload;

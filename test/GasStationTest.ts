@@ -19,7 +19,6 @@ let trace;
 
 const AsterizmInitializerTransfer = locklift.factory.getContractArtifacts("AsterizmInitializerTransfer");
 const AsterizmClientTransfer = locklift.factory.getContractArtifacts("AsterizmClientTransfer");
-const AsterizmNonce = locklift.factory.getContractArtifacts("AsterizmNonce");
 const TokenWallet = locklift.factory.getContractArtifacts("AsterizmTestTokenWallet");
 
 const chainIds = [1, 2];
@@ -128,7 +127,6 @@ describe("Gas station tests", async function () {
                     translatorLib_: translator1.address,
                     initializerTransferCode_: AsterizmInitializerTransfer.code,
                     clientTransferCode_: AsterizmClientTransfer.code,
-                    nonceCode_: AsterizmNonce.code,
                 },
                 constructorParams: {},
                 value: locklift.utils.toNano(1.5),
@@ -144,7 +142,6 @@ describe("Gas station tests", async function () {
                     translatorLib_: translator2.address,
                     initializerTransferCode_: AsterizmInitializerTransfer.code,
                     clientTransferCode_: AsterizmClientTransfer.code,
-                    nonceCode_: AsterizmNonce.code,
                 },
                 constructorParams: {},
                 value: locklift.utils.toNano(1.5),
@@ -224,7 +221,6 @@ describe("Gas station tests", async function () {
                 initParams: {
                     owner_: owner,
                     initializerLib_: initializer1.address,
-                    useForceOrder_: false,
                     disableHashValidation_: true,
                     hashVersion_: hashVersions.CrosschainV1,
                     nonce_: locklift.utils.getRandomNonce().toFixed(),
@@ -244,7 +240,6 @@ describe("Gas station tests", async function () {
                 initParams: {
                     owner_: owner,
                     initializerLib_: initializer2.address,
-                    useForceOrder_: false,
                     disableHashValidation_: true,
                     hashVersion_: hashVersions.CrosschainV1,
                     nonce_: locklift.utils.getRandomNonce().toFixed(),
@@ -598,25 +593,21 @@ describe("Gas station tests", async function () {
             expect(eventTr1?.length).to.be.equals(1);
             let unpackPayload = await locklift.provider.unpackFromCell({
                 structure: [
-                    { name: 'nonce', type: 'uint256' },
                     { name: 'srcChainId', type: 'uint64' },
                     { name: 'srcAddress', type: 'uint256' },
                     { name: 'dstChainId', type: 'uint64' },
                     { name: 'dstAddress', type: 'uint256' },
-                    { name: 'useForceOrder', type: 'bool' },
                     { name: 'txId', type: 'uint256' },
                     { name: 'transferHash', type: 'uint256' },
                 ],
                 boc: eventTr1[0]._payload,
                 allowPartial: true
             });
-            expect(unpackPayload.data.nonce).to.be.equals('0');
             expect(unpackPayload.data.srcChainId).to.be.equals(chainIds[0].toString());
             expect(unpackPayload.data.srcAddress).to.be.equals((new bigInt(gas1.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(chainIds[1].toString());
             expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(gas2.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(firstGasEvent1._dstChainId);
-            expect(unpackPayload.data.useForceOrder).to.be.equals(false);
             expect(unpackPayload.data.txId).to.be.equals(firstGasEvent1._txId);
             expect(unpackPayload.data.transferHash).to.be.equals(firstGasEvent1._transferHash);
             trace = await locklift.tracing.trace(
@@ -641,7 +632,6 @@ describe("Gas station tests", async function () {
             let firstGasEvent2 = eventGas2[0];
             expect(firstGasEvent2._srcChainId).to.be.equals(chainIds[0].toString());
             expect(firstGasEvent2._srcAddress).to.be.equals((new bigInt(gas1.address.toString().substring(2), 16)).value.toString());
-            expect(firstGasEvent2._nonce).to.be.equals(unpackPayload.data.nonce);
             expect(firstGasEvent2._txId).to.be.equals(unpackPayload.data.txId);
             expect(firstGasEvent2._transferHash).to.be.equals(unpackPayload.data.transferHash);
 
@@ -678,7 +668,6 @@ describe("Gas station tests", async function () {
                 gas2.methods.asterizmClReceive({
                     _srcChainId: parseInt(firstGasEvent2._srcChainId),
                     _srcAddress: firstGasEvent2._srcAddress,
-                    _nonce: firstGasEvent2._nonce,
                     _txId: firstGasEvent2._txId,
                     _transferHash: firstGasEvent2._transferHash,
                     _payload: resultPayload
@@ -833,25 +822,21 @@ describe("Gas station tests", async function () {
             expect(eventTr1?.length).to.be.equals(1);
             let unpackPayload = await locklift.provider.unpackFromCell({
                 structure: [
-                    { name: 'nonce', type: 'uint256' },
                     { name: 'srcChainId', type: 'uint64' },
                     { name: 'srcAddress', type: 'uint256' },
                     { name: 'dstChainId', type: 'uint64' },
                     { name: 'dstAddress', type: 'uint256' },
-                    { name: 'useForceOrder', type: 'bool' },
                     { name: 'txId', type: 'uint256' },
                     { name: 'transferHash', type: 'uint256' },
                 ],
                 boc: eventTr1[0]._payload,
                 allowPartial: true
             });
-            expect(unpackPayload.data.nonce).to.be.equals('0');
             expect(unpackPayload.data.srcChainId).to.be.equals(chainIds[0].toString());
             expect(unpackPayload.data.srcAddress).to.be.equals((new bigInt(gas1.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(chainIds[1].toString());
             expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(gas2.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(firstGasEvent1._dstChainId);
-            expect(unpackPayload.data.useForceOrder).to.be.equals(false);
             expect(unpackPayload.data.txId).to.be.equals(firstGasEvent1._txId);
             expect(unpackPayload.data.transferHash).to.be.equals(firstGasEvent1._transferHash);
             

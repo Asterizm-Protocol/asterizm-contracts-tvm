@@ -16,7 +16,6 @@ import "./libs/AddressLib.tsol";
 import "./libs/BytesLib.tsol";
 import "./libs/UintLib.tsol";
 import "./base/AsterizmInitializerTransfer.tsol";
-import "./base/AsterizmNonce.tsol";
 import "./base/AsterizmConfig.tsol";
 
 contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitializerReceiver, AsterizmStructs, AsterizmConfig {
@@ -96,7 +95,6 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
     ITranslator static translatorLib_;
     TvmCell static initializerTransferCode_;
     TvmCell static clientTransferCode_;
-    TvmCell static nonceCode_;
 
     constructor () {
         tvm.accept();
@@ -182,66 +180,6 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
         return address(tvm.hash(_getTransferHashContractStatiInit(_transferHash)));
     }
 
-    /// Return transfer hash contract status init
-    /// @param _chainId uint64  Chain id
-    /// @param _srcAddress uint  Source address
-    /// @param _dstAddress uint  Destination address
-    /// @param _type bool  Nonce contract type (false - source chain, true - destination chain)
-    /// @return TvmCell  Nonce contract state init
-    function _getNonceContractStatiInit(uint64 _chainId, uint _srcAddress, uint _dstAddress, bool _type) private view returns(TvmCell) {
-        return tvm.buildStateInit({
-            contr: AsterizmNonce,  
-            varInit: {
-                owner_: address(this),
-                chainId_: _chainId,
-                srcAddress_: _srcAddress,
-                dstAddress_: _dstAddress,
-                type_: _type
-            },
-            pubkey: 0,
-            code: nonceCode_
-        });
-    }
-
-    /// Deploy nonce contract
-    /// @param _chainId uint64  Chain id
-    /// @param _srcAddress uint  Source address
-    /// @param _dstAddress uint  Destination address
-    /// @param _type bool  Nonce contract type (false - source chain, true - destination chain)
-    /// @return address  Nonce contract address
-    function _deployNonceContract(uint64 _chainId, uint _srcAddress, uint _dstAddress, bool _type) private view returns(address) {
-        address contractAddress = new AsterizmNonce{
-            stateInit: _getNonceContractStatiInit(_chainId, _srcAddress, _dstAddress, _type),
-            value: AsterizmEnvs.NONCE__MIN_DEPLOY_CONTRACT_VALUE,
-            wid: address(this).wid,
-            flag: AsterizmTransferFlags.SENDER_PAYS_FEES
-        }();
-        emit NonceContractDeployEvent(contractAddress);
-
-        return contractAddress;
-    }
-
-    /// Return nonce contract address
-    /// @param _chainId uint64  Chain id
-    /// @param _srcAddress uint  Source address
-    /// @param _dstAddress uint  Destination address
-    /// @param _type bool  Nonce contract type (false - source chain, true - destination chain)
-    /// @return address  Noncecontract address
-    function _getNonceContractAddress(uint64 _chainId, uint _srcAddress, uint _dstAddress, bool _type) private view returns(address) {
-        return address(tvm.hash(_getNonceContractStatiInit(_chainId, _srcAddress, _dstAddress, _type)));
-    }
-
-    /// Return nonce contract address
-    /// @param _chainId uint64  Chain id
-    /// @param _srcAddress uint  Source address
-    /// @param _dstAddress uint  Destination address
-    /// @param _type bool  Nonce contract type (false - source chain, true - destination chain)
-    /// @param _withDeploy bool  With deploy
-    /// @return AsterizmNonce  Nonce contract
-    function _getNonceContract(uint64 _chainId, uint _srcAddress, uint _dstAddress, bool _type, bool _withDeploy) private view returns(AsterizmNonce) {
-        return AsterizmNonce(_withDeploy ? _deployNonceContract(_chainId, _srcAddress, _dstAddress, _type) : _getNonceContractAddress(_chainId, _srcAddress, _dstAddress, _type));
-    }
-
     /** Other internal functions */
 
     /// Block address
@@ -324,18 +262,17 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
         require(sender.toUint() != blockAddresses[localChainId], AsterizmErrors.INITIALIZER__SENDER_ADDRESS_IS_BLOCKED__ERROR);
         require(_dto.dstAddress != blockAddresses[_dto.dstChainId], AsterizmErrors.INITIALIZER__TARGET_ADDRESS_IS_BLOCKED__ERROR);
 
-        _initTransferPrivate(_dto, sender, 0);
+        _initTransferPrivate(_dto, sender);
     }
 
     /// Init transfer (private)
     /// @param _dto IzIninTransferRequestDto  Method DTO
-    /// @param _nonce uint  Nonce
     /// @param _sender address  Sender (cilent) address
-    function _initTransferPrivate(IzIninTransferRequestDto _dto, address _sender, uint _nonce) private view {
+    function _initTransferPrivate(IzIninTransferRequestDto _dto, address _sender) private view {
         tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
         TrSendMessageRequestDto dto = _buildTrSendMessageRequestDto(
-            _sender.toUint(), _dto.dstChainId, _dto.dstAddress, _nonce,
-            _dto.useForceOrder, _dto.txId, _dto.transferHash, _dto.dstFeeAmount
+            _sender.toUint(), _dto.dstChainId, _dto.dstAddress,
+            _dto.txId, _dto.transferHash, _dto.dstFeeAmount
         );
 
         if (_dto.relay != address(0) && _dto.relay != address(translatorLib_)) { // External relays logic
@@ -394,7 +331,7 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
         tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
         IzAsterizmReceiveRequestDto dto = _buildIzAsterizmReceiveRequestDto(
             _dto.srcChainId, _dto.srcAddress, _dto.dstChainId,
-            _dto.dstAddress, _dto.nonce, _dto.txId, _dto.transferHash
+            _dto.dstAddress, _dto.txId, _dto.transferHash
         );
 
         _deployTransferHashContract(_dto.transferHash);

@@ -45,7 +45,6 @@ async function main() {
             owner_: owner,
             initializerLib_: initializer.address,
             disableHashValidation_: false,
-            useForceOrder_: false,
             hashVersion_: HashVersions.CrosschainV1,
             nonce_: locklift.utils.getRandomNonce().toFixed(),
         },
@@ -65,7 +64,7 @@ async function main() {
             })
         );
     }
-    console.log("Deployment was done.\n");
+    console.log("\nDeployment was done.\n");
     console.log("Owner address: %s", owner.toString());
     console.log("Initializer address: %s", initializer.address.toString());
     if (externalRelayAddress != undefined) {

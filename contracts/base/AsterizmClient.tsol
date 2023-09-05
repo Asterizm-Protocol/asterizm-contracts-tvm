@@ -45,10 +45,9 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// Payload receive event (for client server logic)
     /// @param _srcChainId uint64  Source chain ID
     /// @param _srcAddress address  Source address
-    /// @param _nonce uint  Transaction nonce
     /// @param _txId uint  Transfer ID
     /// @param _transferHash uint  Transaction hash
-    event PayloadReceivedEvent(uint64 _srcChainId, uint _srcAddress, uint _nonce, uint _txId, uint _transferHash);
+    event PayloadReceivedEvent(uint64 _srcChainId, uint _srcAddress, uint _txId, uint _transferHash);
 
     /// Add trusted address event
     /// @param _chainId uint64  Chain ID
@@ -63,10 +62,6 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// Set use encryption flag
     /// @param _flag bool  Use encryption flag
     event SetUseEncryptionEvent(bool _flag);
-
-    /// Set use force order flag event
-    /// @param _flag bool  Use force order flag
-    event SetUseForceOrderEvent(bool _flag);
 
     /// Set disable hash validation flag event
     /// @param _flag bool  Use force order flag
@@ -119,7 +114,6 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     address private externalRelay;
 
     IInitializerSender static initializerLib_;
-    bool static useForceOrder_;
     bool static disableHashValidation_;
     uint8 static hashVersion_; // see AsterizmHashLib for available versions information
 
@@ -127,7 +121,6 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         tvm.accept();
 
         emit SetInitializerEvent(address(initializerLib_));
-        emit SetUseForceOrderEvent(useForceOrder_);
         emit SetDisableHashValidationEvent(disableHashValidation_);
         _setLocalChainId(initializerLib_.getLocalChainId{ value: AsterizmEnvs.CLIENT__GETTER_VALUE }().await);
         initializerTransferCode = initializerLib_.getInitializerTransferCode{ value: AsterizmEnvs.CLIENT__GETTER_VALUE }().await;
@@ -518,7 +511,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
             uint128 msgValue = outboundTransfers[_transferHash].msgValue;
             delete outboundTransfers[dto.transferHash];
             initializerLib_.initTransfer{value: msgValue, flag: AsterizmTransferFlags.SENDER_PAYS_FEES, bounce: false} (
-                _buildIzIninTransferRequestDto(dto.dstChainId, dto.dstAddress, dto.txId, dto.transferHash, useForceOrder_, dto.dstFeeAmount, externalRelay)
+                _buildIzIninTransferRequestDto(dto.dstChainId, dto.dstAddress, dto.txId, dto.transferHash, dto.dstFeeAmount, externalRelay)
             );
 
             hashContract.executeTransfer{ value: AsterizmEnvs.TRANSFER__SET_REQUEST_VALUE }(dto.transferHash);
@@ -560,18 +553,17 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         tvm.accept();
 
         _deployClientTransferContract(_dto.transferHash, true);
-        emit PayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.txId, _dto.transferHash);
+        emit PayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.txId, _dto.transferHash);
     }
 
     /// Receive payload from client server
     /// @param _srcChainId uint64  Source chain ID
     /// @param _srcAddress uint  Source address
-    /// @param _nonce uint  Nonce
     /// @param _txId uint  Transaction ID
     /// @param _transferHash uint  Transfer hash
     /// @param _payload TvmCell  Payload
-    function asterizmClReceive(uint64 _srcChainId, uint _srcAddress, uint _nonce, uint _txId, uint _transferHash, TvmCell _payload) external override onlyOwner {
-        ClAsterizmReceiveRequestDto dto = _buildClAsterizmReceiveRequestDto(_srcChainId, _srcAddress, localChainId, _getTrustedAddressByChainId(localChainId), _nonce, _txId, _transferHash, _payload);
+    function asterizmClReceive(uint64 _srcChainId, uint _srcAddress, uint _txId, uint _transferHash, TvmCell _payload) external override onlyOwner {
+        ClAsterizmReceiveRequestDto dto = _buildClAsterizmReceiveRequestDto(_srcChainId, _srcAddress, localChainId, _getTrustedAddressByChainId(localChainId), _txId, _transferHash, _payload);
         _asterizmReceiveInternal(dto);
     }
 

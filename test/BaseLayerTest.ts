@@ -22,7 +22,6 @@ const externalRelaySystemFees = [10, 5];
 
 const AsterizmInitializerTransfer = locklift.factory.getContractArtifacts("AsterizmInitializerTransfer");
 const AsterizmClientTransfer = locklift.factory.getContractArtifacts("AsterizmClientTransfer");
-const AsterizmNonce = locklift.factory.getContractArtifacts("AsterizmNonce");
 
 const chainIds = [1, 2];
 const chainTypes = {EVM: 1, TVM: 2};
@@ -119,7 +118,6 @@ describe("Base layer tests", async function () {
                 translatorLib_: translator1.address,
                 initializerTransferCode_: AsterizmInitializerTransfer.code,
                 clientTransferCode_: AsterizmClientTransfer.code,
-                nonceCode_: AsterizmNonce.code,
                 },
                 constructorParams: {},
                 value: locklift.utils.toNano(1.5),
@@ -135,7 +133,6 @@ describe("Base layer tests", async function () {
                 translatorLib_: translator2.address,
                 initializerTransferCode_: AsterizmInitializerTransfer.code,
                 clientTransferCode_: AsterizmClientTransfer.code,
-                nonceCode_: AsterizmNonce.code,
                 },
                 constructorParams: {},
                 value: locklift.utils.toNano(1.5),
@@ -269,7 +266,6 @@ describe("Base layer tests", async function () {
                 initParams: {
                 owner_: owner,
                 initializerLib_: initializer1.address,
-                useForceOrder_: false,
                 disableHashValidation_: false,
                 hashVersion_: hashVersions.CrosschainV1,
                 nonce_: locklift.utils.getRandomNonce().toFixed(),
@@ -289,7 +285,6 @@ describe("Base layer tests", async function () {
                 initParams: {
                 owner_: owner,
                 initializerLib_: initializer2.address,
-                useForceOrder_: false,
                 disableHashValidation_: false,
                 hashVersion_: hashVersions.CrosschainV1,
                 nonce_: locklift.utils.getRandomNonce().toFixed(),
@@ -595,12 +590,10 @@ describe("Base layer tests", async function () {
             });
             let unpackPayload = await locklift.provider.unpackFromCell({
                 structure: [
-                    { name: 'nonce', type: 'uint256' },
                     { name: 'srcChainId', type: 'uint64' },
                     { name: 'srcAddress', type: 'uint256' },
                     { name: 'dstChainId', type: 'uint64' },
                     { name: 'dstAddress', type: 'uint256' },
-                    { name: 'useForceOrder', type: 'bool' },
                     { name: 'txId', type: 'uint256' },
                     { name: 'transferHash', type: 'uint256' },
                 ],
@@ -608,13 +601,11 @@ describe("Base layer tests", async function () {
                 allowPartial: true
             });
             expect(eventTr1[0]._feeValue).to.be.equals(feeValue.toString());
-            expect(unpackPayload.data.nonce).to.be.equals('0');
             expect(unpackPayload.data.srcChainId).to.be.equals(chainIds[0].toString());
             expect(unpackPayload.data.srcAddress).to.be.equals((new bigInt(demo1.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(chainIds[1].toString());
             expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(eventDemo1[0]._dstChainId);
-            expect(unpackPayload.data.useForceOrder).to.be.equals(false);
             expect(unpackPayload.data.txId).to.be.equals(eventDemo1[0]._txId);
             expect(unpackPayload.data.transferHash).to.be.equals(eventDemo1[0]._transferHash);
             trace = await locklift.tracing.trace(
@@ -665,25 +656,21 @@ describe("Base layer tests", async function () {
             });
             let unpackPayload = await locklift.provider.unpackFromCell({
                 structure: [
-                    { name: 'nonce', type: 'uint256' },
                     { name: 'srcChainId', type: 'uint64' },
                     { name: 'srcAddress', type: 'uint256' },
                     { name: 'dstChainId', type: 'uint64' },
                     { name: 'dstAddress', type: 'uint256' },
-                    { name: 'useForceOrder', type: 'bool' },
                     { name: 'txId', type: 'uint256' },
                     { name: 'transferHash', type: 'uint256' },
                 ],
                 boc: eventTr1[0]._payload,
                 allowPartial: true
             });
-            expect(unpackPayload.data.nonce).to.be.equals('0');
             expect(unpackPayload.data.srcChainId).to.be.equals(chainIds[0].toString());
             expect(unpackPayload.data.srcAddress).to.be.equals((new bigInt(demo1.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(chainIds[1].toString());
             expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(eventDemo1[0]._dstChainId);
-            expect(unpackPayload.data.useForceOrder).to.be.equals(false);
             expect(unpackPayload.data.txId).to.be.equals(eventDemo1[0]._txId);
             expect(unpackPayload.data.transferHash).to.be.equals(eventDemo1[0]._transferHash);
 
@@ -761,25 +748,21 @@ describe("Base layer tests", async function () {
             });
             let unpackPayload = await locklift.provider.unpackFromCell({
                 structure: [
-                    { name: 'nonce', type: 'uint256' },
                     { name: 'srcChainId', type: 'uint64' },
                     { name: 'srcAddress', type: 'uint256' },
                     { name: 'dstChainId', type: 'uint64' },
                     { name: 'dstAddress', type: 'uint256' },
-                    { name: 'useForceOrder', type: 'bool' },
                     { name: 'txId', type: 'uint256' },
                     { name: 'transferHash', type: 'uint256' },
                 ],
                 boc: eventTr1[0]._payload,
                 allowPartial: true
             });
-            expect(unpackPayload.data.nonce).to.be.equals('0');
             expect(unpackPayload.data.srcChainId).to.be.equals(chainIds[0].toString());
             expect(unpackPayload.data.srcAddress).to.be.equals((new bigInt(demo1.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(chainIds[1].toString());
             expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(eventDemo1[0]._dstChainId);
-            expect(unpackPayload.data.useForceOrder).to.be.equals(false);
             expect(unpackPayload.data.txId).to.be.equals(eventDemo1[0]._txId);
             expect(unpackPayload.data.transferHash).to.be.equals(eventDemo1[0]._transferHash);
 
@@ -914,25 +897,21 @@ describe("Base layer tests", async function () {
             });
             let unpackPayload = await locklift.provider.unpackFromCell({
                 structure: [
-                    { name: 'nonce', type: 'uint256' },
                     { name: 'srcChainId', type: 'uint64' },
                     { name: 'srcAddress', type: 'uint256' },
                     { name: 'dstChainId', type: 'uint64' },
                     { name: 'dstAddress', type: 'uint256' },
-                    { name: 'useForceOrder', type: 'bool' },
                     { name: 'txId', type: 'uint256' },
                     { name: 'transferHash', type: 'uint256' },
                 ],
                 boc: eventTr1[0]._payload,
                 allowPartial: true
             });
-            expect(unpackPayload.data.nonce).to.be.equals('0');
             expect(unpackPayload.data.srcChainId).to.be.equals(chainIds[0].toString());
             expect(unpackPayload.data.srcAddress).to.be.equals((new bigInt(demo1.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(chainIds[1].toString());
             expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(eventDemo1[0]._dstChainId);
-            expect(unpackPayload.data.useForceOrder).to.be.equals(false);
             expect(unpackPayload.data.txId).to.be.equals(eventDemo1[0]._txId);
             expect(unpackPayload.data.transferHash).to.be.equals(eventDemo1[0]._transferHash);
             trace = await locklift.tracing.trace(
@@ -966,7 +945,6 @@ describe("Base layer tests", async function () {
                 demo2.methods.asterizmClReceive({
                     _srcChainId: parseInt(firstDemoEvent2._srcChainId),
                     _srcAddress: firstDemoEvent2._srcAddress,
-                    _nonce: firstDemoEvent2._nonce,
                     _txId: firstDemoEvent2._txId,
                     _transferHash: wrongHash,
                     _payload: eventDemo1[0]._payload
@@ -986,7 +964,6 @@ describe("Base layer tests", async function () {
                 demo2.methods.asterizmClReceive({
                     _srcChainId: parseInt(firstDemoEvent2._srcChainId),
                     _srcAddress: firstDemoEvent2._srcAddress,
-                    _nonce: firstDemoEvent2._nonce,
                     _txId: wrongTxId,
                     _transferHash: firstDemoEvent2._transferHash,
                     _payload: eventDemo1[0]._payload
@@ -1006,7 +983,6 @@ describe("Base layer tests", async function () {
                 demo2.methods.asterizmClReceive({
                     _srcChainId: parseInt(firstDemoEvent2._srcChainId),
                     _srcAddress: wrongSrcAddress,
-                    _nonce: firstDemoEvent2._nonce,
                     _txId: firstDemoEvent2._txId,
                     _transferHash: firstDemoEvent2._transferHash,
                     _payload: eventDemo1[0]._payload
@@ -1026,7 +1002,6 @@ describe("Base layer tests", async function () {
                 demo2.methods.asterizmClReceive({
                     _srcChainId: parseInt(wrongSrcChainId),
                     _srcAddress: firstDemoEvent2._srcAddress,
-                    _nonce: firstDemoEvent2._nonce,
                     _txId: firstDemoEvent2._txId,
                     _transferHash: firstDemoEvent2._transferHash,
                     _payload: eventDemo1[0]._payload
@@ -1079,25 +1054,21 @@ describe("Base layer tests", async function () {
             });
             let unpackPayload = await locklift.provider.unpackFromCell({
                 structure: [
-                    { name: 'nonce', type: 'uint256' },
                     { name: 'srcChainId', type: 'uint64' },
                     { name: 'srcAddress', type: 'uint256' },
                     { name: 'dstChainId', type: 'uint64' },
                     { name: 'dstAddress', type: 'uint256' },
-                    { name: 'useForceOrder', type: 'bool' },
                     { name: 'txId', type: 'uint256' },
                     { name: 'transferHash', type: 'uint256' },
                 ],
                 boc: eventTr1[0]._payload,
                 allowPartial: true
             });
-            expect(unpackPayload.data.nonce).to.be.equals('0');
             expect(unpackPayload.data.srcChainId).to.be.equals(chainIds[0].toString());
             expect(unpackPayload.data.srcAddress).to.be.equals((new bigInt(demo1.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(chainIds[1].toString());
             expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(eventDemo1[0]._dstChainId);
-            expect(unpackPayload.data.useForceOrder).to.be.equals(false);
             expect(unpackPayload.data.txId).to.be.equals(eventDemo1[0]._txId);
             expect(unpackPayload.data.transferHash).to.be.equals(eventDemo1[0]._transferHash);
             trace = await locklift.tracing.trace(
@@ -1129,7 +1100,6 @@ describe("Base layer tests", async function () {
                 demo2.methods.asterizmClReceive({
                     _srcChainId: parseInt(firstDemoEvent2._srcChainId),
                     _srcAddress: firstDemoEvent2._srcAddress,
-                    _nonce: firstDemoEvent2._nonce,
                     _txId: firstDemoEvent2._txId,
                     _transferHash: firstDemoEvent2._transferHash,
                     _payload: eventDemo1[0]._payload
@@ -1144,7 +1114,6 @@ describe("Base layer tests", async function () {
                 demo2.methods.asterizmClReceive({
                     _srcChainId: parseInt(firstDemoEvent2._srcChainId),
                     _srcAddress: firstDemoEvent2._srcAddress,
-                    _nonce: firstDemoEvent2._nonce,
                     _txId: firstDemoEvent2._txId,
                     _transferHash: firstDemoEvent2._transferHash,
                     _payload: eventDemo1[0]._payload
@@ -1227,7 +1196,6 @@ describe("Base layer tests", async function () {
             });
             expect(eventDemo2[0]._srcChainId).to.be.equal(chainIds[0].toString());
             expect(eventDemo2[0]._srcAddress).to.be.equal((new bigInt(demo1.address.toString().substring(2), 16)).value.toString());
-            expect(eventDemo2[0]._nonce).to.be.equal('0');
             expect(eventDemo2[0]._txId).to.be.equal('11');
             expect(eventDemo2[0]._transferHash).to.be.equal(eventDemo1[0]._transferHash);
 
@@ -1235,7 +1203,6 @@ describe("Base layer tests", async function () {
                 demo2.methods.asterizmClReceive({
                     _srcChainId: parseInt(eventDemo2[0]._srcChainId),
                     _srcAddress: eventDemo2[0]._srcAddress,
-                    _nonce: eventDemo2[0]._nonce,
                     _txId: eventDemo2[0]._txId,
                     _transferHash: eventDemo2[0]._transferHash,
                     _payload: eventDemo1[0]._payload

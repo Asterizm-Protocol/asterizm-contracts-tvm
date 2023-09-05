@@ -57,9 +57,8 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
     /// @param _srcChainId uint64  Source chain ID
     /// @param _srcAddress uint  Source address
     /// @param _dstAddress uint  Destination address
-    /// @param _nonce uint  Nonce
     /// @param _transferHash uint  Transfer hash
-    event TransferSendEvent(uint64 indexed _srcChainId, uint indexed _srcAddress, uint indexed _dstAddress, uint _nonce, uint _transferHash);
+    event TransferSendEvent(uint64 indexed _srcChainId, uint indexed _srcAddress, uint indexed _dstAddress, uint _transferHash);
 
     /// Resend feiled transfer event
     /// @param _transferHash uint
@@ -226,8 +225,8 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
         tvm.rawReserve(AsterizmEnvs.TRANSLATOR__MIN_CONTRACT_BALANCE, 0);
 
         TvmCell payload = abi.encode(
-            _dto.nonce, localChainId_, _dto.srcAddress, _dto.dstChainId,
-            _dto.dstAddress, _dto.forceOrder, _dto.txId, _dto.transferHash
+            localChainId_, _dto.srcAddress, _dto.dstChainId,
+            _dto.dstAddress, _dto.txId, _dto.transferHash
         );
         if (_dto.dstChainId == localChainId_) {
             TrTransferMessageRequestDto dto = _buildTrTarnsferMessageRequestDto(_dto.dstFeeAmount, payload);
@@ -252,8 +251,8 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
             msg.value,
             _externalRelayAddress,
             abi.encode(
-                _dto.nonce, localChainId_, _dto.srcAddress, _dto.dstChainId,
-                _dto.dstAddress, _dto.forceOrder, _dto.txId, _dto.transferHash
+                localChainId_, _dto.srcAddress, _dto.dstChainId,
+                _dto.dstAddress, _dto.txId, _dto.transferHash
             )
         );
 
@@ -290,20 +289,20 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
     /// @param _dto TrTransferMessageRequestDto  Method DTO
     function _baseTransferMessage(TrTransferMessageRequestDto _dto) private view {
         (
-            uint nonce, uint64 srcChainId, uint srcAddress, uint64 dstChainId,
-            uint dstAddress, bool forceOrder, uint txId, uint transferHash
+            uint64 srcChainId, uint srcAddress, uint64 dstChainId,
+            uint dstAddress, uint txId, uint transferHash
         ) = abi.decode(
             _dto.payload,
-            (uint, uint64, uint, uint64, uint, bool, uint, uint)
+            (uint64, uint, uint64, uint, uint, uint)
         );
 
         require(dstChainId == localChainId_, AsterizmErrors.TRANSLATOR__WRONG_CHAIN_ID__ERROR);
 
         IzReceivePayloadRequestDto dto = _buildIzReceivePayloadRequestDto(
-            _buildBaseTransferDirectionDto(srcChainId, srcAddress, localChainId_, dstAddress), nonce, _dto.gasLimit, forceOrder, txId, transferHash
+            _buildBaseTransferDirectionDto(srcChainId, srcAddress, localChainId_, dstAddress), _dto.gasLimit, txId, transferHash
         );
         initializerLib.receivePayload{ value: 0, flag: AsterizmTransferFlags.ALL_NOT_RESERVED, bounce: false }(dto);
 
-        emit TransferSendEvent(srcChainId, srcAddress, dstAddress, nonce, transferHash);
+        emit TransferSendEvent(srcChainId, srcAddress, dstAddress, transferHash);
     }
 }

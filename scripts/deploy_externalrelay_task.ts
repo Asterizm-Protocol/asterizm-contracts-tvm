@@ -91,9 +91,10 @@ async function main() {
         })
     );
 
-    console.log("Deployment was done.\n");
+    console.log("\nDeployment was done.\n");
     console.log("Owner address: %s", owner.toString());
-    console.log(`External relay address: ${externalTranslator.address.toString()}`);
+    console.log("Initializer address: %s", initializer.address.toString());
+    console.log("External relay address: %s\n", externalTranslator.address.toString());
 }
 
 main()
