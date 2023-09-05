@@ -1,36 +1,42 @@
 import {Address, WalletTypes} from "locklift";
 import { Chains } from './base/base_chains';
 import { ChainTypes } from './base/base_chain_types';
+import { parseArgs } from './base/base_parce_args';
+import { NetworkTypes } from './base/base_network_types';
 
 require('dotenv').config();
 
 async function main() {
+    const commandArgs = parseArgs(process.argv.slice(5));
+    const network = commandArgs.network;
+    const initializer = locklift.factory.getDeployedContract("AsterizmInitializer", new Address(commandArgs.initializer));
+    const relayFee = commandArgs.fee;
+    const relaySystemFee = commandArgs.systemFee;
 
-    const isTestnet = true;
-    const chains = isTestnet ? Chains.testnet : Chains.mainnet;
+    const chains = network == NetworkTypes.localhost || network == NetworkTypes.testnet || network == NetworkTypes.testnetVenom ? Chains.testnet : Chains.mainnet;
     const signer = (await locklift.keystore.getSigner("0"))!;
     let trace;
 
-    //TODO: change it for different chains deployment!
-    const owner = new Address(process.env.LOCALHOST_OWNER_ADDRESS || '');
-    const ownerPubkey = process.env.LOCALHOST_OWNER_KEY || '';
-    // const owner = new Address(process.env.TESTNET_EVER_OWNER_ADDRESS || '');
-    // const ownerPubkey = process.env.TESTNET_EVER_OWNER_KEY || '';
-    // const owner = new Address(process.env.TESTNET_VENOM_OWNER_ADDRESS || '');
-    // const ownerPubkey = process.env.TESTNET_VENOM_OWNER_KEY || '';
-
+    let owner;
+    let ownerPubkey;
+    if (network == NetworkTypes.localhost) {
+        owner = new Address(process.env.LOCALHOST_OWNER_ADDRESS || '');
+        ownerPubkey = process.env.LOCALHOST_OWNER_KEY || '';
+    } else if (network == NetworkTypes.testnet) {
+        owner = new Address(process.env.TESTNET_EVER_OWNER_ADDRESS || '');
+        ownerPubkey = process.env.TESTNET_EVER_OWNER_KEY || '';
+    } else if (network == NetworkTypes.testnetVenom) {
+        owner = new Address(process.env.TESTNET_VENOM_OWNER_ADDRESS || '');
+        ownerPubkey = process.env.TESTNET_VENOM_OWNER_KEY || '';
+    } else {
+        owner = new Address(process.env.MAINNET_EVER_OWNER_ADDRESS || '');
+        ownerPubkey = process.env.MAINNET_EVER_OWNER_KEY || '';
+    }
     const ownerWallet = await locklift.factory.accounts.addExistingAccount({
         address: owner,
         type: WalletTypes.MsigAccount,
         mSigType: "multisig2",
     });
-
-    const initializer = locklift.factory.getDeployedContract(
-        "AsterizmInitializer",
-        new Address("0:4c543da2b79ec6f00c3ba1f98ebe98ac5911676403707bef30705bc7e3a4b78b") // TODO: chainge it
-    );
-    const relayFee = 100;
-    const relaySystemFee = 10;
 
     let chainIds = [];
     let chainTypes = [];
@@ -57,7 +63,6 @@ async function main() {
         value: locklift.utils.toNano(1.5),
     });
     const externalTranslator = locklift.factory.getDeployedContract("AsterizmTranslator", externalTranslatorObj1.address);
-    console.log(`Translator deployed at: ${externalTranslator.address.toString()}`);
     trace = await locklift.tracing.trace(
         externalTranslator.methods.addChains({
             _chainIds: chainIds,
@@ -75,7 +80,6 @@ async function main() {
             amount: locklift.utils.toNano(1)
         })
     );
-    
     trace = await locklift.tracing.trace(
         initializer.methods.manageTrustedRelay({
             _relayAddress: externalTranslator.address,
@@ -86,6 +90,10 @@ async function main() {
             amount: locklift.utils.toNano(1)
         })
     );
+
+    console.log("Deployment was done.\n");
+    console.log("Owner address: %s", owner.toString());
+    console.log(`External relay address: ${externalTranslator.address.toString()}`);
 }
 
 main()

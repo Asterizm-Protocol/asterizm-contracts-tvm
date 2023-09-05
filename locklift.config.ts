@@ -96,16 +96,16 @@ const config: LockliftConfig = {
       connection: {
         id: 1000,
         group: "dev",
-        type: "jrpc",
-        // type: "graphql",
-        // data: {
-        //   endpoints: [VENOM_TESTNET_ENDPOINT],
-        //   latencyDetectionInterval: 1000,
-        //   local: false,
-        // },
+        type: "graphql",
         data: {
-          endpoint: "https://jrpc-testnet.venom.foundation/",
+          endpoints: ['https://gql-testnet.venom.foundation/graphql'],
+          latencyDetectionInterval: 1000,
+          local: false,
         },
+        // type: "jrpc",
+        // data: {
+        //   endpoint: "https://jrpc-testnet.venom.foundation/",
+        // },
       },
       giver: {
         address: process.env.TESTNET_VENOM_GIVER_ADDRESS || '',

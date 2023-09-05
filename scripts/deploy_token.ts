@@ -6,19 +6,20 @@ import { parseArgs } from './base/base_parce_args';
 
 async function main() {
   const commandArgs = parseArgs(process.argv.slice(5));
+  const network = commandArgs.network;
+  const decimals = commandArgs.decimals ? commandArgs.decimals : 9;
 
   const signer = (await locklift.keystore.getSigner("0"))!;
-  const decimals = 9;
 
   let owner;
   let ownerPubkey;
-  if (commandArgs.network == NetworkTypes.localhost) {
+  if (network == NetworkTypes.localhost) {
       owner = new Address(process.env.LOCALHOST_OWNER_ADDRESS || '');
       ownerPubkey = process.env.LOCALHOST_OWNER_KEY || '';
-  } else if (commandArgs.network == NetworkTypes.testnet) {
+  } else if (network == NetworkTypes.testnet) {
       owner = new Address(process.env.TESTNET_EVER_OWNER_ADDRESS || '');
       ownerPubkey = process.env.TESTNET_EVER_OWNER_KEY || '';
-  } else if (commandArgs.network == NetworkTypes.testnetVenom) {
+  } else if (network == NetworkTypes.testnetVenom) {
       owner = new Address(process.env.TESTNET_VENOM_OWNER_ADDRESS || '');
       ownerPubkey = process.env.TESTNET_VENOM_OWNER_KEY || '';
   } else {
