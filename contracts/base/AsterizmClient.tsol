@@ -63,6 +63,10 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// @param _flag bool  Use encryption flag
     event SetUseEncryptionEvent(bool _flag);
 
+    /// Set notify transfer sending result event
+    /// @param _flag bool  Notify transfer sending result flag
+    event SetNotifyTransferSendingResultEvent(bool _flag);
+
     /// Set disable hash validation flag event
     /// @param _flag bool  Use force order flag
     event SetDisableHashValidationEvent(bool _flag);
@@ -93,6 +97,11 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// @param _feeAmount uint128  Additional fee amount
     event ResendAsterizmTransferEvent(uint _transferHash, uint128 _feeAmount);
 
+    /// Transfer sending result notification event
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _statusCode uint8  Status code
+    event TransferSendingResultNotification(bytes32 indexed _transferHash, uint8 _statusCode);
+
     struct AsterizmTransfer {
         bool exists;
         bool successIzReceive;
@@ -114,6 +123,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     address private externalRelay;
 
     IInitializerSender static initializerLib_;
+    bool static notifyTransferSendingResult_;
     bool static disableHashValidation_;
     uint8 static hashVersion_; // see AsterizmHashLib for available versions information
 
@@ -121,6 +131,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         tvm.accept();
 
         emit SetInitializerEvent(address(initializerLib_));
+        emit SetNotifyTransferSendingResultEvent(notifyTransferSendingResult_);
         emit SetDisableHashValidationEvent(disableHashValidation_);
         _setLocalChainId(initializerLib_.getLocalChainId{ value: AsterizmEnvs.CLIENT__GETTER_VALUE }().await);
         initializerTransferCode = initializerLib_.getInitializerTransferCode{ value: AsterizmEnvs.CLIENT__GETTER_VALUE }().await;
@@ -511,7 +522,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
             uint128 msgValue = outboundTransfers[_transferHash].msgValue;
             delete outboundTransfers[dto.transferHash];
             initializerLib_.initTransfer{value: msgValue, flag: AsterizmTransferFlags.SENDER_PAYS_FEES, bounce: false} (
-                _buildIzIninTransferRequestDto(dto.dstChainId, dto.dstAddress, dto.txId, dto.transferHash, dto.dstFeeAmount, externalRelay)
+                _buildIzIninTransferRequestDto(dto.dstChainId, dto.dstAddress, dto.txId, dto.transferHash, dto.dstFeeAmount, externalRelay, notifyTransferSendingResult_)
             );
 
             hashContract.executeTransfer{ value: AsterizmEnvs.TRANSFER__SET_REQUEST_VALUE }(dto.transferHash);
@@ -531,6 +542,15 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
 
         emit ResendAsterizmTransferEvent(_transferHash, _feeAmount);
         initializerLib_.resendTransfer{ value: fullAmount, flag: AsterizmTransferFlags.SENDER_PAYS_FEES, bounce: false }(_transferHash, _feeAmount, externalRelay);
+    }
+
+    /// Transfer sending result notification
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _statusCode uint8  Status code
+    function transferSendingResultNotification(bytes32 _transferHash, uint8 _statusCode) external onlyInitializer {
+        if (notifyTransferSendingResult_) {
+            emit TransferSendingResultNotification(_transferHash, _statusCode);
+        }
     }
 
 

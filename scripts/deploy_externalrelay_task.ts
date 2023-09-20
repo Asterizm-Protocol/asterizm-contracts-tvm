@@ -42,7 +42,7 @@ async function main() {
     let chainTypes = [];
     let currentChain;
     for (let i = 0; i < chains.length; i++) {
-        if (chains[i].isCurrent) {
+        if (chains[i].networkName == network) {
             currentChain = chains[i];
         }
 

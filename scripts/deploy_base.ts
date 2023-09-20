@@ -42,7 +42,7 @@ async function main() {
     let trustedAddresses = [];
     let currentChain;
     for (let i = 0; i < chains.length; i++) {
-        if (chains[i].isCurrent) {
+        if (chains[i].networkName == network) {
             currentChain = chains[i];
         }
 
@@ -118,7 +118,7 @@ async function main() {
 
     const initializer = locklift.factory.getDeployedContract("AsterizmInitializer", initializerAddress);
 
-    console.log("\nDeployment was done\n");
+    console.log("\nDeployment was done");
     console.log("Owner address: %s", owner.toString());
     console.log("Translator address: %s", translator.address.toString());
     console.log("Initializer address: %s\n", initializer.address.toString());

@@ -64,8 +64,12 @@ abstract contract AsterizmStructs is IAsterizmStructs {
     /// @param _transferHash uint  Transfer hash
     /// @param _dstFeeAmount uint  Fee amount
     /// @param _relay address  External relay address
+    /// @param _transferResultNotifyFlag bool  Transfer result notification flag
     /// @return IzIninTransferRequestDto
-    function _buildIzIninTransferRequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, uint _transferHash, uint128 _dstFeeAmount, address _relay) internal pure returns(IzIninTransferRequestDto) {
+    function _buildIzIninTransferRequestDto(
+        uint64 _dstChainId, uint _dstAddress, uint _txId, uint _transferHash,
+        uint128 _dstFeeAmount, address _relay, bool _transferResultNotifyFlag
+    ) internal pure returns(IzIninTransferRequestDto) {
         IzIninTransferRequestDto dto;
         dto.dstChainId = _dstChainId;
         dto.dstAddress = _dstAddress;
@@ -73,6 +77,7 @@ abstract contract AsterizmStructs is IAsterizmStructs {
         dto.transferHash = _transferHash;
         dto.dstFeeAmount = _dstFeeAmount;
         dto.relay = _relay;
+        dto.transferResultNotifyFlag = _transferResultNotifyFlag;
 
         return dto;
     }
@@ -132,10 +137,11 @@ abstract contract AsterizmStructs is IAsterizmStructs {
     /// @param _txId uint  Transaction ID
     /// @param _transferHash uint  Transfer hash
     /// @param _dstFeeAmount uint  Fee amount
+    /// @param _transferResultNotifyFlag bool  Transfer result notification flag
     /// @return TrSendMessageRequestDto
     function _buildTrSendMessageRequestDto(
-        uint _srcAddress, uint64 _dstChainId, uint _dstAddress,
-        uint _txId, uint _transferHash, uint128 _dstFeeAmount
+        uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId,
+        uint _transferHash, uint128 _dstFeeAmount, bool _transferResultNotifyFlag
     ) internal pure returns(TrSendMessageRequestDto) {
         TrSendMessageRequestDto dto;
         dto.srcAddress = _srcAddress;
@@ -144,6 +150,7 @@ abstract contract AsterizmStructs is IAsterizmStructs {
         dto.txId = _txId;
         dto.transferHash = _transferHash;
         dto.dstFeeAmount = _dstFeeAmount;
+        dto.transferResultNotifyFlag = _transferResultNotifyFlag;
 
         return dto;
     }

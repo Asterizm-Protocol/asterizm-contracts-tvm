@@ -29,6 +29,7 @@ const hashVersions = {
   CrosschainV1: 1,
   CrosschainV2: 2,
 }
+let globalTxId = new bigInt(0);
 
 describe("Base layer tests", async function () {
     before(async () => {
@@ -264,12 +265,13 @@ describe("Base layer tests", async function () {
                 contract: "AsterizmDemo",
                 publicKey: signer.publicKey,
                 initParams: {
-                owner_: owner,
-                initializerLib_: initializer1.address,
-                disableHashValidation_: false,
-                hashVersion_: hashVersions.CrosschainV1,
-                nonce_: locklift.utils.getRandomNonce().toFixed(),
-            },
+                    owner_: owner,
+                    initializerLib_: initializer1.address,
+                    notifyTransferSendingResult_: true,
+                    disableHashValidation_: false,
+                    hashVersion_: hashVersions.CrosschainV1,
+                    nonce_: locklift.utils.getRandomNonce().toFixed(),
+                },
                 constructorParams: {},
                 value: locklift.utils.toNano(1.5),
             });
@@ -283,12 +285,13 @@ describe("Base layer tests", async function () {
                 contract: "AsterizmDemo",
                 publicKey: signer.publicKey,
                 initParams: {
-                owner_: owner,
-                initializerLib_: initializer2.address,
-                disableHashValidation_: false,
-                hashVersion_: hashVersions.CrosschainV1,
-                nonce_: locklift.utils.getRandomNonce().toFixed(),
-            },
+                    owner_: owner,
+                    initializerLib_: initializer2.address,
+                    notifyTransferSendingResult_: true,
+                    disableHashValidation_: false,
+                    hashVersion_: hashVersions.CrosschainV1,
+                    nonce_: locklift.utils.getRandomNonce().toFixed(),
+                },
                 constructorParams: {},
                 value: locklift.utils.toNano(1.5),
             });
@@ -334,7 +337,7 @@ describe("Base layer tests", async function () {
             });
             expect(eventDemo[0]._dstChainId).to.be.equal(chainIds[1].toString());
             expect(eventDemo[0]._dstAddress).to.be.equal((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
-            expect(eventDemo[0]._txId).to.be.equal('0');
+            expect(eventDemo[0]._txId).to.be.equal(globalTxId.toString());
             expect(eventDemo[0]._transferHash).to.be.not.empty;
             expect(eventDemo[0]._payload).to.be.not.empty;
 
@@ -357,7 +360,6 @@ describe("Base layer tests", async function () {
             expect(eventDemo[0]._payload).to.be.not.empty;
         });
         
-
         it("Should send transfer message from destination translator", async function () {
             trace = await locklift.tracing.trace(
                 demo1.methods.sendMessage({
@@ -374,7 +376,7 @@ describe("Base layer tests", async function () {
             });
             expect(eventDemo[0]._dstChainId).to.be.equal(chainIds[0].toString());
             expect(eventDemo[0]._dstAddress).to.be.equal((new bigInt(demo1.address.toString().substring(2), 16)).value.toString());
-            expect(eventDemo[0]._txId).to.be.equal('1');
+            expect(eventDemo[0]._txId).to.be.equal((globalTxId = globalTxId.plus(1)).toString());
             expect(eventDemo[0]._transferHash).to.be.not.empty;
             expect(eventDemo[0]._payload).to.be.not.empty;
 
@@ -410,7 +412,7 @@ describe("Base layer tests", async function () {
             });
             expect(eventDemo1[0]._dstChainId).to.be.equal(chainIds[1].toString());
             expect(eventDemo1[0]._dstAddress).to.be.equal((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
-            expect(eventDemo1[0]._txId).to.be.equal('2');
+            expect(eventDemo1[0]._txId).to.be.equal((globalTxId = globalTxId.plus(1)).toString());
             expect(eventDemo1[0]._transferHash).to.be.not.empty;
             expect(eventDemo1[0]._payload).to.be.not.empty;
 
@@ -472,7 +474,7 @@ describe("Base layer tests", async function () {
             });
             expect(eventDemo[0]._dstChainId).to.be.equal(chainIds[1].toString());
             expect(eventDemo[0]._dstAddress).to.be.equal((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
-            expect(eventDemo[0]._txId).to.be.equal('3');
+            expect(eventDemo[0]._txId).to.be.equal((globalTxId = globalTxId.plus(1)).toString());
             expect(eventDemo[0]._transferHash).to.be.not.empty;
             expect(eventDemo[0]._payload).to.be.not.empty;
             trace = await locklift.tracing.trace(
@@ -520,7 +522,7 @@ describe("Base layer tests", async function () {
             });
             expect(eventDemo1[0]._dstChainId).to.be.equal(chainIds[1].toString());
             expect(eventDemo1[0]._dstAddress).to.be.equal((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
-            expect(eventDemo1[0]._txId).to.be.equal('4');
+            expect(eventDemo1[0]._txId).to.be.equal((globalTxId = globalTxId.plus(1)).toString());
             expect(eventDemo1[0]._transferHash).to.be.not.empty;
             expect(eventDemo1[0]._payload).to.be.not.empty;
 
@@ -569,7 +571,7 @@ describe("Base layer tests", async function () {
             });
             expect(eventDemo1[0]._dstChainId).to.be.equal(chainIds[1].toString());
             expect(eventDemo1[0]._dstAddress).to.be.equal((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
-            expect(eventDemo1[0]._txId).to.be.equal('5');
+            expect(eventDemo1[0]._txId).to.be.equal((globalTxId = globalTxId.plus(1)).toString());
             expect(eventDemo1[0]._transferHash).to.be.not.empty;
             expect(eventDemo1[0]._payload).to.be.not.empty;
 
@@ -595,6 +597,7 @@ describe("Base layer tests", async function () {
                     { name: 'dstChainId', type: 'uint64' },
                     { name: 'dstAddress', type: 'uint256' },
                     { name: 'txId', type: 'uint256' },
+                    { name: 'notifyFlag', type: 'bool' },
                     { name: 'transferHash', type: 'uint256' },
                 ],
                 boc: eventTr1[0]._payload,
@@ -607,6 +610,7 @@ describe("Base layer tests", async function () {
             expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(eventDemo1[0]._dstChainId);
             expect(unpackPayload.data.txId).to.be.equals(eventDemo1[0]._txId);
+            expect(unpackPayload.data.notifyFlag).to.be.equals(true);
             expect(unpackPayload.data.transferHash).to.be.equals(eventDemo1[0]._transferHash);
             trace = await locklift.tracing.trace(
                 translator2.methods.transferMessage({
@@ -619,23 +623,24 @@ describe("Base layer tests", async function () {
             );
         });
 
-        it("Should resend message from client and initializer contracts", async function () {
+        it("Should transfer fully completed and emit TransferSendingResultNotification event", async function () {
+            const newMessage = 'New message';
             trace = await locklift.tracing.trace(
                 demo1.methods.sendMessage({
                     _dstChainId: chainIds[1],
-                    _message: 'New message'
+                    _message: newMessage
                 }).send({
                     from: ownerWallet.address,
                     amount: locklift.utils.toNano(1)
                 })
             );
             let eventDemo1 = trace.traceTree?.findEventsForContract({
-            contract: demo1,
-            name: "InitiateTransferEvent",
+                contract: demo1,
+                name: "InitiateTransferEvent",
             });
             expect(eventDemo1[0]._dstChainId).to.be.equal(chainIds[1].toString());
             expect(eventDemo1[0]._dstAddress).to.be.equal((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
-            expect(eventDemo1[0]._txId).to.be.equal('6');
+            expect(eventDemo1[0]._txId).to.be.equal((globalTxId = globalTxId.plus(1)).toString());
             expect(eventDemo1[0]._transferHash).to.be.not.empty;
             expect(eventDemo1[0]._payload).to.be.not.empty;
 
@@ -661,6 +666,7 @@ describe("Base layer tests", async function () {
                     { name: 'dstChainId', type: 'uint64' },
                     { name: 'dstAddress', type: 'uint256' },
                     { name: 'txId', type: 'uint256' },
+                    { name: 'notifyFlag', type: 'bool' },
                     { name: 'transferHash', type: 'uint256' },
                 ],
                 boc: eventTr1[0]._payload,
@@ -672,6 +678,124 @@ describe("Base layer tests", async function () {
             expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(eventDemo1[0]._dstChainId);
             expect(unpackPayload.data.txId).to.be.equals(eventDemo1[0]._txId);
+            expect(unpackPayload.data.notifyFlag).to.be.equals(true);
+            expect(unpackPayload.data.transferHash).to.be.equals(eventDemo1[0]._transferHash);
+
+            trace = await locklift.tracing.trace(
+                externalTranslator2.methods.transferMessage({
+                    _gasLimit: parseInt(eventTr1[0]._feeValue),
+                    _payload: eventTr1[0]._payload
+                }).send({
+                    from: ownerWallet.address,
+                    amount: locklift.utils.toNano(1)
+                })
+            );
+            let eventDemo2 = trace.traceTree?.findEventsForContract({
+                contract: demo2,
+                name: "PayloadReceivedEvent",
+            });
+            expect(eventDemo2[0]._srcChainId).to.be.equal(chainIds[0].toString());
+            expect(eventDemo2[0]._srcAddress).to.be.equal((new bigInt(demo1.address.toString().substring(2), 16)).value.toString());
+            expect(eventDemo2[0]._txId).to.be.equal(globalTxId.toString());
+            expect(eventDemo2[0]._transferHash).to.be.equal(eventDemo1[0]._transferHash);
+
+            const statusCode = 0;
+            trace = await locklift.tracing.trace(
+                translator1.methods.transferSendingResultNotification({
+                    _targetAddress: demo1.address,
+                    _transferHash: unpackPayload.data.transferHash,
+                    _statusCode: statusCode
+                }).send({
+                    from: ownerWallet.address,
+                    amount: locklift.utils.toNano(0.4)
+                })
+            );
+            let eventTr3 = trace.traceTree?.findEventsForContract({
+                contract: demo1,
+                name: "TransferSendingResultNotification",
+            });
+            expect(eventTr3[0]._transferHash).to.be.equals(unpackPayload.data.transferHash);
+            expect(eventTr3[0]._statusCode).to.be.equals(statusCode.toString());
+
+            trace = await locklift.tracing.trace(
+                demo2.methods.asterizmClReceive({
+                    _srcChainId: parseInt(eventDemo2[0]._srcChainId),
+                    _srcAddress: eventDemo2[0]._srcAddress,
+                    _txId: eventDemo2[0]._txId,
+                    _transferHash: eventDemo2[0]._transferHash,
+                    _payload: eventDemo1[0]._payload
+                }).send({
+                    from: ownerWallet.address,
+                    amount: locklift.utils.toNano(1)
+                })
+            );
+            let eventDemo3 = trace.traceTree?.findEventsForContract({
+                contract: demo2,
+                name: "SuccessTransferExecutedEvent",
+            });
+            expect(eventDemo3[0]._transferHash).to.be.equal(eventDemo2[0]._transferHash);
+            let eventDemo4 = trace.traceTree?.findEventsForContract({
+                contract: demo2,
+                name: "SetChainMessageEvent",
+            });
+            expect(eventDemo4[0]._message).to.be.equal(newMessage);
+        });
+
+        it("Should resend message from client and initializer contracts", async function () {
+            trace = await locklift.tracing.trace(
+                demo1.methods.sendMessage({
+                    _dstChainId: chainIds[1],
+                    _message: 'New message'
+                }).send({
+                    from: ownerWallet.address,
+                    amount: locklift.utils.toNano(1)
+                })
+            );
+            let eventDemo1 = trace.traceTree?.findEventsForContract({
+            contract: demo1,
+            name: "InitiateTransferEvent",
+            });
+            expect(eventDemo1[0]._dstChainId).to.be.equal(chainIds[1].toString());
+            expect(eventDemo1[0]._dstAddress).to.be.equal((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
+            expect(eventDemo1[0]._txId).to.be.equal((globalTxId = globalTxId.plus(1)).toString());
+            expect(eventDemo1[0]._transferHash).to.be.not.empty;
+            expect(eventDemo1[0]._payload).to.be.not.empty;
+
+            trace = await locklift.tracing.trace(
+                demo1.methods.initAsterizmTransfer({
+                    _dstChainId: parseInt(eventDemo1[0]._dstChainId),
+                    _txId: parseInt(eventDemo1[0]._txId),
+                    _transferHash: eventDemo1[0]._transferHash,
+                    _transferFeeValue: 0
+                }).send({
+                    from: ownerWallet.address,
+                    amount: locklift.utils.toNano(1)
+                })
+            );
+            let eventTr1 = trace.traceTree?.findEventsForContract({
+                contract: translator1,
+                name: "SendMessageEvent",
+            });
+            let unpackPayload = await locklift.provider.unpackFromCell({
+                structure: [
+                    { name: 'srcChainId', type: 'uint64' },
+                    { name: 'srcAddress', type: 'uint256' },
+                    { name: 'dstChainId', type: 'uint64' },
+                    { name: 'dstAddress', type: 'uint256' },
+                    { name: 'txId', type: 'uint256' },
+                    { name: 'notifyFlag', type: 'bool' },
+                    { name: 'transferHash', type: 'uint256' },
+                ],
+                boc: eventTr1[0]._payload,
+                allowPartial: true
+            });
+            expect(unpackPayload.data.srcChainId).to.be.equals(chainIds[0].toString());
+            expect(unpackPayload.data.srcAddress).to.be.equals((new bigInt(demo1.address.toString().substring(2), 16)).value.toString());
+            expect(unpackPayload.data.dstChainId).to.be.equals(chainIds[1].toString());
+            expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
+            expect(unpackPayload.data.dstChainId).to.be.equals(eventDemo1[0]._dstChainId);
+            expect(unpackPayload.data.txId).to.be.equals(eventDemo1[0]._txId);
+            expect(unpackPayload.data.notifyFlag).to.be.equals(true);
             expect(unpackPayload.data.transferHash).to.be.equals(eventDemo1[0]._transferHash);
 
             const feeAmount = 1000;
@@ -727,7 +851,7 @@ describe("Base layer tests", async function () {
             });
             expect(eventDemo1[0]._dstChainId).to.be.equal(chainIds[1].toString());
             expect(eventDemo1[0]._dstAddress).to.be.equal((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
-            expect(eventDemo1[0]._txId).to.be.equal('7');
+            expect(eventDemo1[0]._txId).to.be.equal((globalTxId = globalTxId.plus(1)).toString());
             expect(eventDemo1[0]._transferHash).to.be.not.empty;
             expect(eventDemo1[0]._payload).to.be.not.empty;
 
@@ -753,6 +877,7 @@ describe("Base layer tests", async function () {
                     { name: 'dstChainId', type: 'uint64' },
                     { name: 'dstAddress', type: 'uint256' },
                     { name: 'txId', type: 'uint256' },
+                    { name: 'notifyFlag', type: 'bool' },
                     { name: 'transferHash', type: 'uint256' },
                 ],
                 boc: eventTr1[0]._payload,
@@ -764,6 +889,7 @@ describe("Base layer tests", async function () {
             expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(eventDemo1[0]._dstChainId);
             expect(unpackPayload.data.txId).to.be.equals(eventDemo1[0]._txId);
+            expect(unpackPayload.data.notifyFlag).to.be.equals(true);
             expect(unpackPayload.data.transferHash).to.be.equals(eventDemo1[0]._transferHash);
 
             trace = await locklift.tracing.trace(
@@ -802,7 +928,7 @@ describe("Base layer tests", async function () {
             });
             expect(eventDemo1[0]._dstChainId).to.be.equal(chainIds[1].toString());
             expect(eventDemo1[0]._dstAddress).to.be.equal((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
-            expect(eventDemo1[0]._txId).to.be.equal('8');
+            expect(eventDemo1[0]._txId).to.be.equal((globalTxId = globalTxId.plus(1)).toString());
             expect(eventDemo1[0]._transferHash).to.be.not.empty;
             expect(eventDemo1[0]._payload).to.be.not.empty;
 
@@ -876,7 +1002,7 @@ describe("Base layer tests", async function () {
             });
             expect(eventDemo1[0]._dstChainId).to.be.equal(chainIds[1].toString());
             expect(eventDemo1[0]._dstAddress).to.be.equal((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
-            expect(eventDemo1[0]._txId).to.be.equal('9');
+            expect(eventDemo1[0]._txId).to.be.equal((globalTxId = globalTxId.plus(1)).toString());
             expect(eventDemo1[0]._transferHash).to.be.not.empty;
             expect(eventDemo1[0]._payload).to.be.not.empty;
 
@@ -902,6 +1028,7 @@ describe("Base layer tests", async function () {
                     { name: 'dstChainId', type: 'uint64' },
                     { name: 'dstAddress', type: 'uint256' },
                     { name: 'txId', type: 'uint256' },
+                    { name: 'notifyFlag', type: 'bool' },
                     { name: 'transferHash', type: 'uint256' },
                 ],
                 boc: eventTr1[0]._payload,
@@ -913,6 +1040,7 @@ describe("Base layer tests", async function () {
             expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(eventDemo1[0]._dstChainId);
             expect(unpackPayload.data.txId).to.be.equals(eventDemo1[0]._txId);
+            expect(unpackPayload.data.notifyFlag).to.be.equals(true);
             expect(unpackPayload.data.transferHash).to.be.equals(eventDemo1[0]._transferHash);
             trace = await locklift.tracing.trace(
                 translator2.methods.transferMessage({
@@ -1033,7 +1161,7 @@ describe("Base layer tests", async function () {
             });
             expect(eventDemo1[0]._dstChainId).to.be.equal(chainIds[1].toString());
             expect(eventDemo1[0]._dstAddress).to.be.equal((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
-            expect(eventDemo1[0]._txId).to.be.equal('10');
+            expect(eventDemo1[0]._txId).to.be.equal((globalTxId = globalTxId.plus(1)).toString());
             expect(eventDemo1[0]._transferHash).to.be.not.empty;
             expect(eventDemo1[0]._payload).to.be.not.empty;
 
@@ -1059,6 +1187,7 @@ describe("Base layer tests", async function () {
                     { name: 'dstChainId', type: 'uint64' },
                     { name: 'dstAddress', type: 'uint256' },
                     { name: 'txId', type: 'uint256' },
+                    { name: 'notifyFlag', type: 'bool' },
                     { name: 'transferHash', type: 'uint256' },
                 ],
                 boc: eventTr1[0]._payload,
@@ -1070,6 +1199,7 @@ describe("Base layer tests", async function () {
             expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(eventDemo1[0]._dstChainId);
             expect(unpackPayload.data.txId).to.be.equals(eventDemo1[0]._txId);
+            expect(unpackPayload.data.notifyFlag).to.be.equals(true);
             expect(unpackPayload.data.transferHash).to.be.equals(eventDemo1[0]._transferHash);
             trace = await locklift.tracing.trace(
                 translator2.methods.transferMessage({
@@ -1161,7 +1291,7 @@ describe("Base layer tests", async function () {
             });
             expect(eventDemo1[0]._dstChainId).to.be.equal(chainIds[1].toString());
             expect(eventDemo1[0]._dstAddress).to.be.equal((new bigInt(demo2.address.toString().substring(2), 16)).value.toString());
-            expect(eventDemo1[0]._txId).to.be.equal('11');
+            expect(eventDemo1[0]._txId).to.be.equal((globalTxId = globalTxId.plus(1)).toString());
             expect(eventDemo1[0]._transferHash).to.be.not.empty;
             expect(eventDemo1[0]._payload).to.be.not.empty;
 
@@ -1196,7 +1326,7 @@ describe("Base layer tests", async function () {
             });
             expect(eventDemo2[0]._srcChainId).to.be.equal(chainIds[0].toString());
             expect(eventDemo2[0]._srcAddress).to.be.equal((new bigInt(demo1.address.toString().substring(2), 16)).value.toString());
-            expect(eventDemo2[0]._txId).to.be.equal('11');
+            expect(eventDemo2[0]._txId).to.be.equal(globalTxId.toString());
             expect(eventDemo2[0]._transferHash).to.be.equal(eventDemo1[0]._transferHash);
 
             trace = await locklift.tracing.trace(

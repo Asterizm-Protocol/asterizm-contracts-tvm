@@ -30,6 +30,7 @@ interface IAsterizmStructs {
     /// @param txId uint  Transaction ID
     /// @param transferHash uint  Transfer hash
     /// @param dstFeeAmount uint128  Fee amount
+    /// @param transferResultNotifyFlag bool  Transfer result notification flag
     struct TrSendMessageRequestDto {
         uint srcAddress;
         uint64 dstChainId;
@@ -37,6 +38,7 @@ interface IAsterizmStructs {
         uint txId;
         uint transferHash;
         uint128 dstFeeAmount;
+        bool transferResultNotifyFlag;
     }
 
     /// Initializator receive payload request DTO
@@ -74,6 +76,7 @@ interface IAsterizmStructs {
     /// @param txId uint  Transaction ID
     /// @param dstFeeAmount uint128  Fee amount
     /// @param relay address  External relay address
+    /// @param transferResultNotifyFlag bool  Transfer result notification flag
     struct IzIninTransferRequestDto {
         uint64 dstChainId;
         uint dstAddress;
@@ -81,6 +84,7 @@ interface IAsterizmStructs {
         uint txId;
         uint128 dstFeeAmount;
         address relay;
+        bool transferResultNotifyFlag;
     }
 
     /// Initializer asterizm receive request DTO

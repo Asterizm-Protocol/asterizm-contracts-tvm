@@ -93,7 +93,7 @@ async function main() {
             _decimals: decimals
         }).send({
             from: ownerWallet.address,
-            amount: locklift.utils.toNano(1)
+            amount: locklift.utils.toNano(2)
         })
     );
 
@@ -124,7 +124,7 @@ async function main() {
         })
     );
 
-    console.log("Deployment was done\n");
+    console.log("\nDeployment was done");
     console.log("TestToken (ATT) address: %s", tokenRootAddress.toString());
     console.log("Initializer address: %s", initializer.address.toString());
     if (externalRelayAddress != undefined) {

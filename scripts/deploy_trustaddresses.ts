@@ -9,12 +9,12 @@ async function main() {
     let trace;
     const commandArgs = parseArgs(process.argv.slice(5));
     const network = commandArgs.network;
-    const tragetAddress = commandArgs.tragetAddress;
+    const targetAddress = commandArgs.targetAddress;
 
     const chains = network == NetworkTypes.localhost || network == NetworkTypes.testnet || network == NetworkTypes.testnetVenom ?
         Chains.testnet : Chains.mainnet;
   
-    const targetContract = locklift.factory.getDeployedContract("AsterizmDemo", new Address(tragetAddress));
+    const targetContract = locklift.factory.getDeployedContract("AsterizmDemo", new Address(targetAddress));
 
     let owner;
     let ownerPubkey;

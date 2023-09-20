@@ -271,8 +271,8 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
     function _initTransferPrivate(IzIninTransferRequestDto _dto, address _sender) private view {
         tvm.rawReserve(AsterizmEnvs.INITIALIZER__MIN_CONTRACT_BALANCE, 0);
         TrSendMessageRequestDto dto = _buildTrSendMessageRequestDto(
-            _sender.toUint(), _dto.dstChainId, _dto.dstAddress,
-            _dto.txId, _dto.transferHash, _dto.dstFeeAmount
+            _sender.toUint(), _dto.dstChainId, _dto.dstAddress, _dto.txId,
+            _dto.transferHash, _dto.dstFeeAmount, _dto.transferResultNotifyFlag
         );
 
         if (_dto.relay != address(0) && _dto.relay != address(translatorLib_)) { // External relays logic
@@ -312,6 +312,18 @@ contract AsterizmInitializer is AsterizmOwnable, IInitializerSender, IInitialize
         }
 
         translatorLib_.resendMessage{ value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false }(_transferHash, sender.toUint(), _feeAmount);
+    }
+
+    /// Transfer sending result notification
+    /// @param _targetAddress address  Target client contract address
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _statusCode uint8  Status code
+    function transferSendingResultNotification(address _targetAddress, bytes32 _transferHash, uint8 _statusCode) external onlyTranslatorOrExternalRelay {
+        IClientReceiverContract(_targetAddress).transferSendingResultNotification{
+            value: AsterizmEnvs.INITIALIZER__NOTIFY_TRANSFER_STATUS_VALUE,
+            flag: AsterizmTransferFlags.RECEIVER_PAYS_FEES,
+            bounce: false
+        }(_transferHash, _statusCode);
     }
 
 

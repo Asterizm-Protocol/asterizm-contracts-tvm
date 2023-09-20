@@ -35,6 +35,7 @@ library AsterizmEnvs {
     uint128 constant INITIALIZER__RECEIVE_TRANSFER_WITH_NONCE_VALUE = 0.02 ton;
     uint128 constant INITIALIZER__RECEIVE_TRANSFER_CLIENT_CONTRACT_VALUE = 0.015 ton;
     uint128 constant INITIALIZER__TRANSFER_CONTRACT_DEPLOY_VALUE = 0.015 ton;
+    uint128 constant INITIALIZER__NOTIFY_TRANSFER_STATUS_VALUE = 0.015 ton;
 
     // For Asterizm client contract
     uint128 constant CLIENT__MIN_CONTRACT_BALANCE = 1 ton;
