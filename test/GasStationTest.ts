@@ -30,6 +30,14 @@ const hashVersions = {
 const decimals = 9;
 const pow = BigNumber(10).pow(decimals);
 
+const initTransferValue = 0.1;
+const withdrawCoinsValue = 0.1;
+const withdrawTokensValue = 0.1;
+const setAmountsValue = 0.02;
+const initAsterizmTransferValue = 0.4;
+const transferMessageValue = 0.1;
+const asterizmClReceiveValue = 0.4;
+
 describe("Gas station tests", async function () {
     before(async () => {
         signer = (await locklift.keystore.getSigner("0"))!;
@@ -305,7 +313,7 @@ describe("Gas station tests", async function () {
                     _amount: locklift.utils.toNano(1)
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(2)
+                    amount: locklift.utils.toNano(withdrawCoinsValue)
                 })
             );
             const balanceOwnerAfter = await locklift.provider.getBalance(ownerWallet.address);
@@ -324,7 +332,7 @@ describe("Gas station tests", async function () {
                     payload: 'te6ccgEBAQEAAgAAAA=='
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initTransferValue)
                 })
             );
             const { value0: gasTokenBalanceAfter } = await gasTokenWallet.methods.balance({ answerId: 0 }).call();
@@ -336,7 +344,7 @@ describe("Gas station tests", async function () {
                     _amount: tokenValue
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(2)
+                    amount: locklift.utils.toNano(withdrawTokensValue)
                 })
             );
             const { value0: gasTokenBalanceFinal } = await gasTokenWallet.methods.balance({ answerId: 0 }).call();
@@ -369,7 +377,7 @@ describe("Gas station tests", async function () {
                     _amount: 1000
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(setAmountsValue)
                 })
             );
             trace = await locklift.tracing.trace(
@@ -382,7 +390,7 @@ describe("Gas station tests", async function () {
                     payload: transferPayload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initTransferValue)
                 }),
                 {
                     allowedCodes: { compute: [7005] },
@@ -394,7 +402,7 @@ describe("Gas station tests", async function () {
                     _amount: 5
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(setAmountsValue)
                 })
             );
 
@@ -403,7 +411,7 @@ describe("Gas station tests", async function () {
                     _amount: 1
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(setAmountsValue)
                 })
             );
             trace = await locklift.tracing.trace(
@@ -416,7 +424,7 @@ describe("Gas station tests", async function () {
                     payload: transferPayload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initTransferValue)
                 }),
                 {
                     allowedCodes: { compute: [7006] },
@@ -428,7 +436,7 @@ describe("Gas station tests", async function () {
                     _amount: 1000
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(setAmountsValue)
                 })
             );
 
@@ -437,7 +445,7 @@ describe("Gas station tests", async function () {
                     _amount: 1000
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(setAmountsValue)
                 })
             );
             trace = await locklift.tracing.trace(
@@ -450,7 +458,7 @@ describe("Gas station tests", async function () {
                     payload: transferPayload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initTransferValue)
                 }),
                 {
                     allowedCodes: { compute: [7013] },
@@ -462,7 +470,7 @@ describe("Gas station tests", async function () {
                     _amount: 5
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(setAmountsValue)
                 })
             );
 
@@ -471,7 +479,7 @@ describe("Gas station tests", async function () {
                     _amount: 1
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(setAmountsValue)
                 })
             );
             trace = await locklift.tracing.trace(
@@ -484,7 +492,7 @@ describe("Gas station tests", async function () {
                     payload: transferPayload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initTransferValue)
                 }),
                 {
                     allowedCodes: { compute: [7014] },
@@ -496,7 +504,7 @@ describe("Gas station tests", async function () {
                     _amount: 1000
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(setAmountsValue)
                 })
             );
 
@@ -510,7 +518,7 @@ describe("Gas station tests", async function () {
                     payload: transferPayload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(2)
+                    amount: locklift.utils.toNano(initTransferValue)
                 })
             );
             expect(trace.traceTree?.getAllErrors().length).to.be.equals(0);
@@ -561,7 +569,7 @@ describe("Gas station tests", async function () {
                     payload: transferPayload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(2)
+                    amount: locklift.utils.toNano(initTransferValue)
                 })
             );
             expect(trace.traceTree?.getAllErrors().length).to.be.equals(0);
@@ -585,7 +593,7 @@ describe("Gas station tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let eventTr1 = trace.traceTree?.findEventsForContract({
@@ -620,7 +628,7 @@ describe("Gas station tests", async function () {
                     _payload: eventTr1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(transferMessageValue)
                 })
             );
             let eventTr2 = trace.traceTree?.findEventsForContract({
@@ -677,7 +685,7 @@ describe("Gas station tests", async function () {
                     _payload: resultPayload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(3)
+                    amount: locklift.utils.toNano(asterizmClReceiveValue)
                 })
             );
             let eventGas3 = trace.traceTree?.findEventsForContract({
@@ -727,7 +735,7 @@ describe("Gas station tests", async function () {
                     payload: transferPayload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(2)
+                    amount: locklift.utils.toNano(initTransferValue)
                 })
             );
             expect(trace.traceTree?.getAllErrors().length).to.be.equals(0);
@@ -752,7 +760,7 @@ describe("Gas station tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 }),
                 {
                     allowedCodes: { compute: [null, 9] },
@@ -792,7 +800,7 @@ describe("Gas station tests", async function () {
                     payload: transferPayload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(2)
+                    amount: locklift.utils.toNano(initTransferValue)
                 })
             );
             expect(trace.traceTree?.getAllErrors().length).to.be.equals(0);
@@ -816,7 +824,7 @@ describe("Gas station tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let eventTr1 = trace.traceTree?.findEventsForContract({
@@ -854,7 +862,7 @@ describe("Gas station tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let gasErrorEvent = trace.traceTree?.findEventsForContract({

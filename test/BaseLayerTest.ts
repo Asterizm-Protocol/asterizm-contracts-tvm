@@ -31,6 +31,17 @@ const hashVersions = {
 }
 let globalTxId = new bigInt(0);
 
+const sendMessageValue = 0.08;
+const initAsterizmTransferValue = 0.4;
+const transferMessageValue = 0.1;
+const removeBlockAddressValue = 0.02;
+const addBlockAddressValue = 0.02;
+const transferSendingResultNotificationValue = 0.02;
+const asterizmClReceiveValue = 0.4;
+const resendAsterizmTransferValue = 0.1;
+const resendTransferValue = 0.1;
+const setExternalRelayValue = 0.05;
+
 describe("Base layer tests", async function () {
     before(async () => {
         signer = (await locklift.keystore.getSigner("0"))!;
@@ -328,7 +339,7 @@ describe("Base layer tests", async function () {
                     _message: 'New message'
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(sendMessageValue)
                 })
             );
             let eventDemo = trace.traceTree?.findEventsForContract({
@@ -349,7 +360,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let eventTr = trace.traceTree?.findEventsForContract({
@@ -367,7 +378,7 @@ describe("Base layer tests", async function () {
                     _message: 'New message'
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(sendMessageValue)
                 })
             );
             let eventDemo = trace.traceTree?.findEventsForContract({
@@ -388,7 +399,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let eventTr = trace.traceTree?.findEventsForContract({
@@ -403,7 +414,7 @@ describe("Base layer tests", async function () {
                     _message: 'New message'
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(sendMessageValue)
                 })
             );
             let eventDemo1 = trace.traceTree?.findEventsForContract({
@@ -424,7 +435,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let eventTr1 = trace.traceTree?.findEventsForContract({
@@ -438,7 +449,7 @@ describe("Base layer tests", async function () {
                     _payload: eventTr1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
         });
@@ -450,7 +461,7 @@ describe("Base layer tests", async function () {
                     _address: (new bigInt(demo2.address.toString().substring(2), 16)).value.toString()
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(addBlockAddressValue)
                 })
             );
             let eventIz = trace.traceTree.findEventsForContract({
@@ -465,7 +476,7 @@ describe("Base layer tests", async function () {
                     _message: 'New message'
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(sendMessageValue)
                 })
             );
             let eventDemo = trace.traceTree?.findEventsForContract({
@@ -485,7 +496,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 }),
                 {
                     allowedCodes: { compute: [3003] },
@@ -498,7 +509,7 @@ describe("Base layer tests", async function () {
                     _chainId: chainIds[1]
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(removeBlockAddressValue)
                 })
             );
             let eventIz1 = trace.traceTree?.findEventsForContract({
@@ -513,7 +524,7 @@ describe("Base layer tests", async function () {
                     _message: 'New message'
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(sendMessageValue)
                 })
             );
             let eventDemo1 = trace.traceTree?.findEventsForContract({
@@ -534,7 +545,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let eventTr1 = trace.traceTree?.findEventsForContract({
@@ -548,7 +559,7 @@ describe("Base layer tests", async function () {
                     _payload: eventTr1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(transferMessageValue)
                 })
             );
 
@@ -562,7 +573,7 @@ describe("Base layer tests", async function () {
                     _message: 'New message'
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(sendMessageValue)
                 })
             );
             let eventDemo1 = trace.traceTree?.findEventsForContract({
@@ -583,7 +594,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: feeValue
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let eventTr1 = trace.traceTree?.findEventsForContract({
@@ -618,7 +629,7 @@ describe("Base layer tests", async function () {
                     _payload: eventTr1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(transferMessageValue)
                 })
             );
         });
@@ -631,7 +642,7 @@ describe("Base layer tests", async function () {
                     _message: newMessage
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(sendMessageValue)
                 })
             );
             let eventDemo1 = trace.traceTree?.findEventsForContract({
@@ -652,7 +663,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let eventTr1 = trace.traceTree?.findEventsForContract({
@@ -687,7 +698,7 @@ describe("Base layer tests", async function () {
                     _payload: eventTr1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(transferMessageValue)
                 })
             );
             let eventDemo2 = trace.traceTree?.findEventsForContract({
@@ -707,7 +718,7 @@ describe("Base layer tests", async function () {
                     _statusCode: statusCode
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(0.4)
+                    amount: locklift.utils.toNano(transferSendingResultNotificationValue)
                 })
             );
             let eventTr3 = trace.traceTree?.findEventsForContract({
@@ -726,7 +737,7 @@ describe("Base layer tests", async function () {
                     _payload: eventDemo1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(asterizmClReceiveValue)
                 })
             );
             let eventDemo3 = trace.traceTree?.findEventsForContract({
@@ -748,7 +759,7 @@ describe("Base layer tests", async function () {
                     _message: 'New message'
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(sendMessageValue)
                 })
             );
             let eventDemo1 = trace.traceTree?.findEventsForContract({
@@ -769,7 +780,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let eventTr1 = trace.traceTree?.findEventsForContract({
@@ -805,7 +816,7 @@ describe("Base layer tests", async function () {
                     _feeAmount: feeAmount
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(resendAsterizmTransferValue)
                 })
             );
             let eventTr2 = trace.traceTree?.findEventsForContract({
@@ -823,7 +834,7 @@ describe("Base layer tests", async function () {
                     _relay: zeroAddress
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(resendTransferValue)
                 })
             );
             let eventTr3 = trace.traceTree?.findEventsForContract({
@@ -842,7 +853,7 @@ describe("Base layer tests", async function () {
                     _message: 'New message'
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(sendMessageValue)
                 })
             );
             let eventDemo1 = trace.traceTree?.findEventsForContract({
@@ -863,7 +874,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let eventTr1 = trace.traceTree?.findEventsForContract({
@@ -900,7 +911,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let demoErrorEvent = trace.traceTree?.findEventsForContract({
@@ -919,7 +930,7 @@ describe("Base layer tests", async function () {
                     _message: 'New message'
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(sendMessageValue)
                 })
             );
             let eventDemo1 = trace.traceTree?.findEventsForContract({
@@ -941,7 +952,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 }),
                 {
                     allowedCodes: { compute: [null, 9] },
@@ -958,7 +969,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 }),
                 {
                     allowedCodes: { compute: [4011] },
@@ -976,7 +987,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 }),
                 {
                     allowedCodes: { compute: [4009] },
@@ -993,7 +1004,7 @@ describe("Base layer tests", async function () {
                     _message: 'New message'
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(sendMessageValue)
                 })
             );
             let eventDemo1 = trace.traceTree?.findEventsForContract({
@@ -1014,7 +1025,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let eventTr1 = trace.traceTree?.findEventsForContract({
@@ -1048,7 +1059,7 @@ describe("Base layer tests", async function () {
                     _payload: eventTr1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(transferMessageValue)
                 })
             );
             let eventTr2 = trace.traceTree?.findEventsForContract({
@@ -1078,7 +1089,7 @@ describe("Base layer tests", async function () {
                     _payload: eventDemo1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(3)
+                    amount: locklift.utils.toNano(asterizmClReceiveValue)
                 }),
                 {
                     allowedCodes: { compute: [4004] },
@@ -1097,7 +1108,7 @@ describe("Base layer tests", async function () {
                     _payload: eventDemo1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(3)
+                    amount: locklift.utils.toNano(asterizmClReceiveValue)
                 }),
                 {
                     allowedCodes: { compute: [4004] },
@@ -1116,7 +1127,7 @@ describe("Base layer tests", async function () {
                     _payload: eventDemo1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(3)
+                    amount: locklift.utils.toNano(asterizmClReceiveValue)
                 }),
                 {
                     allowedCodes: { compute: [4003] },
@@ -1135,7 +1146,7 @@ describe("Base layer tests", async function () {
                     _payload: eventDemo1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(3)
+                    amount: locklift.utils.toNano(asterizmClReceiveValue)
                 }),
                 {
                     allowedCodes: { compute: [4003] },
@@ -1152,7 +1163,7 @@ describe("Base layer tests", async function () {
                     _message: 'New message'
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(sendMessageValue)
                 })
             );
             let eventDemo1 = trace.traceTree?.findEventsForContract({
@@ -1173,7 +1184,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let eventTr1 = trace.traceTree?.findEventsForContract({
@@ -1207,7 +1218,7 @@ describe("Base layer tests", async function () {
                     _payload: eventTr1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(transferMessageValue)
                 })
             );
             let eventTr2 = trace.traceTree?.findEventsForContract({
@@ -1235,7 +1246,7 @@ describe("Base layer tests", async function () {
                     _payload: eventDemo1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(3)
+                    amount: locklift.utils.toNano(asterizmClReceiveValue)
                 })
             );
             expect(trace.traceTree?.getAllErrors().length).to.be.equals(0);
@@ -1249,7 +1260,7 @@ describe("Base layer tests", async function () {
                     _payload: eventDemo1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(3)
+                    amount: locklift.utils.toNano(asterizmClReceiveValue)
                 }),
                 {
                     allowedCodes: { compute: [4014] },
@@ -1267,7 +1278,7 @@ describe("Base layer tests", async function () {
                     _externalRelay: externalTranslator1.address
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(setExternalRelayValue)
                 })
             );
             let eventDemoParams1 = trace.traceTree?.findEventsForContract({
@@ -1282,7 +1293,7 @@ describe("Base layer tests", async function () {
                     _message: newMessage
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(sendMessageValue)
                 })
             );
             let eventDemo1 = trace.traceTree?.findEventsForContract({
@@ -1303,7 +1314,7 @@ describe("Base layer tests", async function () {
                     _transferFeeValue: 0
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(initAsterizmTransferValue)
                 })
             );
             let eventTr1 = trace.traceTree?.findEventsForContract({
@@ -1317,7 +1328,7 @@ describe("Base layer tests", async function () {
                     _payload: eventTr1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(transferMessageValue)
                 })
             );
             let eventDemo2 = trace.traceTree?.findEventsForContract({
@@ -1338,7 +1349,7 @@ describe("Base layer tests", async function () {
                     _payload: eventDemo1[0]._payload
                 }).send({
                     from: ownerWallet.address,
-                    amount: locklift.utils.toNano(1)
+                    amount: locklift.utils.toNano(asterizmClReceiveValue)
                 })
             );
             let eventDemo3 = trace.traceTree?.findEventsForContract({

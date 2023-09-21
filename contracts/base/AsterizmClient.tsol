@@ -533,8 +533,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// @param _transferHash uint  Transfer hash
     /// @param _feeAmount uint128  Transfer fee amount
     function resendAsterizmTransfer(uint _transferHash, uint128 _feeAmount) external onlyOwner {
-        uint128 resendTransferLogicFee = 0.5 ton;
-        uint128 fullAmount = _feeAmount + resendTransferLogicFee;
+        uint128 fullAmount = _feeAmount + AsterizmEnvs.CLIENT__RESEND_TRANSFER_FEE_VALUE;
         require(fullAmount <= msg.value, AsterizmErrors.CLIENT__TRANSFER_FEE_VALUE_IS_TOO_SMALL_ERROR);
         require(address(this).balance >= fullAmount, AsterizmErrors.CLIENT__BALANCE_NOT_ENOUGH__ERROR);
 
@@ -551,6 +550,8 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         if (notifyTransferSendingResult_) {
             emit TransferSendingResultNotification(_transferHash, _statusCode);
         }
+
+        address(initializerLib_).transfer({ value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false });
     }
 
 
