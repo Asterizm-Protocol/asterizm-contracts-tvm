@@ -229,7 +229,7 @@ describe("Gas station tests", async function () {
                 initParams: {
                     owner_: owner,
                     initializerLib_: initializer1.address,
-                    notifyTransferSendingResult_: true,
+                    notifyTransferSendingResult_: false,
                     disableHashValidation_: true,
                     hashVersion_: hashVersions.CrosschainV1,
                     nonce_: locklift.utils.getRandomNonce().toFixed(),
@@ -249,7 +249,7 @@ describe("Gas station tests", async function () {
                 initParams: {
                     owner_: owner,
                     initializerLib_: initializer2.address,
-                    notifyTransferSendingResult_: true,
+                    notifyTransferSendingResult_: false,
                     disableHashValidation_: true,
                     hashVersion_: hashVersions.CrosschainV1,
                     nonce_: locklift.utils.getRandomNonce().toFixed(),
@@ -620,7 +620,7 @@ describe("Gas station tests", async function () {
             expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(gas2.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(firstGasEvent1._dstChainId);
             expect(unpackPayload.data.txId).to.be.equals(firstGasEvent1._txId);
-            expect(unpackPayload.data.notifyFlag).to.be.equals(true);
+            expect(unpackPayload.data.notifyFlag).to.be.equals(false);
             expect(unpackPayload.data.transferHash).to.be.equals(firstGasEvent1._transferHash);
             trace = await locklift.tracing.trace(
                 translator2.methods.transferMessage({
@@ -851,7 +851,7 @@ describe("Gas station tests", async function () {
             expect(unpackPayload.data.dstAddress).to.be.equals((new bigInt(gas2.address.toString().substring(2), 16)).value.toString());
             expect(unpackPayload.data.dstChainId).to.be.equals(firstGasEvent1._dstChainId);
             expect(unpackPayload.data.txId).to.be.equals(firstGasEvent1._txId);
-            expect(unpackPayload.data.notifyFlag).to.be.equals(true);
+            expect(unpackPayload.data.notifyFlag).to.be.equals(false);
             expect(unpackPayload.data.transferHash).to.be.equals(firstGasEvent1._transferHash);
             
             trace = await locklift.tracing.trace(

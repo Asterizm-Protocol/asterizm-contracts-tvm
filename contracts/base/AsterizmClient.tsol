@@ -426,6 +426,31 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         return trustedAddresses[_chainId];
     }
 
+    /// Return initializer address
+    /// @return address
+    function getInitializerAddress() external view returns(address) {
+        return address(initializerLib_);
+    }
+
+    /// Return trusted src addresses
+    /// @param _chainId uint64  Chain id
+    /// @return AsterizmChain
+    function getTrustedAddresses(uint64 _chainId) external view returns(uint) {
+        return trustedAddresses[_chainId];
+    }
+
+    /// Return disable hash validation flag
+    /// @return bool
+    function getDisableHashValidation() external view returns(bool) {
+        return disableHashValidation_;
+    }
+
+    /// Return notify transfer sending result flag
+    /// @return bool
+    function getNotifyTransferSendingResult() external view returns(bool) {
+        return notifyTransferSendingResult_;
+    }
+
 
     /*******************/
     /** External logic */

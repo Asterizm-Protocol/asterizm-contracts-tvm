@@ -5,11 +5,9 @@ pragma AbiHeader pubkey;
 import "broxus-ton-tokens-contracts/contracts/interfaces/ITokenRoot.tsol";
 import "broxus-ton-tokens-contracts/contracts/interfaces/ITokenWallet.tsol";
 import "broxus-ton-tokens-contracts/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
-import "../../base/AsterizmClient.tsol";
-import "../../libs/UintLib.tsol";
-import "../../libs/AddressLib.tsol";
 import "./GasStationErrors.tsol";
 import "./GasStationEnvs.tsol";
+import "asterizmprotocol/contracts/tvm/AsterizmClient.tsol";
 
 contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
 

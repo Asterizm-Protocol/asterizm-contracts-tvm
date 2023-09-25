@@ -1,7 +1,7 @@
 pragma ton-solidity >= 0.70.0;
 pragma AbiHeader expire;
 
-import "../base/AsterizmClient.tsol";
+import "asterizmprotocol/contracts/tvm/AsterizmClient.tsol";
 
 contract AsterizmDemo is AsterizmClient {
 

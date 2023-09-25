@@ -10,8 +10,8 @@ async function main() {
     const commandArgs = parseArgs(process.argv.slice(5));
     const network = commandArgs.network;
     const contractAddress = commandArgs.contractAddress;
-    const trustedChainId = commandArgs.trustedChainId;
-    const trustedAddress = commandArgs.trustedAddress;
+    const destinationChainId = commandArgs.destinationChainId;
+    const message = commandArgs.message;
 
     let owner;
     let ownerPubkey;
@@ -38,16 +38,16 @@ async function main() {
     const targetContract = locklift.factory.getDeployedContract("AsterizmDemo", new Address(contractAddress));
 
     trace = await locklift.tracing.trace(
-        targetContract.methods.addTrustedAddresses({
-            _chainIds: [trustedChainId],
-            _trustedAddresses: [trustedAddress]
+        targetContract.methods.sendMessage({
+            _dstChainId: destinationChainId,
+            _message: message
         }).send({
             from: ownerWallet.address,
-            amount: locklift.utils.toNano(2)
+            amount: locklift.utils.toNano(0.5)
         })
     );
 
-    console.log("\nAdded trusted address successfully\n");
+    console.log("\nMessage sent successfully\n");
     console.log("Target contract address: %s", targetContract.address);
     console.log("Transfer hash: %s\n", trace.inMessage.hash);
 }
