@@ -149,7 +149,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
         initializerTransferCode = initializerLib_.getInitializerTransferCode{ value: AsterizmEnvs.CLIENT__GETTER_VALUE }().await;
         clientTransferCode = initializerLib_.getClientTransferCode{ value: AsterizmEnvs.CLIENT__GETTER_VALUE }().await;
         chains = initializerLib_.getChainsList{ value: AsterizmEnvs.CLIENT__GETTER_VALUE }().await;
-        addSender(owner());
+        _addSenderPrivate(owner());
 
         address currencAddress = address(this);
         _addTrustedAddressPrivate(localChainId, currencAddress.toUint());
@@ -351,6 +351,12 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmOwnable, As
     /// Add sender
     /// @param _sender address  Sender address
     function addSender(address _sender) public onlyOwner {
+        _addSenderPrivate(_sender);
+    }
+
+    /// Add sender private method
+    /// @param _sender address  Sender address
+    function _addSenderPrivate(address _sender) private {
         senders[_sender].exists = true;
         emit AddSenderEvent(_sender);
     }
