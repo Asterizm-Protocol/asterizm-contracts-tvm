@@ -1,7 +1,6 @@
 import {Address, WalletTypes} from "locklift";
-import { Chains } from './base/base_chains';
-import { NetworkTypes } from './base/base_network_types';
-import { parseArgs } from './base/base_parce_args';
+import { NetworkTypes } from '../base/base_network_types';
+import { parseArgs } from '../base/base_parce_args';
 
 require('dotenv').config();
 

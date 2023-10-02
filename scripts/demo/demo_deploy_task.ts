@@ -1,9 +1,9 @@
 import {Address, WalletTypes} from "locklift";
 import {EverWalletAccount} from "everscale-standalone-client/nodejs";
 const bigInt = require("big-integer");
-import { HashVersions } from './base/base_hash_versions';
-import { parseArgs } from './base/base_parce_args';
-import { NetworkTypes } from './base/base_network_types';
+import { HashVersions } from '../base/base_hash_versions';
+import { parseArgs } from '../base/base_parce_args';
+import { NetworkTypes } from '../base/base_network_types';
 
 require('dotenv').config();
 

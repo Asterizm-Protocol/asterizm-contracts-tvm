@@ -53,6 +53,9 @@ library AsterizmErrors {
     uint16 constant CLIENT__WRONG_TRANSFER_HASH_ADDRESS__ERROR = 4017;
     uint16 constant CLIENT__TRANSFER_FEE_VALUE_IS_TOO_SMALL_ERROR = 4018;
     uint16 constant CLIENT__EXTERNAL_RELAY_SET_ALREADY__ERROR = 4019;
+    uint16 constant CLIENT__ONLY_SENDER__ERROR = 4020;
+    uint16 constant CLIENT__ONLY_OWNER_OR_SENDER__ERROR = 4021;
+    uint16 constant CLIENT__SENDER_NOT_EXISTS__ERROR = 4022;
 
     // For Transfer contract
     uint16 constant TRANSFER__NON_ZERO_PUBLIC_KEY__ERROR = 5001;
