@@ -13,8 +13,10 @@ async function main() {
     const minUsdAmount = commandArgs.minUsdAmount;
     const maxUsdAmount = commandArgs.maxUsdAmount;
     const minUsdAmountPerChain = commandArgs.minUsdAmountPerChain;
+    const maxUsdAmountPerChain = commandArgs.maxUsdAmountPerChain;
     const externalRelayAddress = commandArgs.externalRelay;
     const decimals = commandArgs.decimals ? commandArgs.decimals : 9;
+    const pauseInSeconds = commandArgs.pause ? commandArgs.pause : 0; // Use this shit for avoid callbacks errors
 
     const signer = (await locklift.keystore.getSigner("0"))!;
 
@@ -75,12 +77,62 @@ async function main() {
     }
 
     const gas = locklift.factory.getDeployedContract("GasStation", gasAddress);
+    console.log("GasSender address: %s", gas.address.toString());
+
+    if (pauseInSeconds > 0) {
+        console.log("Pause in seconds: %s", pauseInSeconds.toString());
+        await new Promise(f => setTimeout(f, pauseInSeconds * 1000));
+    }
 
     if (externalRelayAddress != undefined) {
         const externalRelay = locklift.factory.getDeployedContract("AsterizmTranslator", new Address(externalRelayAddress));
         trace = await locklift.tracing.trace(
             gas.methods.setExternalRelay({
                 _externalRelay: externalRelay.address,
+            }).send({
+                from: ownerWallet.address,
+                amount: locklift.utils.toNano(1)
+            })
+        );
+    }
+
+    if (minUsdAmount != undefined) {
+        trace = await locklift.tracing.trace(
+            gas.methods.setMinUsdAmount({
+                _amount: minUsdAmount
+            }).send({
+                from: ownerWallet.address,
+                amount: locklift.utils.toNano(1)
+            })
+        );
+    }
+
+    if (maxUsdAmount != undefined) {
+        trace = await locklift.tracing.trace(
+            gas.methods.setMaxUsdAmount({
+                _amount: maxUsdAmount
+            }).send({
+                from: ownerWallet.address,
+                amount: locklift.utils.toNano(1)
+            })
+        );
+    }
+
+    if (minUsdAmountPerChain != undefined) {
+        trace = await locklift.tracing.trace(
+            gas.methods.setMinUsdAmountPerChain({
+                _amount: minUsdAmountPerChain
+            }).send({
+                from: ownerWallet.address,
+                amount: locklift.utils.toNano(1)
+            })
+        );
+    }
+
+    if (maxUsdAmountPerChain != undefined) {
+        trace = await locklift.tracing.trace(
+            gas.methods.setMaxUsdAmountPerChain({
+                _amount: maxUsdAmountPerChain
             }).send({
                 from: ownerWallet.address,
                 amount: locklift.utils.toNano(1)
@@ -95,33 +147,6 @@ async function main() {
         }).send({
             from: ownerWallet.address,
             amount: locklift.utils.toNano(2)
-        })
-    );
-
-    trace = await locklift.tracing.trace(
-        gas.methods.setMinUsdAmount({
-            _amount: minUsdAmount
-        }).send({
-            from: ownerWallet.address,
-            amount: locklift.utils.toNano(1)
-        })
-    );
-
-    trace = await locklift.tracing.trace(
-        gas.methods.setMaxUsdAmount({
-            _amount: maxUsdAmount
-        }).send({
-            from: ownerWallet.address,
-            amount: locklift.utils.toNano(1)
-        })
-    );
-
-    trace = await locklift.tracing.trace(
-        gas.methods.setMinUsdAmountPerChain({
-            _amount: minUsdAmountPerChain
-        }).send({
-            from: ownerWallet.address,
-            amount: locklift.utils.toNano(1)
         })
     );
 

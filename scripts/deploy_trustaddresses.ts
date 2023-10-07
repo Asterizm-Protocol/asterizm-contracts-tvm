@@ -54,9 +54,9 @@ async function main() {
     let chainIds = [];
     let trustedAddresses = [];
     for (let i = 0; i < chains.length; i++) {
-        chainIds.push(chains[i].id);
         if (chains[i].trustAddresses.gas.uint != '0') {
-          trustedAddresses.push(chains[i].trustAddresses.gas.uint);
+            chainIds.push(chains[i].id);
+            trustedAddresses.push(chains[i].trustAddresses.gas.uint);
         }
     }
 

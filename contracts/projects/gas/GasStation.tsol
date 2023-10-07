@@ -77,6 +77,7 @@ contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
     function setMinUsdAmount(uint _amount) external onlyOwner {
         minUsdAmount = _amount;
         emit SetMinUsdAmountEvent(_amount);
+        msg.sender.transfer({ value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false });
     }
 
     /// Set maximum amount in USD
@@ -84,6 +85,7 @@ contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
     function setMaxUsdAmount(uint _amount) external onlyOwner {
         maxUsdAmount = _amount;
         emit SetMaxUsdAmountEvent(_amount);
+        msg.sender.transfer({ value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false });
     }
 
     /// Set minimum amount in USD per chain
@@ -91,6 +93,7 @@ contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
     function setMinUsdAmountPerChain(uint _amount) external onlyOwner {
         minUsdAmountPerChain = _amount;
         emit SetMinUsdAmountPerChainEvent(_amount);
+        msg.sender.transfer({ value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false });
     }
 
     /// Set maximum amount in USD per chain
@@ -98,6 +101,7 @@ contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
     function setMaxUsdAmountPerChain(uint _amount) external onlyOwner {
         maxUsdAmountPerChain = _amount;
         emit SetMaxUsdAmountPerChainEvent(_amount);
+        msg.sender.transfer({ value: 0, flag: AsterizmTransferFlags.REMAINING_GAS, bounce: false });
     }
 
     /** Stable coins logic */
@@ -108,14 +112,13 @@ contract GasStation is AsterizmClient, IAcceptTokensTransferCallback {
     function addStableCoin(ITokenRoot _tokenRoot, uint8 _decimals) external onlyOwner {
         address tokenRootAddress = address(_tokenRoot);
         require(!stableCoins[tokenRootAddress].exists, GasStationErrors.GAS__STABLE_COIN_EXISTS_ALREADY__ERROR);
-        tvm.rawReserve(GasStationEnvs.GAS__MIN_CONTRACT_BALANCE, 0);
     
         stableCoins[tokenRootAddress] = StableCoin(true, address(0), _decimals);
 
         _tokenRoot.deployWallet{
             value: 0,
-            bounce: false,
-            flag: AsterizmTransferFlags.ALL_NOT_RESERVED,
+            bounce: true,
+            flag: AsterizmTransferFlags.REMAINING_GAS,
             callback: onStableCoinWalletDeployed
         } (address(this), GasStationEnvs.GAS__MIN_STABLE_WALLET_BALANCE);
     }

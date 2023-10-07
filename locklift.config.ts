@@ -39,6 +39,28 @@ const config: LockliftConfig = {
     version: "0.20.3",
   },
   networks: {
+      locklift: {
+        connection: {
+            id: 1001,
+            // @ts-ignore
+            type: "proxy",
+            // @ts-ignore
+            data: {},
+        },
+        // This giver is default local-node giverV2
+        // giver: {
+        //   // Check if you need provide custom giver
+        //   address: process.env.LOCALHOST_GIVER_ADDRESS || '',
+        //   key: process.env.LOCALHOST_GIVER_KEY || '',
+        // },
+        // tracing: {
+        //   endpoint: LOCAL_NETWORK_ENDPOINT,
+        // },
+        keys: {
+            // phrase: process.env.LOCALHOST_SEED,
+            amount: 20,
+        },
+    },
     local: {
       // Specify connection settings for https://github.com/broxus/everscale-standalone-client/
       connection: {
