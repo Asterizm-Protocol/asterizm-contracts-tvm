@@ -14,9 +14,7 @@ async function main() {
     const relaySystemFee = commandArgs.systemFee;
 
     const chains = network == NetworkTypes.localhost || network == NetworkTypes.testnet || network == NetworkTypes.testnetVenom ? Chains.testnet : Chains.mainnet;
-    const signer = (await locklift.keystore.getSigner("0"))!;
     let trace;
-
     let owner;
     let ownerPubkey;
     if (network == NetworkTypes.localhost) {
@@ -28,6 +26,9 @@ async function main() {
     } else if (network == NetworkTypes.testnetVenom) {
         owner = new Address(process.env.TESTNET_VENOM_OWNER_ADDRESS || '');
         ownerPubkey = process.env.TESTNET_VENOM_OWNER_KEY || '';
+    } else if (network == NetworkTypes.venom) {
+        owner = new Address(process.env.MAINNET_VENOM_OWNER_ADDRESS || '');
+        ownerPubkey = process.env.MAINNET_VENOM_OWNER_KEY || '';
     } else {
         owner = new Address(process.env.MAINNET_EVER_OWNER_ADDRESS || '');
         ownerPubkey = process.env.MAINNET_EVER_OWNER_KEY || '';
@@ -50,12 +51,15 @@ async function main() {
         chainTypes.push(chains[i].chainType);
     }
 
+    currentChain = currentChain ? currentChain : chains[0];
+    const signer = (await locklift.keystore.getSigner(currentChain.giverId || '0'))!;
+
     const { contract: externalTranslatorObj1 } = await locklift.factory.deployContract({
         contract: "AsterizmTranslator",
         publicKey: signer.publicKey,
         initParams: {
             owner_: owner,
-            localChainId_: currentChain ? currentChain.id : chainIds[0],
+            localChainId_: currentChain.id,
             localChainType_: ChainTypes.TVM,
             nonce_: locklift.utils.getRandomNonce().toFixed(),
         },

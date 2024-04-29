@@ -11,10 +11,7 @@ async function main() {
     let trace;
     const commandArgs = parseArgs(process.argv.slice(5));
     const network = commandArgs.network;
-
     const chains = network == NetworkTypes.localhost || network == NetworkTypes.testnet || network == NetworkTypes.testnetVenom ? Chains.testnet : Chains.mainnet;
-
-    const signer = (await locklift.keystore.getSigner("0"))!;
 
     let owner;
     let ownerPubkey;
@@ -27,6 +24,9 @@ async function main() {
     } else if (network == NetworkTypes.testnetVenom) {
         owner = new Address(process.env.TESTNET_VENOM_OWNER_ADDRESS || '');
         ownerPubkey = process.env.TESTNET_VENOM_OWNER_KEY || '';
+    } else if (network == NetworkTypes.venom) {
+        owner = new Address(process.env.MAINNET_VENOM_OWNER_ADDRESS || '');
+        ownerPubkey = process.env.MAINNET_VENOM_OWNER_KEY || '';
     } else {
         owner = new Address(process.env.MAINNET_EVER_OWNER_ADDRESS || '');
         ownerPubkey = process.env.MAINNET_EVER_OWNER_KEY || '';
@@ -54,6 +54,7 @@ async function main() {
     }
 
     currentChain = currentChain ? currentChain : chains[0];
+    const signer = (await locklift.keystore.getSigner(currentChain.giverId || '0'))!;
 
     let translatorAddress;
     // translatorAddress = new Address("0:520237b291e5af75605228ede9b9fb56ddcd30574251d27490ca0a0418bf5fab");
@@ -71,6 +72,7 @@ async function main() {
             value: locklift.utils.toNano(1.5),
         });
         translatorAddress = translatorObj.address;
+        console.log("Translator deployment successfully: %s", translatorAddress);
 
         trace = await locklift.tracing.trace(
             translatorObj.methods.addChains({
@@ -84,7 +86,6 @@ async function main() {
     }
 
     const translator = locklift.factory.getDeployedContract("AsterizmTranslator", translatorAddress);
-
 
     const AsterizmInitializerTransfer = locklift.factory.getContractArtifacts("AsterizmInitializerTransfer");
     const AsterizmClientTransfer = locklift.factory.getContractArtifacts("AsterizmClientTransfer");
@@ -105,6 +106,7 @@ async function main() {
             value: locklift.utils.toNano(1.5),
         });
         initializerAddress = initializer.address;
+        console.log("Initializer deployment successfully: %s", initializerAddress);
 
         trace = await locklift.tracing.trace(
             translator.methods.setInitializer({

@@ -24,6 +24,9 @@ async function main() {
     } else if (network == NetworkTypes.testnetVenom) {
         owner = new Address(process.env.TESTNET_VENOM_OWNER_ADDRESS || '');
         ownerPubkey = process.env.TESTNET_VENOM_OWNER_KEY || '';
+    } else if (network == NetworkTypes.venom) {
+        owner = new Address(process.env.MAINNET_VENOM_OWNER_ADDRESS || '');
+        ownerPubkey = process.env.MAINNET_VENOM_OWNER_KEY || '';
     } else {
         owner = new Address(process.env.MAINNET_EVER_OWNER_ADDRESS || '');
         ownerPubkey = process.env.MAINNET_EVER_OWNER_KEY || '';

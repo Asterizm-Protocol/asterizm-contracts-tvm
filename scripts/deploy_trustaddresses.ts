@@ -32,6 +32,10 @@ async function main() {
         ownerPubkey = process.env.TESTNET_VENOM_OWNER_KEY || '';
         // tokenRootAddress = new Address('0:d5756401c0e2ad938bb980e72846f22f02b15d83c2c9190f93c0c2ff44771336');
         tokenRootAddress = new Address('0:4a2219d92ed7971c16093c04dc2f442925fcfb4f1c7f18fc4b6b18cf100b27aa');
+    } else if (network == NetworkTypes.venom) {
+        owner = new Address(process.env.MAINNET_VENOM_OWNER_ADDRESS || '');
+        ownerPubkey = process.env.MAINNET_VENOM_OWNER_KEY || '';
+        tokenRootAddress = new Address('0:8c6dcaa30727458527e99a479dae92a92a51c24e235e5b531659e201204d79ee');
     } else {
         owner = new Address(process.env.MAINNET_EVER_OWNER_ADDRESS || '');
         ownerPubkey = process.env.MAINNET_EVER_OWNER_KEY || '';

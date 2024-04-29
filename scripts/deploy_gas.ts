@@ -2,6 +2,7 @@ import {Address, WalletTypes} from "locklift";
 import { NetworkTypes } from './base/base_network_types';
 import { HashVersions } from './base/base_hash_versions';
 import { parseArgs } from './base/base_parce_args';
+import {Chains} from "./base/base_chains";
 
 require('dotenv').config();
 
@@ -17,8 +18,6 @@ async function main() {
     const externalRelayAddress = commandArgs.externalRelay;
     const decimals = commandArgs.decimals ? commandArgs.decimals : 9;
     const pauseInSeconds = commandArgs.pause ? commandArgs.pause : 0; // Use this shit for avoid callbacks errors
-
-    const signer = (await locklift.keystore.getSigner("0"))!;
 
     let owner;
     let ownerPubkey;
@@ -36,6 +35,10 @@ async function main() {
         ownerPubkey = process.env.TESTNET_VENOM_OWNER_KEY || '';
         // tokenRootAddress = new Address('0:d5756401c0e2ad938bb980e72846f22f02b15d83c2c9190f93c0c2ff44771336');
         tokenRootAddress = new Address('0:4a2219d92ed7971c16093c04dc2f442925fcfb4f1c7f18fc4b6b18cf100b27aa');
+    } else if (network == NetworkTypes.venom) {
+        owner = new Address(process.env.MAINNET_VENOM_OWNER_ADDRESS || '');
+        ownerPubkey = process.env.MAINNET_VENOM_OWNER_KEY || '';
+        tokenRootAddress = new Address('0:8c6dcaa30727458527e99a479dae92a92a51c24e235e5b531659e201204d79ee');
     } else {
         owner = new Address(process.env.MAINNET_EVER_OWNER_ADDRESS || '');
         ownerPubkey = process.env.MAINNET_EVER_OWNER_KEY || '';
@@ -55,6 +58,21 @@ async function main() {
     //     address: owner,
     //     type: WalletTypes.EverWallet,
     // });
+
+    const chains = network == NetworkTypes.localhost || network == NetworkTypes.testnet || network == NetworkTypes.testnetVenom ? Chains.testnet : Chains.mainnet;
+    let chainIds = [];
+    let chainTypes = [];
+    let currentChain;
+    for (let i = 0; i < chains.length; i++) {
+        if (chains[i].networkName == network) {
+            currentChain = chains[i];
+        }
+
+        chainIds.push(chains[i].id);
+        chainTypes.push(chains[i].chainType);
+    }
+    currentChain = currentChain ? currentChain : chains[0];
+    const signer = (await locklift.keystore.getSigner(currentChain.giverId || '0'))!;
 
     let gasAddress;
     // gasAddress = new Address("0:bbc77c9530eb2911428f0073348fbf4c7c9c77566b5fb91a17133ccb29bbc34e");
