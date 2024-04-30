@@ -76,12 +76,7 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
 
     uint64 static localChainId_;
     uint8 static localChainType_;
-
-
-
-    uint static nonce_; //TODO: drop this after debeloplent
-
-
+    uint static nonce_;
 
     constructor () {
         tvm.accept();
