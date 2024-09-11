@@ -66,6 +66,9 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
     /// @param _feeAmount uint128
     event ResendFailedTransferEvent(uint _transferHash, uint _senderAddress, uint128 _feeAmount);
 
+    /// Update chain types list event
+    event UpdateChainTypesEvent();
+
     struct Relayer {
         bool exists;
     }
@@ -183,6 +186,13 @@ contract AsterizmTranslator is AsterizmOwnable, ITranslator, AsterizmStructs, As
         require(localChainId_ != _chainId, AsterizmErrors.TRANSLATOR__REMOVE_LOCAL_CHAIN__ERROR);
         delete chains[_chainId];
         emit RemoveChainEvent(_chainId);
+    }
+
+    /// Remove chain
+    /// @param _chainId uint64  Chain ID
+    function updateChainTypes() public onlyOwner sendResidue {
+        _fillChainTypes();
+        emit UpdateChainTypesEvent();
     }
 
 
